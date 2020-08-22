@@ -6,7 +6,7 @@
   "license": "MIT",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node ./src/index.ts"
+    "start": "node -r ts-node/register ./src/index.ts"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
