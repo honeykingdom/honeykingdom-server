@@ -19,7 +19,7 @@ app.get(
 );
 
 app.get('*', (req, res) => {
-  res.status(404);
+  res.sendStatus(404);
 });
 
 app.listen(parseInt(process.env.PORT!));
