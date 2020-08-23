@@ -1,1 +1,1 @@
-web: cd packages/recent-messages && yarn build && cd ../server && yarn start
+web: yarn start

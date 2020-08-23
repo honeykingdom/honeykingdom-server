@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import recentMessages from 'recent-messages';
+
+import recentMessages from './features/recent-messages';
 
 dotenv.config();
 
