@@ -1,5 +1,5 @@
-import receiveMessage from "./receiveMessage";
-import db from "./db";
+import receiveMessage from './receiveMessage';
+import db from '../database';
 
 type RecentMessagesParams = {
   channels: string[];
