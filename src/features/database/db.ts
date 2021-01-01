@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const MessageSchema = new mongoose.Schema({
   raw: String,
@@ -15,7 +15,7 @@ type DbMessage = {
   user: String;
 };
 
-const Message = mongoose.model("Message", MessageSchema);
+const Message = mongoose.model('Message', MessageSchema);
 
 const connect = async (url: string) =>
   await mongoose.connect(url, {
@@ -38,7 +38,7 @@ const insertMessage = async ({ raw, channel, message, user }: DbMessage) => {
 const getLastMessages = async (channel: string, limit: number) => {
   const messages = await Message.find({ channel })
     .limit(limit)
-    .sort({ timestamp: "desc" })
+    .sort({ timestamp: 'desc' })
     .exec();
 
   return {
