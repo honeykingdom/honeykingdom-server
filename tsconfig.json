@@ -1,20 +1,15 @@
 {
-  "include": ["src"],
   "compilerOptions": {
     "module": "commonjs",
-    "target": "esnext",
-    "lib": ["dom", "esnext"],
-    "importHelpers": true,
     "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
     "sourceMap": true,
-    "rootDir": "./src",
-    "strict": true,
-    "moduleResolution": "node",
+    "outDir": "./dist",
     "baseUrl": "./",
-    "paths": {
-      "*": ["src/*", "node_modules/*"]
-    },
-    "jsx": "react",
-    "esModuleInterop": true
+    "incremental": true
   }
 }
