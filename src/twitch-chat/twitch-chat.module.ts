@@ -5,6 +5,6 @@ import { TwitchChatService } from 'src/twitch-chat/twitch-chat.service';
 @Module({
   imports: [ConfigModule],
   providers: [TwitchChatService],
-  controllers: [],
+  exports: [TwitchChatService],
 })
 export class TwitchChatModule {}
