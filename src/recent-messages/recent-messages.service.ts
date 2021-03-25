@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Config } from 'src/config/config.interface';
 import { TwitchChatService } from 'src/twitch-chat/twitch-chat.service';
-import { Message } from 'src/recent-messages/message/message.entity';
+import { Message } from 'src/recent-messages/entities/message.entity';
 import { RecentMessagesResponse } from 'src/recent-messages/recent.messages.interface';
 
 @Injectable()

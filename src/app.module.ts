@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Config } from 'src/config/config.interface';
-import { Message } from 'src/recent-messages/message/message.entity';
+import { Message } from 'src/recent-messages/entities/message.entity';
 import { RecentMessagesModule } from 'src/recent-messages/recent-messages.module';
 
 @Module({
