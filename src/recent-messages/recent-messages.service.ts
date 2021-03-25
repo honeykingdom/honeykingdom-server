@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PrivateMessage } from 'twitch-js';
 import { Config } from 'src/config/config.interface';
 import { TwitchChatService } from 'src/twitch-chat/twitch-chat.service';
 import { Message } from 'src/recent-messages/entities/message.entity';
@@ -27,11 +28,15 @@ export class RecentMessagesService {
       .split(';');
 
     Promise.all(
+      channels.map((channel) => twitchChatService.joinChannel(channel)),
+    );
+
+    Promise.all(
       channels.map((channel) =>
         this.recentMessagesRepository.find({
           where: { channel },
           take: this.messagesLimit,
-          order: { timestamp: 'DESC' },
+          order: { timestamp: 'ASC' },
         }),
       ),
     ).then((allRecentMessages) => {
@@ -44,37 +49,35 @@ export class RecentMessagesService {
       });
     });
 
-    this.listenChat();
+    this.twitchChatService.addChatListener(this.handleChatMessage);
   }
 
-  listenChat() {
-    this.twitchChatService.addChatListener((privateMessage) => {
-      const {
-        _raw,
-        channel: channelRaw,
+  handleChatMessage(privateMessage: PrivateMessage) {
+    const {
+      _raw,
+      channel: channelRaw,
+      message,
+      username,
+      timestamp,
+    } = privateMessage;
+
+    const channel = channelRaw.slice(1);
+
+    if (this.recentMessages[channel].length >= this.messagesLimit) {
+      this.recentMessages[channel].shift();
+    }
+
+    this.recentMessages[channel].push(_raw);
+
+    this.recentMessagesRepository
+      .insert({
+        raw: _raw,
+        channel,
         message,
         username,
         timestamp,
-      } = privateMessage;
-
-      const channel = channelRaw.slice(1);
-
-      if (this.recentMessages[channel].length >= this.messagesLimit) {
-        this.recentMessages[channel].shift();
-      }
-
-      this.recentMessages[channel].push(_raw);
-
-      this.recentMessagesRepository
-        .insert({
-          raw: _raw,
-          channel,
-          message,
-          username,
-          timestamp,
-        })
-        .catch((e) => console.log(e));
-    });
+      })
+      .catch((e) => console.log(e));
   }
 
   getRecentMessages(channel: string): RecentMessagesResponse {
