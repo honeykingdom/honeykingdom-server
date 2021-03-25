@@ -49,7 +49,9 @@ export class RecentMessagesService {
       });
     });
 
-    this.twitchChatService.addChatListener(this.handleChatMessage);
+    this.twitchChatService.addChatListener((message) =>
+      this.handleChatMessage(message),
+    );
   }
 
   handleChatMessage(privateMessage: PrivateMessage) {
