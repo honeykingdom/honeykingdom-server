@@ -36,16 +36,16 @@ export class RecentMessagesService {
         this.recentMessagesRepository.find({
           where: { channel },
           take: this.messagesLimit,
-          order: { timestamp: 'ASC' },
+          order: { timestamp: 'DESC' },
         }),
       ),
     ).then((allRecentMessages) => {
       allRecentMessages.forEach((recentMessages, i) => {
         const channel = channels[i];
 
-        this.recentMessages[channel] = recentMessages.map(
-          (message) => message.raw,
-        );
+        this.recentMessages[channel] = recentMessages
+          .reverse()
+          .map((message) => message.raw);
       });
     });
 
