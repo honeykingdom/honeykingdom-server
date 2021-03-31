@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Config } from 'src/config/config.interface';
 import { Message } from 'src/recent-messages/entities/message.entity';
 import { RecentMessagesModule } from 'src/recent-messages/recent-messages.module';
+import { HerokuAwakeModule } from './heroku-awake/heroku-awake.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RecentMessagesModule } from 'src/recent-messages/recent-messages.module
       inject: [ConfigService],
     }),
     RecentMessagesModule,
+    HerokuAwakeModule,
   ],
   providers: [],
   controllers: [],
