@@ -4,4 +4,5 @@ export interface Config {
   MESSAGES_LIMIT: string;
   CORS_ORIGIN: string;
   MONGODB_URI: string;
+  DEFAULT_RECENT_MESSAGES_URL: string;
 }
