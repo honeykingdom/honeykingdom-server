@@ -1,21 +1,27 @@
 import * as https from 'https';
 import * as http from 'http';
 import { Injectable } from '@nestjs/common';
-
-// 15 min
-const DEFAULT_INTERVAL = 15 * 60 * 1000;
+import { ConfigService } from '@nestjs/config';
+import { Config } from 'src/config/config.interface';
 
 @Injectable()
 export class HerokuAwakeService {
-  constructor() {
-    setInterval(() => {
-      const url = `${process.env.BASE_URL}/api/ping`;
+  private readonly interval: number;
 
+  constructor(private readonly configService: ConfigService<Config>) {
+    this.interval = Number.parseInt(
+      this.configService.get<string>('HEROKU_AWAKE_INTERVAL'),
+    );
+
+    const baseUrl = this.configService.get<string>('HEROKU_AWAKE_BASE_URL');
+    const url = `${baseUrl}/api/ping`;
+
+    setInterval(() => {
       if (url.startsWith('https')) {
         https.get(url);
       } else {
         http.get(url);
       }
-    }, DEFAULT_INTERVAL);
+    }, this.interval);
   }
 }
