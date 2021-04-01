@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { Config } from 'src/config/config.interface';
@@ -7,15 +7,15 @@ import { RecentMessagesResponse } from 'src/recent-messages/recent.messages.inte
 
 @Controller('api/v1/recent-messages')
 export class RecentMessagesController {
-  private readonly channels: string[];
+  private readonly defaultRecentMessagesUrl: string;
 
   constructor(
     private readonly configService: ConfigService<Config>,
-    private recentMessagesService: RecentMessagesService,
+    private readonly recentMessagesService: RecentMessagesService,
   ) {
-    this.channels = this.configService
-      .get<string>('TWITCH_CHANNELS')
-      .split(';');
+    this.defaultRecentMessagesUrl = this.configService.get<string>(
+      'RECENT_MESSAGES_REDIRECT_URL',
+    );
   }
 
   @Get(':channel')
@@ -23,14 +23,10 @@ export class RecentMessagesController {
     @Res() res: Response,
     @Param('channel') channel: string,
   ): RecentMessagesResponse {
-    if (!this.channels.includes(channel)) {
-      const defaultRecentMessagesUrl = this.configService.get<string>(
-        'DEFAULT_RECENT_MESSAGES_URL',
-        '',
-      );
-      const url = defaultRecentMessagesUrl.replace('%1', channel);
+    if (!this.recentMessagesService.channels.includes(channel)) {
+      const url = this.defaultRecentMessagesUrl.replace('%1', channel);
 
-      res.redirect(url);
+      res.redirect(HttpStatus.MOVED_PERMANENTLY, url);
 
       return;
     }

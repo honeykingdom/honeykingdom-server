@@ -13,6 +13,8 @@ export class RecentMessagesService {
   private readonly messagesLimit: number;
   private readonly recentMessages: Record<string, string[]> = {};
 
+  public readonly channels: string[];
+
   constructor(
     private readonly configService: ConfigService<Config>,
     @InjectRepository(Message)
@@ -20,19 +22,19 @@ export class RecentMessagesService {
     private readonly twitchChatService: TwitchChatService,
   ) {
     this.messagesLimit = Number.parseInt(
-      this.configService.get<string>('MESSAGES_LIMIT'),
+      this.configService.get<string>('RECENT_MESSAGES_LIMIT'),
     );
 
-    const channels = this.configService
-      .get<string>('TWITCH_CHANNELS')
+    this.channels = this.configService
+      .get<string>('RECENT_MESSAGES_CHANNELS')
       .split(';');
 
     Promise.all(
-      channels.map((channel) => twitchChatService.joinChannel(channel)),
+      this.channels.map((channel) => twitchChatService.joinChannel(channel)),
     );
 
     Promise.all(
-      channels.map((channel) =>
+      this.channels.map((channel) =>
         this.recentMessagesRepository.find({
           where: { channel },
           take: this.messagesLimit,
@@ -41,7 +43,7 @@ export class RecentMessagesService {
       ),
     ).then((allRecentMessages) => {
       allRecentMessages.forEach((recentMessages, i) => {
-        const channel = channels[i];
+        const channel = this.channels[i];
 
         this.recentMessages[channel] = recentMessages
           .reverse()
@@ -71,15 +73,17 @@ export class RecentMessagesService {
 
     this.recentMessages[channel].push(_raw);
 
-    this.recentMessagesRepository
-      .insert({
-        raw: _raw,
-        channel,
-        message,
-        username,
-        timestamp,
-      })
-      .catch((e) => console.log(e));
+    if (process.env.NODE_ENV === 'production') {
+      this.recentMessagesRepository
+        .insert({
+          raw: _raw,
+          channel,
+          message,
+          username,
+          timestamp,
+        })
+        .catch((e) => console.log(e));
+    }
   }
 
   getRecentMessages(channel: string): RecentMessagesResponse {
