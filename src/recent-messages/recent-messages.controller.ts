@@ -1,6 +1,6 @@
-import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import fetch from 'node-fetch';
 import { Config } from 'src/config/config.interface';
 import { RecentMessagesService } from 'src/recent-messages/recent-messages.service';
 import { RecentMessagesResponse } from 'src/recent-messages/recent.messages.interface';
@@ -19,18 +19,20 @@ export class RecentMessagesController {
   }
 
   @Get(':channel')
-  getRecentMessages(
-    @Res() res: Response,
+  async getRecentMessages(
     @Param('channel') channel: string,
-  ): RecentMessagesResponse {
-    if (!this.recentMessagesService.channels.includes(channel)) {
+  ): Promise<RecentMessagesResponse> {
+    let recentMessages: RecentMessagesResponse;
+
+    if (this.recentMessagesService.channels.includes(channel)) {
+      recentMessages = this.recentMessagesService.getRecentMessages(channel);
+    } else {
       const url = this.defaultRecentMessagesUrl.replace('%1', channel);
+      const response = await fetch(url);
 
-      res.redirect(HttpStatus.MOVED_PERMANENTLY, url);
-
-      return;
+      recentMessages = await response.json();
     }
 
-    res.send(this.recentMessagesService.getRecentMessages(channel));
+    return recentMessages;
   }
 }
