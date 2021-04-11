@@ -18,7 +18,7 @@ export class RecentMessagesService {
   constructor(
     private readonly configService: ConfigService<Config>,
     @InjectRepository(Message)
-    private readonly recentMessagesRepository: Repository<Message>,
+    private readonly messageRepository: Repository<Message>,
     private readonly twitchChatService: TwitchChatService,
   ) {
     this.messagesLimit = Number.parseInt(
@@ -35,7 +35,7 @@ export class RecentMessagesService {
 
     Promise.all(
       this.channels.map((channel) =>
-        this.recentMessagesRepository.find({
+        this.messageRepository.find({
           where: { channel },
           take: this.messagesLimit,
           order: { timestamp: 'DESC' },
@@ -81,7 +81,7 @@ export class RecentMessagesService {
     channelRecentMessages.push(_raw);
 
     if (process.env.NODE_ENV === 'production') {
-      this.recentMessagesRepository
+      this.messageRepository
         .insert({
           raw: _raw,
           channel,

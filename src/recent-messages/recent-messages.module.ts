@@ -10,7 +10,7 @@ import { TwitchChatModule } from 'src/twitch-chat/twitch-chat.module';
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([Message]),
-    TwitchChatModule.register(),
+    TwitchChatModule.register({}),
   ],
   providers: [RecentMessagesService],
   controllers: [RecentMessagesController],
