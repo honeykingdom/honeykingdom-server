@@ -11,7 +11,7 @@ import { RecentMessagesResponse } from 'src/recent-messages/recent.messages.inte
 @Injectable()
 export class RecentMessagesService {
   private readonly messagesLimit: number;
-  private readonly recentMessages: Record<string, string[]> = {};
+  private readonly recentMessages: Map<string, string[]> = new Map();
 
   public readonly channels: string[];
 
@@ -42,13 +42,12 @@ export class RecentMessagesService {
         }),
       ),
     ).then((allRecentMessages) => {
-      allRecentMessages.forEach((recentMessages, i) => {
-        const channel = this.channels[i];
-
-        this.recentMessages[channel] = recentMessages
-          .reverse()
-          .map((message) => message.raw);
-      });
+      allRecentMessages.forEach((channelRecentMessages, i) =>
+        this.recentMessages.set(
+          this.channels[i],
+          channelRecentMessages.reverse().map((message) => message.raw),
+        ),
+      );
     });
 
     this.twitchChatService.addChatListener((message) =>
@@ -67,11 +66,19 @@ export class RecentMessagesService {
 
     const channel = channelRaw.slice(1);
 
-    if (this.recentMessages[channel].length >= this.messagesLimit) {
-      this.recentMessages[channel].shift();
+    if (!this.channels.includes(channel)) return;
+
+    if (!this.recentMessages.get(channel)) {
+      this.recentMessages.set(channel, []);
     }
 
-    this.recentMessages[channel].push(_raw);
+    const channelRecentMessages = this.recentMessages.get(channel);
+
+    if (channelRecentMessages.length >= this.messagesLimit) {
+      channelRecentMessages.shift();
+    }
+
+    channelRecentMessages.push(_raw);
 
     if (process.env.NODE_ENV === 'production') {
       this.recentMessagesRepository
@@ -88,7 +95,7 @@ export class RecentMessagesService {
 
   getRecentMessages(channel: string): RecentMessagesResponse {
     return {
-      messages: this.recentMessages[channel] ?? [],
+      messages: this.recentMessages.get(channel) ?? [],
     };
   }
 }
