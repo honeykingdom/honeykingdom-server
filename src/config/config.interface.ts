@@ -18,6 +18,8 @@ export interface Config {
   HONEY_BOT_TOKEN: string;
   HONEY_BOT_CHANNELS: string;
   HONEY_BOT_TELEGRAM_TO_CHAT: string;
+
+  LINK_SHORTENER_ACCESS_TOKEN: string;
 }
 
 export const validationSchema = Joi.object({
@@ -41,4 +43,6 @@ export const validationSchema = Joi.object({
   HONEY_BOT_TOKEN: Joi.string().required(),
   HONEY_BOT_CHANNELS: Joi.string().required(),
   HONEY_BOT_TELEGRAM_TO_CHAT: Joi.string().required(),
+
+  LINK_SHORTENER_ACCESS_TOKEN: Joi.string().required(),
 });
