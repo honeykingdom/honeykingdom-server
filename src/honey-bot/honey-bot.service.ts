@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config/config.interface';
+import { LinkShortenerService } from 'src/link-shortener/link-shortener.service';
+import { TelegramPost } from 'src/telegram-api/telegram-api.interface';
 import { TelegramApiService } from 'src/telegram-api/telegram-api.service';
 import { TwitchChatService } from 'src/twitch-chat/twitch-chat.service';
 
@@ -21,6 +23,7 @@ export class HoneyBotService {
     private readonly configService: ConfigService<Config>,
     private readonly twitchChatService: TwitchChatService,
     private readonly telegramApiService: TelegramApiService,
+    private readonly linkShortenerService: LinkShortenerService,
   ) {
     this.configService
       .get('HONEY_BOT_CHANNELS')
@@ -51,10 +54,10 @@ export class HoneyBotService {
       this.telegramApiService.addChannel(telegramChannel),
     );
 
-    this.telegramApiService.on('post', (post) => {
+    this.telegramApiService.on('post', async (post) => {
       if (!telegramChannels.includes(post.channel.name)) return;
 
-      const message = `${post.channel.title}: ${post.bodyText}`.slice(0, 500);
+      const message = await this.formatTelegramMessage(post);
 
       this.messagesQueue.push({ channel, message });
     });
@@ -68,5 +71,23 @@ export class HoneyBotService {
     const { channel, message } = queuedMessage;
 
     this.twitchChatService.say(channel, message);
+  }
+
+  private async formatTelegramMessage(post: TelegramPost) {
+    const shortLinks = await Promise.all(
+      post.media
+        .filter((p) => p.url)
+        .map(({ url }) => this.linkShortenerService.shorten(url)),
+    );
+
+    const links = shortLinks.filter(Boolean).join(' ');
+    const maxTextLength = links.length ? 500 - links.length + 1 : 500;
+    const text = `${post.channel.title}: ${post.bodyText}`
+      .trim()
+      .slice(0, maxTextLength);
+
+    const message = `${text} ${links}`.trim();
+
+    return message;
   }
 }
