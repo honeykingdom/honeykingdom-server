@@ -11,10 +11,6 @@ export class TwitchChatService {
 
     this.chat.on(ChatEvents.CONNECTED, () => console.log('connected'));
     this.chat.on(ChatEvents.DISCONNECTED, () => console.log('disconnected'));
-
-    this.chat.on(Commands.JOIN, ({ channel }) =>
-      console.log(`join: ${channel}`),
-    );
   }
 
   connect() {
