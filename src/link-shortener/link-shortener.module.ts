@@ -1,8 +1,9 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { LinkShortenerService } from './link-shortener.service';
 
 @Module({
-  imports: [],
+  imports: [ConfigModule],
   providers: [LinkShortenerService],
   controllers: [],
   exports: [LinkShortenerService],
