@@ -18,7 +18,7 @@ export class TelegramApiService extends EventEmitter {
   private readonly checkInterval: number;
   private readonly softCheckCount = 2;
   private readonly hardCheckCount = 10;
-  private readonly hardCheckEveryIterations = 10;
+  private readonly hardCheckEveryIterations = 20;
   private iterations = 0;
 
   private readonly channels: Set<string> = new Set();
