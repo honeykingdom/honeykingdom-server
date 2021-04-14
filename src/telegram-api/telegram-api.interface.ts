@@ -5,13 +5,13 @@ type TelegramPostChannel = {
 };
 type TelegramPostImage = {
   type: 'image';
-  // url: string;
+  url: string;
 };
 type TelegramPostVideo = {
   type: 'video';
-  // url?: string;
-  // thumbUrl: string;
-  // duration: string;
+  url?: string;
+  thumbUrl: string;
+  duration: string;
 };
 type TelegramPostMedia = TelegramPostImage | TelegramPostVideo;
 

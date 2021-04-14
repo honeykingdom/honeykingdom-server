@@ -4,6 +4,8 @@ import { TelegramPost as TelegramPost } from '../telegram-api.interface';
 
 // https://regex101.com/r/dL6xuS/1
 const CHANNEL_ID_REGEX = /c(\d+)_-?\d+/;
+// https://regex101.com/r/63nXkR/1
+const IMAGE_URL_REGEX = /background-image:url\('(.+)'\)/;
 
 const IMAGE_CLASS = 'tgme_widget_message_photo_wrap';
 const VIDEO_CLASS = 'tgme_widget_message_video_player';
@@ -12,6 +14,67 @@ const parsePostLink = (link: string): [channelName: string, postId: number] => {
   const [, , , channelName, postIdString] = link.split('/');
 
   return [channelName, Number.parseInt(postIdString)];
+};
+
+const parseForwardedFrom = ($: cheerio.Root): TelegramPost['forwardedFrom'] => {
+  const forwardedFromElem = $('.tgme_widget_message_forwarded_from_name');
+
+  if (!forwardedFromElem.length) return;
+
+  const [channelName, postId] = parsePostLink(forwardedFromElem.attr('href'));
+
+  return {
+    postId,
+    channelName,
+    channelTitle: forwardedFromElem.text().trim(),
+  };
+};
+
+const parseReplyTo = ($: cheerio.Root): TelegramPost['replyTo'] => {
+  const replyElem = $('.tgme_widget_message_reply');
+
+  if (!replyElem.length) return;
+
+  const [channelName, postId] = parsePostLink(replyElem.attr('href'));
+  const channelTitle = $('.tgme_widget_message_author_name').text().trim();
+  const bodyText = $('.tgme_widget_message_reply > .tgme_widget_message_text')
+    .text()
+    .trim();
+
+  return {
+    postId,
+    channelName,
+    channelTitle,
+    bodyText,
+  };
+};
+
+const parseMediaImage = ($: cheerio.Root, elem: cheerio.Cheerio) => {
+  const styleAttr = elem.attr('style');
+  const m = IMAGE_URL_REGEX.exec(styleAttr);
+
+  return {
+    type: 'image' as const,
+    url: m[1],
+  };
+};
+
+const parseMediaVideo = ($: cheerio.Root, elem: cheerio.Cheerio) => {
+  const thumbElem = $('.tgme_widget_message_video_thumb', elem);
+  const styleAttr = thumbElem.attr('style');
+  const m = IMAGE_URL_REGEX.exec(styleAttr);
+
+  const videoElem = $('.tgme_widget_message_video_wrap video', elem);
+  const url = videoElem.attr('src');
+
+  const duration = $('.message_video_duration', elem).text().trim();
+
+  return {
+    type: 'video' as const,
+    url,
+    thumbUrl: m[1],
+    duration,
+  };
 };
 
 const parseMedia = ($: cheerio.Root): TelegramPost['media'] => {
@@ -24,19 +87,11 @@ const parseMedia = ($: cheerio.Root): TelegramPost['media'] => {
       const $elem = $(elem);
 
       if ($elem.hasClass(IMAGE_CLASS)) {
-        return {
-          type: 'image',
-          // url: '',
-        };
+        return parseMediaImage($, $elem);
       }
 
       if ($elem.hasClass(VIDEO_CLASS)) {
-        return {
-          type: 'video',
-          // url: '',
-          // thumbUrl: '',
-          // duration: '',
-        };
+        return parseMediaVideo($, $elem);
       }
 
       return null as never;
@@ -46,13 +101,13 @@ const parseMedia = ($: cheerio.Root): TelegramPost['media'] => {
   const imageElem = $(`.${IMAGE_CLASS}`);
 
   if (imageElem.length) {
-    return [{ type: 'image' }];
+    return [parseMediaImage($, imageElem)];
   }
 
   const videoElem = $(`.${VIDEO_CLASS}`);
 
   if (videoElem.length) {
-    return [{ type: 'video' }];
+    return [parseMediaVideo($, videoElem)];
   }
 
   return [];
@@ -76,36 +131,9 @@ const parseTelegramPost = (html: string): ParseTelegramPostReturnType => {
     return { type: 'service-message', post: null };
   }
 
-  let forwardedFrom: TelegramPost['forwardedFrom'];
-  const forwardedFromElem = $('.tgme_widget_message_forwarded_from_name');
-
-  if (forwardedFromElem.length) {
-    const [channelName, postId] = parsePostLink(forwardedFromElem.attr('href'));
-
-    forwardedFrom = {
-      postId,
-      channelName,
-      channelTitle: forwardedFromElem.text().trim(),
-    };
-  }
-
-  let replyTo: TelegramPost['replyTo'];
-  const replyElem = $('.tgme_widget_message_reply');
-
-  if (replyElem.length) {
-    const [channelName, postId] = parsePostLink(replyElem.attr('href'));
-    const channelTitle = $('.tgme_widget_message_author_name').text().trim();
-    const bodyText = $('.tgme_widget_message_reply > .tgme_widget_message_text')
-      .text()
-      .trim();
-
-    replyTo = {
-      postId,
-      channelName,
-      channelTitle,
-      bodyText,
-    };
-  }
+  const forwardedFrom = parseForwardedFrom($);
+  const replyTo = parseReplyTo($);
+  const media = parseMedia($);
 
   const widgetMessageElem = $('.tgme_widget_message');
   const peer = widgetMessageElem.data('peer') as string;
@@ -135,8 +163,6 @@ const parseTelegramPost = (html: string): ParseTelegramPostReturnType => {
     .text()
     .trim()
     .replace(/\s+/g, ' ');
-
-  const media = parseMedia($);
 
   const post: TelegramPost = {
     id,
