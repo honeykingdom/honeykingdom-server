@@ -155,11 +155,10 @@ const parseTelegramPost = (html: string): ParseTelegramPostReturnType => {
 
   const [channelName, id] = parsePostLink(link);
 
-  const bodyHtml = $('.tgme_widget_message_bubble > .tgme_widget_message_text')
-    .html()
-    .replace(/<br>/g, ' ');
+  const bodyHtml =
+    $('.tgme_widget_message_bubble > .tgme_widget_message_text').html() || '';
   const bodyText = cheerio
-    .load(bodyHtml)(':root')
+    .load(bodyHtml.replace(/<br>/g, ' '))(':root')
     .text()
     .trim()
     .replace(/\s+/g, ' ');
