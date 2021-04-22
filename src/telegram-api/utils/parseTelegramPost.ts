@@ -1,6 +1,6 @@
 import assert from 'assert';
 import cheerio from 'cheerio';
-import { TelegramPost as TelegramPost } from '../telegram-api.interface';
+import { TelegramPost } from '../telegram-api.interface';
 
 // https://regex101.com/r/dL6xuS/1
 const CHANNEL_ID_REGEX = /c(\d+)_-?\d+/;
