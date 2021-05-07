@@ -20,6 +20,12 @@ export interface Config {
   HONEY_BOT_TELEGRAM_TO_CHAT: string;
 
   LINK_SHORTENER_ACCESS_TOKEN: string;
+
+  POSTGRES_HOST: string;
+  POSTGRES_PORT: string;
+  POSTGRES_DATABASE: string;
+  POSTGRES_USER: string;
+  POSTGRES_PASSWORD: string;
 }
 
 export const validationSchema = Joi.object({
@@ -45,4 +51,10 @@ export const validationSchema = Joi.object({
   HONEY_BOT_TELEGRAM_TO_CHAT: Joi.string().required(),
 
   LINK_SHORTENER_ACCESS_TOKEN: Joi.string().required(),
+
+  POSTGRES_HOST: Joi.string().required(),
+  POSTGRES_PORT: Joi.number().required(),
+  POSTGRES_DATABASE: Joi.string().required(),
+  POSTGRES_USER: Joi.string().required(),
+  POSTGRES_PASSWORD: Joi.string().required(),
 });
