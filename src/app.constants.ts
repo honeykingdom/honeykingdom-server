@@ -1,0 +1,1 @@
+export const TYPEORM_SUPABASE = 'TYPEORM_SUPABASE';
