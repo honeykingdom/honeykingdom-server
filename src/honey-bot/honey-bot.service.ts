@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PrivateMessage } from 'twitch-js';
 import { Config } from 'src/config/config.interface';
 import { LinkShortenerService } from 'src/link-shortener/link-shortener.service';
 import { TelegramPost } from 'src/telegram-api/telegram-api.interface';
@@ -43,6 +44,10 @@ export class HoneyBotService {
     setInterval(() => {
       this.sendMessageInQueue();
     }, this.sendMessageInterval);
+
+    this.twitchChatService.addChatListener((message) =>
+      this.handleMessage(message),
+    );
   }
 
   private watchChannel(channel: string) {
@@ -61,6 +66,19 @@ export class HoneyBotService {
 
       this.messagesQueue.push({ channel, message });
     });
+  }
+
+  private handleMessage({ channel: channelRaw, message }: PrivateMessage) {
+    const channel = channelRaw.slice(1);
+
+    if (!this.channels.has(channel)) return;
+
+    if (['!чат', '!chat'].includes(message.toLowerCase())) {
+      this.twitchChatService.say(
+        channel,
+        `https://honeykingdom.github.io/chat/#${channel}`,
+      );
+    }
   }
 
   private sendMessageInQueue() {
