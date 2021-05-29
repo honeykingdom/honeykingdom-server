@@ -60,10 +60,12 @@ export class VotesService {
 
     if (!message.startsWith('%')) return;
 
+    const content = message.slice(1).trim();
+
+    if (!content) return;
+
     if (!VotesService.hasPermissions(privateMessage, channelVoting.permissions))
       return;
-
-    const content = message.slice(1).trim();
 
     this.userVoteRepository.save({
       channelId: roomId,
