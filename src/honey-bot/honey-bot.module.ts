@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Config } from 'src/config/config.interface';
-import { LinkShortenerModule } from 'src/link-shortener/link-shortener.module';
-import { TelegramApiModule } from 'src/telegram-api/telegram-api.module';
-import { TwitchChatModule } from 'src/twitch-chat/twitch-chat.module';
+import { Config } from '../config/config.interface';
+import { LinkShortenerModule } from '../link-shortener/link-shortener.module';
+import { TelegramApiModule } from '../telegram-api/telegram-api.module';
+import { TwitchChatModule } from '../twitch-chat/twitch-chat.module';
 import { HoneyBotService } from './honey-bot.service';
 
 @Module({

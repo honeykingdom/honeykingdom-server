@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrivateMessage } from 'twitch-js';
-import { Config } from 'src/config/config.interface';
-import { LinkShortenerService } from 'src/link-shortener/link-shortener.service';
-import { TelegramPost } from 'src/telegram-api/telegram-api.interface';
-import { TelegramApiService } from 'src/telegram-api/telegram-api.service';
-import { TwitchChatService } from 'src/twitch-chat/twitch-chat.service';
+import { Config } from '../config/config.interface';
+import { LinkShortenerService } from '../link-shortener/link-shortener.service';
+import { TelegramPost } from '../telegram-api/telegram-api.interface';
+import { TelegramApiService } from '../telegram-api/telegram-api.service';
+import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
 
 type QueuedMessage = {
   channel: string;
