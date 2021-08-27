@@ -77,6 +77,23 @@ const parseMediaVideo = ($: cheerio.Root, elem: cheerio.Cheerio) => {
   };
 };
 
+const parseMediaAudio = ($: cheerio.Root, elem: cheerio.Cheerio) => {
+  const audioElem = $('audio.tgme_widget_message_voice', elem);
+  let url: string;
+
+  if (audioElem.length) {
+    url = audioElem.attr('src');
+  }
+
+  const duration = $('.tgme_widget_message_voice_duration').text().trim();
+
+  return {
+    type: 'audio' as const,
+    url,
+    duration,
+  };
+};
+
 const parseMedia = ($: cheerio.Root): TelegramPost['media'] => {
   const mediaElems = $(
     '.tgme_widget_message_grouped_wrap > .tgme_widget_message_grouped > .tgme_widget_message_grouped_layer > a',
@@ -108,6 +125,12 @@ const parseMedia = ($: cheerio.Root): TelegramPost['media'] => {
 
   if (videoElem.length) {
     return [parseMediaVideo($, videoElem)];
+  }
+
+  const audioElem = $('.tgme_widget_message_voice_player');
+
+  if (audioElem.length) {
+    return [parseMediaAudio($, audioElem)];
   }
 
   return [];

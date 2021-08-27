@@ -13,7 +13,15 @@ type TelegramPostVideo = {
   thumbUrl: string;
   duration: string;
 };
-type TelegramPostMedia = TelegramPostImage | TelegramPostVideo;
+type TelegramPostAudio = {
+  type: 'audio';
+  url?: string;
+  duration: string;
+};
+type TelegramPostMedia =
+  | TelegramPostImage
+  | TelegramPostVideo
+  | TelegramPostAudio;
 
 export type TelegramPost = {
   id: number;

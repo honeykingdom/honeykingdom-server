@@ -240,6 +240,27 @@ describe('parseTelegramMessage', () => {
     });
   });
 
+  it('should parse post with one audio', async () => {
+    expect(parseTelegramPost(await readFile('one-audio.html'))).toEqual({
+      type: 'post',
+      post: {
+        id: 129,
+        channel: { id: 1455926914, name: 'melhagram', title: 'Ебейший Чилзон' },
+        date: 1620464489000,
+        link: 'https://t.me/melhagram/129',
+        bodyText: '',
+        media: [
+          {
+            type: 'audio',
+            url:
+              'https://cdn4.telesco.pe/file/db43c128e1.ogg?token=rPxTPK7D7RzKyQ58simHKy92BbjAma7VViRonz9x6ahfGU3RPBeJvaGCdEe0oIXCpSVslOiZBUYwFFG_JJ-aQfaPANPHYFF233VdezvUT32pqXi6I2B9Om-CNiWpCdWcZ4EMKlaXHV01TFHZHjJTZWsykb-sKrqO9hjYzG1WU092D9s921LT8IRNTWAmDKpnH5nwptskh4iJmt6GsAmJBz0MDYdk0Ur5kFBDPC-gUNWz-jUZZTBNcLXI5f13I2ZzqmdZPRf-o8NWZyXTBRJcAoA9SCzI0sJEFauY_PXHBgB6TPY1Dg3_llf2MsTD2nSAyRQlkeg7lH3jYArLYqpU-g',
+            duration: '0:51',
+          },
+        ],
+      },
+    });
+  });
+
   it('should parse post with images and videos', async () => {
     expect(parseTelegramPost(await readFile('videos-and-images.html'))).toEqual(
       {

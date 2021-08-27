@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { lastValueFrom } from 'rxjs';
 import { EventEmitter } from 'events';
-import { Config } from 'src/config/config.interface';
-import { HttpRequestService } from 'src/http-request/http-request.service';
+import { Config } from '../config/config.interface';
 import { Repository } from 'typeorm';
 import { TelegramChannel } from './entities/telegram-channel.entity';
 import { TelegramPost } from './telegram-api.interface';
@@ -13,6 +14,7 @@ export interface TelegramApiService {
   on(event: 'post', listener: (post: TelegramPost) => void): this;
 }
 
+// TODO: repost with images and text https://t.me/etozhemad/11531
 @Injectable()
 export class TelegramApiService extends EventEmitter {
   private readonly checkInterval: number;
@@ -26,7 +28,7 @@ export class TelegramApiService extends EventEmitter {
 
   constructor(
     private readonly configService: ConfigService<Config>,
-    private readonly httpRequestService: HttpRequestService,
+    private readonly httpService: HttpService,
     @InjectRepository(TelegramChannel)
     private readonly telegramChannelRepository: Repository<TelegramChannel>,
   ) {
@@ -102,12 +104,10 @@ export class TelegramApiService extends EventEmitter {
   }
 
   private async getPost(channel: string, postId: number) {
-    const html = await this.httpRequestService.get(
-      `https://t.me/${channel}/${postId}?embed=1`,
-      {},
-      'text',
+    const response = await lastValueFrom(
+      this.httpService.get<string>(`https://t.me/${channel}/${postId}?embed=1`),
     );
 
-    return parseTelegramPost(html);
+    return parseTelegramPost(response.data);
   }
 }
