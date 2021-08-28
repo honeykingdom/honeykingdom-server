@@ -1,7 +1,7 @@
 import { BitlyClient } from 'bitly';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Config } from 'src/config/config.interface';
+import { Config } from '../config/config.interface';
 
 @Injectable()
 export class LinkShortenerService {
