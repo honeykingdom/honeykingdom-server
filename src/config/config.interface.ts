@@ -1,6 +1,7 @@
 import * as Joi from 'joi';
 
 export interface Config {
+  NODE_ENV: 'development' | 'production' | 'test';
   PORT: string;
 
   RECENT_MESSAGES_CHANNELS: string;
@@ -26,11 +27,26 @@ export interface Config {
   POSTGRES_DATABASE: string;
   POSTGRES_USER: string;
   POSTGRES_PASSWORD: string;
+
+  HONEY_VOTES_BASE_URL: string;
+  HONEY_VOTES_REDIRECT_FRONTEND_URL: string;
+  HONEY_VOTES_ACCESS_TOKEN_SECRET: string;
+  HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: string;
+  HONEY_VOTES_REFRESH_TOKEN_SECRET: string;
+  HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME: string;
+  HONEY_VOTES_TWITCH_CLIENT_ID: string;
+  HONEY_VOTES_TWITCH_CLIENT_SECRET: string;
+
+  KINOPOISK_API_KEY: string;
+
+  IGDB_CLIENT_ID: string;
+  IGDB_CLIENT_SECRET: string;
+  IGDB_ACCESS_TOKEN: string;
 }
 
 export const validationSchema = Joi.object({
   NODE_ENV: Joi.string()
-    .valid('development', 'production')
+    .valid('development', 'production', 'test')
     .default('development'),
   PORT: Joi.number().default(3000),
 
@@ -57,4 +73,19 @@ export const validationSchema = Joi.object({
   POSTGRES_DATABASE: Joi.string().required(),
   POSTGRES_USER: Joi.string().required(),
   POSTGRES_PASSWORD: Joi.string().required(),
+
+  HONEY_VOTES_BASE_URL: Joi.string().required(),
+  HONEY_VOTES_REDIRECT_FRONTEND_URL: Joi.string().required(),
+  HONEY_VOTES_ACCESS_TOKEN_SECRET: Joi.string().required(),
+  HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: Joi.string().required(),
+  HONEY_VOTES_REFRESH_TOKEN_SECRET: Joi.string().required(),
+  HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME: Joi.string().required(),
+  HONEY_VOTES_TWITCH_CLIENT_ID: Joi.string().required(),
+  HONEY_VOTES_TWITCH_CLIENT_SECRET: Joi.string().required(),
+
+  KINOPOISK_API_KEY: Joi.string().required(),
+
+  IGDB_CLIENT_ID: Joi.string().required(),
+  IGDB_CLIENT_SECRET: Joi.string().required(),
+  IGDB_ACCESS_TOKEN: Joi.string().required(),
 });
