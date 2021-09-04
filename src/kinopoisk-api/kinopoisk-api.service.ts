@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { lastValueFrom } from 'rxjs';
 import { Config } from '../config/config.interface';
 import { GetFilmData, GetFilmDataResponse } from './kinopoisk-api.interface';
 
@@ -15,11 +16,13 @@ export class KinopoiskApiService {
     this.apiKey = configService.get<string>('KINOPOISK_API_KEY');
   }
 
-  getFilmData(id: string): Promise<GetFilmData> {
-    const url = `https://kinopoiskapiunofficial.tech/api/v2.1/films/${id}`;
+  getFilmData(id: number): Promise<GetFilmData> {
+    const url = `https://kinopoiskapiunofficial.tech/api/v2.2/films/${id}`;
     const config = { headers: this.getHeaders() };
 
-    return this.httpService.get<GetFilmDataResponse>(url, config).toPromise();
+    return lastValueFrom(
+      this.httpService.get<GetFilmDataResponse>(url, config),
+    );
   }
 
   private getHeaders() {
