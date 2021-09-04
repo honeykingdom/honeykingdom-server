@@ -27,7 +27,7 @@ export class TwitchApiService {
   /** https://dev.twitch.tv/docs/authentication#revoking-access-tokens */
   async revokeToken(accessToken: string, clientId: string): Promise<number> {
     const url = `https://id.twitch.tv/oauth2/revoke?client_id=${clientId}&token=${accessToken}`;
-    const response = await this.httpService.post(url).toPromise();
+    const response = await lastValueFrom(this.httpService.post(url));
 
     return response.status;
   }
