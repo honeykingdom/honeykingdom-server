@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { lastValueFrom } from 'rxjs';
 import { Config } from '../config/config.interface';
 
 @Injectable()
@@ -22,7 +23,7 @@ export class IgdbApiService {
     const url = 'https://api.igdb.com/v4/games';
     const config = { body, headers: this.getHeaders() };
 
-    return this.httpService.post(url, config).toPromise();
+    return lastValueFrom(this.httpService.post(url, config));
   }
 
   private getHeaders() {
