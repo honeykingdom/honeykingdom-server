@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PrivateMessage } from 'twitch-js';
-import { Config } from 'src/config/config.interface';
-import { TwitchChatService } from 'src/twitch-chat/twitch-chat.service';
-import { Message } from 'src/recent-messages/entities/message.entity';
-import { RecentMessagesResponse } from 'src/recent-messages/recent.messages.interface';
+import { Config } from '../config/config.interface';
+import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
+import { Message } from '../recent-messages/entities/message.entity';
+import { RecentMessagesResponse } from '../recent-messages/recent.messages.interface';
 
 @Injectable()
 export class RecentMessagesService {

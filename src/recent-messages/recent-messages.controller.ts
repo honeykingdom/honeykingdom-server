@@ -1,9 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import fetch from 'node-fetch';
-import { Config } from 'src/config/config.interface';
-import { RecentMessagesService } from 'src/recent-messages/recent-messages.service';
-import { RecentMessagesResponse } from 'src/recent-messages/recent.messages.interface';
+import { Config } from '../config/config.interface';
+import { RecentMessagesService } from '../recent-messages/recent-messages.service';
+import { RecentMessagesResponse } from '../recent-messages/recent.messages.interface';
 
 @Controller('api/v1/recent-messages')
 export class RecentMessagesController {
