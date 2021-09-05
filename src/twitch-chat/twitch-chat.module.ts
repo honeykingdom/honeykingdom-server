@@ -1,5 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { TwitchChatService } from 'src/twitch-chat/twitch-chat.service';
+import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
 import {
   TwitchChatModuleAsyncOptions,
   TwitchChatModuleOptions,
