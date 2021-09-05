@@ -9,6 +9,12 @@ export type UnauthorizedResponse = {
   message: 'Token invalid or missing required scope';
 };
 
+// RevokeToken
+export type RevokeTokenParams = {
+  client_id: string;
+  token: string;
+};
+
 // RefreshToken
 export type RefreshTokenParams = {
   refresh_token: string;

@@ -11,6 +11,7 @@ import {
   GetUserFollowsResponse,
   RefreshTokenParams,
   RefreshTokenResponse,
+  RevokeTokenParams,
   TwitchCredentials,
 } from './twitch-api.interface';
 
@@ -28,8 +29,9 @@ export class TwitchApiService {
    *
    * https://dev.twitch.tv/docs/authentication#revoking-access-tokens
    */
-  async revokeToken(accessToken: string, clientId: string): Promise<boolean> {
-    const url = `https://id.twitch.tv/oauth2/revoke?client_id=${clientId}&token=${accessToken}`;
+  async revokeToken(params: RevokeTokenParams): Promise<boolean> {
+    const urlParams = new URLSearchParams(params);
+    const url = `https://id.twitch.tv/oauth2/revoke?${urlParams}`;
     const response = await lastValueFrom(this.httpService.post(url));
 
     return response.status === 200;
