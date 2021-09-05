@@ -4,16 +4,12 @@ import { lastValueFrom } from 'rxjs';
 import {
   CheckUserSubscriptionParams,
   CheckUserSubscriptionResponse,
-  CheckUserSubscriptionSuccess,
   GetChannelEditorsResponse,
-  GetChannelEditorsSuccess,
   GetModeratorsResponse,
-  GetModeratorsSuccess,
   GetUserFollowsParams,
   GetUserFollowsResponse,
-  GetUserFollowsSuccess,
+  RefreshTokenResponse,
   TwitchCredentials,
-  TwitchRefreshTokenResponseSuccess,
 } from './twitch-api.interface';
 
 @Injectable()
@@ -33,11 +29,11 @@ export class TwitchApiService {
   }
 
   /** https://dev.twitch.tv/docs/authentication#refreshing-access-tokens */
-  async refreshToken(
+  refreshToken(
     refreshToken: string,
     clientId: string,
     clientSecret: string,
-  ): Promise<TwitchRefreshTokenResponseSuccess | null> {
+  ): Promise<RefreshTokenResponse> {
     const urlParams = new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
@@ -46,19 +42,12 @@ export class TwitchApiService {
     });
     const url = `https://id.twitch.tv/oauth2/token?${urlParams}`;
 
-    try {
-      const response = await lastValueFrom(
-        this.httpService.post<TwitchRefreshTokenResponseSuccess>(url),
-      );
-
-      return response.data;
-    } catch (error) {
-      return null;
-    }
+    return lastValueFrom(
+      this.httpService.post(url),
+    ) as Promise<RefreshTokenResponse>;
   }
 
   /** https://dev.twitch.tv/docs/api/reference#get-channel-editors */
-  // Promise<GetChannelEditorsResponse>
   getChannelEditors(
     broadcasterId: string,
     credentials: TwitchCredentials,
@@ -66,8 +55,9 @@ export class TwitchApiService {
     const url = `https://api.twitch.tv/helix/channels/editors?broadcaster_id=${broadcasterId}`;
     const config = { headers: this.getHeaders(credentials) };
 
-    // TODO: fix types
-    return lastValueFrom(this.httpService.get(url, config)) as any;
+    return lastValueFrom(
+      this.httpService.get(url, config),
+    ) as Promise<GetChannelEditorsResponse>;
   }
 
   /** https://dev.twitch.tv/docs/api/reference#get-moderators */
@@ -78,7 +68,9 @@ export class TwitchApiService {
     const url = `https://api.twitch.tv/helix/moderation/moderators?broadcaster_id=${broadcasterId}`;
     const config = { headers: this.getHeaders(credentials) };
 
-    return lastValueFrom(this.httpService.get(url, config)) as any;
+    return lastValueFrom(
+      this.httpService.get(url, config),
+    ) as Promise<GetModeratorsResponse>;
   }
 
   /** https://dev.twitch.tv/docs/api/reference#check-user-subscription */
@@ -90,7 +82,9 @@ export class TwitchApiService {
     const url = `https://api.twitch.tv/helix/subscriptions/user?${urlParams}`;
     const config = { headers: this.getHeaders(credentials) };
 
-    return lastValueFrom(this.httpService.get(url, config)) as any;
+    return lastValueFrom(
+      this.httpService.get(url, config),
+    ) as Promise<CheckUserSubscriptionResponse>;
   }
 
   /** https://dev.twitch.tv/docs/api/reference#get-users-follows */
@@ -102,7 +96,9 @@ export class TwitchApiService {
     const url = `https://api.twitch.tv/helix/users/follows?${urlParams}`;
     const config = { headers: this.getHeaders(credentials) };
 
-    return lastValueFrom(this.httpService.get(url, config)) as any;
+    return lastValueFrom(
+      this.httpService.get(url, config),
+    ) as Promise<GetUserFollowsResponse>;
   }
 
   private getHeaders({ clientId, accessToken }: TwitchCredentials) {
