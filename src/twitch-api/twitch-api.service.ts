@@ -38,7 +38,13 @@ export class TwitchApiService {
     clientId: string,
     clientSecret: string,
   ): Promise<TwitchRefreshTokenResponseSuccess | null> {
-    const url = `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}`;
+    const urlParams = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+    const url = `https://id.twitch.tv/oauth2/token?${urlParams}`;
 
     try {
       const response = await lastValueFrom(
