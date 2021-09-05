@@ -1,48 +1,38 @@
-import { AxiosResponse } from 'axios';
-
 export type TwitchCredentials = {
   clientId?: string;
   accessToken?: string;
 };
 
-type UnauthorizedResponse = {
+export type UnauthorizedResponse = {
   status: 401;
   error: 'Unauthorized';
   message: 'Token invalid or missing required scope';
 };
 
 // RefreshToken
-type RefreshTokenResponse200 = {
+export type RefreshTokenResponse = {
   access_token: string;
   refresh_token: string;
   scope: string;
 };
-type RefreshTokenResponse400 = {
+
+export type RefreshTokenError400 = {
   status: 400;
   error: 'Bad Request';
   message: 'Invalid refresh token';
 };
 
-export type RefreshTokenResponse =
-  | (AxiosResponse<RefreshTokenResponse200> & { status: 200 })
-  | (AxiosResponse<RefreshTokenResponse400> & { status: 400 })
-  | (AxiosResponse<UnauthorizedResponse> & { status: 401 });
-
 // GetChannelEditors
-type GetChannelEditorsSuccess = {
+export type GetChannelEditorsResponse = {
   data: {
     user_id: string;
     user_name: string;
     created_at: string;
   }[];
 };
-export type GetChannelEditorsResponse =
-  | (AxiosResponse<GetChannelEditorsSuccess> & { status: 200 })
-  | (AxiosResponse<UnauthorizedResponse> & { status: 401 })
-  | (AxiosResponse & { status: 400 });
 
 // GetModerators
-type GetModeratorsSuccess = {
+export type GetModeratorsResponse = {
   data: {
     user_id: string;
     user_login: string;
@@ -50,17 +40,13 @@ type GetModeratorsSuccess = {
   }[];
   pagination: { cursor?: string };
 };
-export type GetModeratorsResponse =
-  | (AxiosResponse<GetModeratorsSuccess> & { status: 200 })
-  | (AxiosResponse<UnauthorizedResponse> & { status: 401 })
-  | (AxiosResponse & { status: 400 });
 
 // CheckUserSubscription
 export type CheckUserSubscriptionParams = {
   broadcaster_id: string;
   user_id: string;
 };
-type CheckUserSubscriptionSuccess = {
+export type CheckUserSubscriptionResponse = {
   data: {
     broadcaster_id: string;
     broadcaster_login: string;
@@ -72,10 +58,6 @@ type CheckUserSubscriptionSuccess = {
     tier: '1000' | '2000' | '3000';
   }[];
 };
-export type CheckUserSubscriptionResponse =
-  | (AxiosResponse<CheckUserSubscriptionSuccess> & { status: 200 })
-  | (AxiosResponse<UnauthorizedResponse> & { status: 401 })
-  | (AxiosResponse & { status: 400 | 404 });
 
 // GetUserFollows
 export type GetUserFollowsParams = {
@@ -84,7 +66,7 @@ export type GetUserFollowsParams = {
   after?: string;
   first?: string;
 };
-type GetUserFollowsSuccess = {
+export type GetUserFollowsResponse = {
   total: number;
   data: {
     from_id: string;
@@ -96,7 +78,3 @@ type GetUserFollowsSuccess = {
   }[];
   pagination: { cursor?: string };
 };
-export type GetUserFollowsResponse =
-  | (AxiosResponse<GetUserFollowsSuccess> & { status: 200 })
-  | (AxiosResponse<UnauthorizedResponse> & { status: 401 })
-  | (AxiosResponse & { status: 400 | 404 });
