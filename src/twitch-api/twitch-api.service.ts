@@ -9,6 +9,7 @@ import {
   GetModeratorsResponse,
   GetUserFollowsParams,
   GetUserFollowsResponse,
+  RefreshTokenParams,
   RefreshTokenResponse,
   TwitchCredentials,
 } from './twitch-api.interface';
@@ -41,16 +42,10 @@ export class TwitchApiService {
    *
    * https://dev.twitch.tv/docs/authentication#refreshing-access-tokens
    */
-  refreshToken(
-    refreshToken: string,
-    clientId: string,
-    clientSecret: string,
-  ): AxiosPromise<RefreshTokenResponse> {
+  refreshToken(params: RefreshTokenParams): AxiosPromise<RefreshTokenResponse> {
     const urlParams = new URLSearchParams({
       grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-      client_id: clientId,
-      client_secret: clientSecret,
+      ...params,
     });
     const url = `https://id.twitch.tv/oauth2/token?${urlParams}`;
 
