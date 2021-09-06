@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { POSTGRES_CONNECTION } from '../../app.constants';
 import { TwitchApiModule } from '../../twitch-api/twitch-api.module';
 import { User } from './entities/User.entity';
+import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 @Module({
@@ -12,6 +13,7 @@ import { UsersService } from './users.service';
     TypeOrmModule.forFeature([User], POSTGRES_CONNECTION),
     TwitchApiModule,
   ],
+  controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
 })

@@ -56,14 +56,20 @@ export class UsersService {
     );
   }
 
-  async getChannelIdByName(channelName: string) {
-    const channel = await this.userRepo.findOne({
-      where: { login: channelName },
-    });
+  async getChannelByLogin(login: string): Promise<User> {
+    const channel = await this.userRepo.findOne({ where: { login } });
 
     if (!channel) throw new NotFoundException();
 
-    return { channelId: channel.id };
+    return channel;
+  }
+
+  async getChannelById(id: string): Promise<User> {
+    const channel = await this.userRepo.findOne(id);
+
+    if (!channel) throw new NotFoundException();
+
+    return channel;
   }
 
   async findOne(
