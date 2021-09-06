@@ -53,11 +53,10 @@ export class AuthService {
 
     await this.usersService.store({
       id,
-      accessToken,
-      refreshToken,
       login,
       displayName,
       avatarUrl,
+      credentials: { accessToken, refreshToken },
     });
 
     return this.signTokens({ sub: id, login });

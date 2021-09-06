@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { POSTGRES_CONNECTION } from '../../app.constants';
@@ -9,7 +8,6 @@ import { UsersService } from './users.service';
 
 @Module({
   imports: [
-    HttpModule,
     ConfigModule,
     TypeOrmModule.forFeature([User], POSTGRES_CONNECTION),
     TwitchApiModule,

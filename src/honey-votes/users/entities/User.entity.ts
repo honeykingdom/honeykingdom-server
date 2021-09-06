@@ -7,6 +7,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserCredentials } from './UserCredentials.entity';
 import { ChatVoting } from '../../chat-votes/entities/ChatVoting.entity';
 import { Voting } from '../../votes/entities/Voting.entity';
 import { Vote } from '../../votes/entities/Vote.entity';
@@ -18,20 +19,6 @@ export const USER_TABLE_NAME = 'hv_user';
 export class User {
   @PrimaryColumn()
   id: string;
-
-  /**
-   * Twitch accessToken have an expiration time and also can become invalid
-   * when a user changes their password or disconnects an app
-   */
-  @Column()
-  accessToken: string;
-
-  /**
-   * Twitch refreshToken never expires but it can become invalid
-   * when a user changes their password or disconnects an app
-   */
-  @Column()
-  refreshToken: string;
 
   @Column()
   login: string;
@@ -45,6 +32,12 @@ export class User {
   /** If `false` the user needs to re-login */
   @Column({ default: true })
   areTokensValid: boolean;
+
+  @OneToOne(() => UserCredentials, (userCredentials) => userCredentials.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  credentials: UserCredentials;
 
   // @OneToOne(() => ChatVoting, (chatVoting) => chatVoting.user, {
   //   onDelete: 'SET NULL',

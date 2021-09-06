@@ -1,16 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
-import ms from 'ms';
 import { POSTGRES_CONNECTION } from '../../app.constants';
 import { Config } from '../../config/config.interface';
 import { TwitchApiService } from '../../twitch-api/twitch-api.service';
 import { SubTier, TwitchUserType } from '../honey-votes.interface';
 import { User } from './entities/User.entity';
+import { UserCredentials } from './entities/UserCredentials.entity';
 import {
   CheckUserSubscriptionResponse,
   GetChannelEditorsResponse,
@@ -30,13 +29,17 @@ type CheckUserTypesInput = {
   minutesToFollowRequired?: number;
 };
 
+type StoreUserInput = Pick<User, 'id' | 'login' | 'displayName' | 'avatarUrl'> &
+  Partial<Pick<User, 'areTokensValid'>> & {
+    credentials: Omit<UserCredentials, 'user'>;
+  };
+
 @Injectable()
 export class UsersService {
   private readonly clientId: string;
   private readonly clientSecret: string;
 
   // TODO: cache requests
-  // private readonly twitchRevalidateInterval = ms('5m');
   // private readonly editorIds = new Map<string, Set<string>>();
   // private readonly modIds = new Map<string, Set<string>>();
   // private readonly vipIds = new Map<string, Set<string>>();
@@ -45,7 +48,6 @@ export class UsersService {
     private readonly configService: ConfigService<Config>,
     @InjectRepository(User, POSTGRES_CONNECTION)
     private readonly userRepo: Repository<User>,
-    // private readonly httpService: HttpService,
     private readonly twitchApiService: TwitchApiService,
   ) {
     this.clientId = configService.get<string>('HONEY_VOTES_TWITCH_CLIENT_ID');
@@ -54,47 +56,39 @@ export class UsersService {
     );
   }
 
-  async findOne(userId: string): Promise<User | null> {
-    const user = await this.userRepo.findOne(userId);
+  async getChannelIdByName(channelName: string) {
+    const channel = await this.userRepo.findOne({
+      where: { login: channelName },
+    });
+
+    if (!channel) throw new NotFoundException();
+
+    return { channelId: channel.id };
+  }
+
+  async findOne(
+    userId: string,
+    options?: FindOneOptions<User>,
+  ): Promise<User | null> {
+    const user = await this.userRepo.findOne(userId, options);
 
     if (!user) return null;
 
     return user;
   }
 
-  async findOneOrFail(userId: string): Promise<User> {
-    return this.userRepo.findOneOrFail(userId);
+  async findOneOrFail(
+    userId: string,
+    options?: FindOneOptions<User>,
+  ): Promise<User> {
+    return this.userRepo.findOneOrFail(userId, options);
   }
 
-  // async findMany(userIds: string[]): Promise<User[]> {
-  //   const users = await this.userRepo.find({ where: { id: In(userIds) } });
+  async store(user: StoreUserInput) {
+    const dbUser = await this.findOne(user.id, { relations: ['credentials'] });
 
-  //   return users;
-  // }
-
-  async store(
-    user: Pick<
-      User,
-      | 'id'
-      | 'accessToken'
-      | 'refreshToken'
-      | 'login'
-      | 'displayName'
-      | 'avatarUrl'
-    >,
-  ) {
-    const dbUser = await this.findOne(user.id);
-
-    if (dbUser && dbUser.accessToken) {
-      // TODO: don't await this operation?
-      console.log('revokeToken', dbUser.accessToken);
-
-      const response = await this.twitchApiService.revokeToken({
-        token: dbUser.accessToken,
-        client_id: this.clientId,
-      });
-
-      console.log('revokeToken', response);
+    if (dbUser?.credentials?.accessToken) {
+      await this.revokeToken(dbUser.credentials.accessToken);
     }
 
     return this.userRepo.save(user);
@@ -161,8 +155,9 @@ export class UsersService {
     user: User,
   ): Promise<{ isSub: boolean; tier?: SubTier }> {
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
-    let accessToken = user.accessToken;
+    let accessToken = user.credentials.accessToken;
 
+    // TODO: remove loops or add iteration limit
     while (true) {
       try {
         response = await this.twitchApiService.checkUserSubscription(
@@ -177,7 +172,7 @@ export class UsersService {
 
           if (updatedUser === null) return { isSub: false };
 
-          accessToken = updatedUser.accessToken;
+          accessToken = updatedUser.credentials.accessToken;
         } else {
           return { isSub: false };
         }
@@ -194,7 +189,7 @@ export class UsersService {
     user: User,
   ): Promise<{ isFollower: boolean; minutesFollowed?: number }> {
     let response: AxiosResponse<GetUserFollowsResponse>;
-    let accessToken = user.accessToken;
+    let accessToken = user.credentials.accessToken;
 
     while (true) {
       try {
@@ -210,7 +205,7 @@ export class UsersService {
 
           if (updatedUser === null) return { isFollower: false };
 
-          accessToken = updatedUser.accessToken;
+          accessToken = updatedUser.credentials.accessToken;
         } else {
           return { isFollower: false };
         }
@@ -227,7 +222,7 @@ export class UsersService {
 
   async getChannelEditors(channel: User): Promise<Set<string>> {
     let response: AxiosResponse<GetChannelEditorsResponse>;
-    let accessToken = channel.accessToken;
+    let accessToken = channel.credentials.accessToken;
 
     while (true) {
       try {
@@ -243,7 +238,7 @@ export class UsersService {
 
           if (updatedUser === null) return new Set();
 
-          accessToken = updatedUser.accessToken;
+          accessToken = updatedUser.credentials.accessToken;
         } else {
           return new Set();
         }
@@ -255,7 +250,7 @@ export class UsersService {
 
   private async getChannelMods(channel: User): Promise<Set<string>> {
     let response: AxiosResponse<GetModeratorsResponse>;
-    let accessToken = channel.accessToken;
+    let accessToken = channel.credentials.accessToken;
 
     while (true) {
       try {
@@ -271,7 +266,7 @@ export class UsersService {
 
           if (updatedUser === null) return new Set();
 
-          accessToken = updatedUser.accessToken;
+          accessToken = updatedUser.credentials.accessToken;
         } else {
           return new Set();
         }
@@ -285,6 +280,18 @@ export class UsersService {
     return new Set();
   }
 
+  private async revokeToken(accessToken: string) {
+    // TODO: don't await this operation?
+    console.log('revokeToken', accessToken);
+
+    const response = await this.twitchApiService.revokeToken({
+      token: accessToken,
+      client_id: this.clientId,
+    });
+
+    console.log('revokeToken', response);
+  }
+
   /**
    * Try to refresh tokens and write them to the db
    * @returns null if refresh failed
@@ -294,23 +301,29 @@ export class UsersService {
     let response: AxiosResponse<RefreshTokenResponse>;
 
     try {
-      response = await this.twitchApiService.refreshToken({} as any);
+      response = await this.twitchApiService.refreshToken({
+        refresh_token: user.credentials.refreshToken,
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+      });
     } catch (e) {
       if (e.response.status === 400) {
-        await this.userRepo.save({ ...user, areTokensValid: false });
+        await this.store({
+          ...user,
+          credentials: { accessToken: null, refreshToken: null },
+          areTokensValid: false,
+        });
 
         return null;
       }
     }
 
-    const {
-      data: { access_token, refresh_token },
-    } = response;
-
-    const newUser = await this.userRepo.save({
+    const newUser = await this.store({
       ...user,
-      accessToken: access_token,
-      refreshToken: refresh_token,
+      credentials: {
+        accessToken: response.data.access_token,
+        refreshToken: response.data.refresh_token,
+      },
       areTokensValid: true,
     });
 
