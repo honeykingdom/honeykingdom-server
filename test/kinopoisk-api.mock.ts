@@ -1,0 +1,58 @@
+export const movie371 = {
+  kinopoiskId: 371,
+  imdbId: 'tt0120815',
+  nameRu: 'Спасти рядового Райана',
+  nameEn: null,
+  nameOriginal: 'Saving Private Ryan',
+  posterUrl: 'https://kinopoiskapiunofficial.tech/images/posters/kp/371.jpg',
+  posterUrlPreview:
+    'https://kinopoiskapiunofficial.tech/images/posters/kp_small/371.jpg',
+  reviewsCount: 196,
+  ratingGoodReview: 85.4,
+  ratingGoodReviewVoteCount: 151,
+  ratingKinopoisk: 8.2,
+  ratingKinopoiskVoteCount: 243583,
+  ratingImdb: 8.6,
+  ratingImdbVoteCount: 1284148,
+  ratingFilmCritics: 8.6,
+  ratingFilmCriticsVoteCount: 143,
+  ratingAwait: null,
+  ratingAwaitCount: 0,
+  ratingRfCritics: null,
+  ratingRfCriticsVoteCount: 0,
+  webUrl: 'https://www.kinopoisk.ru/film/371/',
+  year: 1998,
+  filmLength: 169,
+  slogan: 'The movie that inspired to the world to remember',
+  description:
+    'Капитан Джон Миллер получает тяжелое задание. Вместе с отрядом из восьми человек Миллер должен отправиться в тыл врага на поиски рядового Джеймса Райана, три родных брата которого почти одновременно погибли на полях сражений.\n\nКомандование приняло решение демобилизовать Райана и отправить его на родину к безутешной матери. Но для того, чтобы найти и спасти солдата, крошечному отряду придется пройти через все круги ада...',
+  shortDescription:
+    'Военная драма Стивена Спилберга о ценности человеческой жизни на фоне масштабных боевых действий',
+  editorAnnotation: null,
+  isTicketsAvailable: false,
+  productionStatus: null,
+  type: 'FILM',
+  ratingMpaa: 'r',
+  ratingAgeLimits: 'age16',
+  countries: [
+    {
+      country: 'США',
+    },
+  ],
+  genres: [
+    {
+      genre: 'драма',
+    },
+    {
+      genre: 'военный',
+    },
+  ],
+  startYear: null,
+  endYear: null,
+  serial: false,
+  shortFilm: false,
+  completed: false,
+  hasImax: false,
+  has3D: false,
+  lastSync: '2021-08-18T05:30:17.295402',
+};
