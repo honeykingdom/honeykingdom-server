@@ -6,6 +6,7 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Max,
@@ -22,14 +23,16 @@ import {
 } from '../entities/Voting.entity';
 import { VotingOptionType } from '../../honey-votes.interface';
 
-export class AddVotingDto {
+export class AddVotingDtoBase {
   @IsString()
   @IsOptional()
+  @IsNotEmpty()
   @MaxLength(VOTING_TITLE_MAX_LENGTH)
   title?: string;
 
   @IsString()
   @IsOptional()
+  @IsNotEmpty()
   @MaxLength(VOTING_DESCRIPTION_MAX_LENGTH)
   description?: string;
 
@@ -58,4 +61,10 @@ export class AddVotingDto {
   @Max(VOTING_OPTIONS_LIMIT_MAX)
   @IsOptional()
   votingOptionsLimit?: number;
+}
+
+export class AddVotingDto extends AddVotingDtoBase {
+  @IsString()
+  @IsNotEmpty()
+  channelId: string;
 }

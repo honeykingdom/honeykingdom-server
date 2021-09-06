@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsEnum,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsPositive,
   IsString,
@@ -15,8 +16,6 @@ import {
 } from '../entities/VotingOption.entity';
 
 // https://stackoverflow.com/a/61401118/4687416
-
-// TODO: add @IsNotEmpty()
 
 class BaseVotingOption {
   @IsEnum(VotingOptionType)
@@ -40,16 +39,22 @@ class VotingOptionCustom extends BaseVotingOption {
   type: VotingOptionType.Custom;
 
   @IsString()
+  @IsNotEmpty()
   @MaxLength(VOTING_OPTION_CARD_TITLE_MAX_LENGTH)
   title: string;
 
   @IsString()
-  @MaxLength(VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH)
+  @IsNotEmpty()
   @IsOptional()
+  @MaxLength(VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH)
   description?: string;
 }
 
 export class AddVotingOptionDto {
+  @IsInt()
+  @IsPositive()
+  votingId: string;
+
   @ValidateNested()
   @Type(() => BaseVotingOption, {
     keepDiscriminatorProperty: true,

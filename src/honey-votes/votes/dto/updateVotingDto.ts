@@ -1,3 +1,3 @@
-import { AddVotingDto } from './addVotingDto';
+import { AddVotingDtoBase } from './addVotingDto';
 
-export class UpdateVotingDto extends AddVotingDto {}
+export class UpdateVotingDto extends AddVotingDtoBase {}
