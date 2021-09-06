@@ -76,8 +76,6 @@ export class VotingService {
     return { success: true };
   }
 
-  // check access methods
-
   private async canCreateVoting(
     userId: string,
     channelId: string,
