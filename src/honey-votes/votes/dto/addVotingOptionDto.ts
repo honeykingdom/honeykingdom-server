@@ -53,7 +53,7 @@ class VotingOptionCustom extends BaseVotingOption {
 export class AddVotingOptionDto {
   @IsInt()
   @IsPositive()
-  votingId: string;
+  votingId: number;
 
   @ValidateNested()
   @Type(() => BaseVotingOption, {
