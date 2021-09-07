@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
@@ -160,6 +164,8 @@ export class UsersService {
     channel: User,
     user: User,
   ): Promise<{ isSub: boolean; tier?: SubTier }> {
+    if (!user.areTokensValid) throw new UnauthorizedException();
+
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
     let accessToken = user.credentials.accessToken;
 
@@ -176,7 +182,7 @@ export class UsersService {
         if (e.response.status === 401) {
           const updatedUser = await this.refreshToken(user);
 
-          if (updatedUser === null) return { isSub: false };
+          if (updatedUser === null) throw new UnauthorizedException();
 
           accessToken = updatedUser.credentials.accessToken;
         } else {
@@ -190,10 +196,13 @@ export class UsersService {
     return { isSub: true, tier };
   }
 
+  // TODO: if user token not valid take channel token
   async isFollower(
     channel: User,
     user: User,
   ): Promise<{ isFollower: boolean; minutesFollowed?: number }> {
+    if (!user.areTokensValid) throw new UnauthorizedException();
+
     let response: AxiosResponse<GetUserFollowsResponse>;
     let accessToken = user.credentials.accessToken;
 
@@ -209,7 +218,7 @@ export class UsersService {
         if (e.response.status === 401) {
           const updatedUser = await this.refreshToken(user);
 
-          if (updatedUser === null) return { isFollower: false };
+          if (updatedUser === null) throw new UnauthorizedException();
 
           accessToken = updatedUser.credentials.accessToken;
         } else {
@@ -227,6 +236,8 @@ export class UsersService {
   }
 
   async getChannelEditors(channel: User): Promise<Set<string>> {
+    if (!channel.areTokensValid) throw new UnauthorizedException();
+
     let response: AxiosResponse<GetChannelEditorsResponse>;
     let accessToken = channel.credentials.accessToken;
 
@@ -242,7 +253,7 @@ export class UsersService {
         if (e.response.status === 401) {
           const updatedUser = await this.refreshToken(channel);
 
-          if (updatedUser === null) return new Set();
+          if (updatedUser === null) throw new UnauthorizedException();
 
           accessToken = updatedUser.credentials.accessToken;
         } else {
@@ -255,6 +266,8 @@ export class UsersService {
   }
 
   private async getChannelMods(channel: User): Promise<Set<string>> {
+    if (!channel.areTokensValid) throw new UnauthorizedException();
+
     let response: AxiosResponse<GetModeratorsResponse>;
     let accessToken = channel.credentials.accessToken;
 
@@ -270,7 +283,7 @@ export class UsersService {
         if (e.response.status === 401) {
           const updatedUser = await this.refreshToken(channel);
 
-          if (updatedUser === null) return new Set();
+          if (updatedUser === null) throw new UnauthorizedException();
 
           accessToken = updatedUser.credentials.accessToken;
         } else {
@@ -316,7 +329,7 @@ export class UsersService {
       if (e.response.status === 400) {
         await this.store({
           ...user,
-          credentials: { accessToken: null, refreshToken: null },
+          credentials: { accessToken: '', refreshToken: '' },
           areTokensValid: false,
         });
 
