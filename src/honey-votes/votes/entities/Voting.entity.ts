@@ -55,7 +55,7 @@ export class UserTypesParams {
   [TwitchUserType.Viewer]: UserTypeParams;
 }
 
-export const VOTING_TABLE_NAME = 'hv_voting';
+const VOTING_TABLE_NAME = 'hv_voting';
 
 export const VOTING_TITLE_MAX_LENGTH = 50;
 export const VOTING_DESCRIPTION_MAX_LENGTH = 255;
@@ -88,6 +88,8 @@ export const VOTING_OPTIONS_LIMIT_DEFAULT = 100;
 
 @Entity(VOTING_TABLE_NAME)
 export class Voting {
+  static readonly tableName = VOTING_TABLE_NAME;
+
   @PrimaryGeneratedColumn()
   id: number;
 

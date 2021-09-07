@@ -13,10 +13,12 @@ import { Voting } from '../../votes/entities/Voting.entity';
 import { Vote } from '../../votes/entities/Vote.entity';
 import { VotingOption } from '../../votes/entities/VotingOption.entity';
 
-export const USER_TABLE_NAME = 'hv_user';
+const USER_TABLE_NAME = 'hv_user';
 
 @Entity(USER_TABLE_NAME)
 export class User {
+  static readonly tableName = USER_TABLE_NAME;
+
   @PrimaryColumn()
   id: string;
 

@@ -14,7 +14,7 @@ import { VotingOptionType } from '../../honey-votes.interface';
 import { Vote } from './Vote.entity';
 import { Voting } from './Voting.entity';
 
-export const VOTING_OPTION_TABLE_NAME = 'hv_voting_option';
+const VOTING_OPTION_TABLE_NAME = 'hv_voting_option';
 
 export const VOTING_OPTION_CARD_TITLE_MAX_LENGTH = 50;
 export const VOTING_OPTION_CARD_SUBTITLE_MAX_LENGTH = 255;
@@ -22,6 +22,8 @@ export const VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH = 255;
 
 @Entity(VOTING_OPTION_TABLE_NAME)
 export class VotingOption {
+  static readonly tableName = VOTING_OPTION_TABLE_NAME;
+
   @PrimaryGeneratedColumn()
   id: number;
 

@@ -12,10 +12,12 @@ import { User } from '../../users/entities/User.entity';
 import { Voting } from './Voting.entity';
 import { VotingOption } from './VotingOption.entity';
 
-export const VOTE_TABLE_NAME = 'hv_vote';
+const VOTE_TABLE_NAME = 'hv_vote';
 
 @Entity(VOTE_TABLE_NAME)
 export class Vote {
+  static readonly tableName = VOTE_TABLE_NAME;
+
   @PrimaryGeneratedColumn()
   id: number;
 
