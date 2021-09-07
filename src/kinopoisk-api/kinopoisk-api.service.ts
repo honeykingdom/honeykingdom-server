@@ -5,6 +5,11 @@ import { lastValueFrom } from 'rxjs';
 import { Config } from '../config/config.interface';
 import { GetFilmData, GetFilmDataResponse } from './kinopoisk-api.interface';
 
+/**
+ * There is no rate limits for this API.
+ *
+ * https://kinopoiskapiunofficial.tech/user
+ */
 @Injectable()
 export class KinopoiskApiService {
   private readonly apiKey: string;
