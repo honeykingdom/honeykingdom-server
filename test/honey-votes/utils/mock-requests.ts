@@ -8,6 +8,7 @@ import {
 import { server, rest } from './test-server';
 import { MockUser } from './users';
 
+// TODO: refactor get response functions
 export const mockGetChannelEditors = (editors: MockUser[] = []) => {
   const response: GetChannelEditorsResponse = {
     data: editors.map(({ id, displayName }) => ({

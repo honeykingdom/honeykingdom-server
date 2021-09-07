@@ -325,7 +325,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
         });
       });
 
-      it.only('should not create Vote for one VotingOption for the same user twice', async () => {
+      it('should not create Vote for one VotingOption for the same user twice', async () => {
         const [user, viewer] = await ctx.userRepo.save(users);
 
         await testCreateVote(400, {
