@@ -38,8 +38,10 @@ export class VotingOptionsService {
   async addVotingOption(userId: string, data: AddVotingOptionDto) {
     const { votingId, payload } = data;
     const [user, voting] = await Promise.all([
-      this.usersService.findOne(userId),
-      this.votingRepo.findOne(votingId, { relations: ['user'] }),
+      this.usersService.findOne(userId, { relations: ['credentials'] }),
+      this.votingRepo.findOne(votingId, {
+        relations: ['user', 'user.credentials'],
+      }),
     ]);
     const hasAccess = await this.canCreateVotingOption(
       user,
@@ -125,9 +127,9 @@ export class VotingOptionsService {
 
   private async canDeleteVotingOption(userId: string, votingOptionId: number) {
     const [user, votingOption] = await Promise.all([
-      this.usersService.findOne(userId),
+      this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingOptionRepo.findOne(votingOptionId, {
-        relations: ['voting', 'voting.user'],
+        relations: ['voting', 'voting.user', 'voting.user.credentials'],
       }),
     ]);
 

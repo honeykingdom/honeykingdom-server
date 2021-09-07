@@ -52,8 +52,10 @@ export class VotingService {
 
   async updateVoting(userId: string, votingId: number, data: UpdateVotingDto) {
     const [user, voting] = await Promise.all([
-      this.usersService.findOne(userId),
-      this.votingRepo.findOne(votingId, { relations: ['user'] }),
+      this.usersService.findOne(userId, { relations: ['credentials'] }),
+      this.votingRepo.findOne(votingId, {
+        relations: ['user', 'user.credentials'],
+      }),
     ]);
     const hasAccess = await this.canUpdateOrDeleteVoting(user, voting);
 
@@ -64,8 +66,10 @@ export class VotingService {
 
   async removeVoting(userId: string, votingId: number) {
     const [user, voting] = await Promise.all([
-      this.usersService.findOne(userId),
-      this.votingRepo.findOne(votingId, { relations: ['user'] }),
+      this.usersService.findOne(userId, { relations: ['credentials'] }),
+      this.votingRepo.findOne(votingId, {
+        relations: ['user', 'user.credentials'],
+      }),
     ]);
     const hasAccess = await this.canUpdateOrDeleteVoting(user, voting);
 
@@ -81,14 +85,16 @@ export class VotingService {
     channelId: string,
   ): Promise<boolean> {
     if (userId === channelId) {
-      const user = await this.usersService.findOne(userId);
+      const user = await this.usersService.findOne(userId, {
+        relations: ['credentials'],
+      });
 
       return !!user;
     }
 
     const [user, channel] = await Promise.all([
-      this.usersService.findOne(userId),
-      this.usersService.findOne(channelId),
+      this.usersService.findOne(userId, { relations: ['credentials'] }),
+      this.usersService.findOne(channelId, { relations: ['credentials'] }),
     ]);
 
     if (!user || !channel) return false;

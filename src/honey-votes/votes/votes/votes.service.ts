@@ -9,6 +9,7 @@ import { POSTGRES_CONNECTION } from '../../../app.constants';
 import { UsersService } from '../../users/users.service';
 import { AddVoteDto } from '../dto/addVoteDto';
 import { Vote } from '../entities/Vote.entity';
+import { Voting } from '../entities/Voting.entity';
 import { VotingOption } from '../entities/VotingOption.entity';
 
 @Injectable()
@@ -35,37 +36,43 @@ export class VotesService {
     await queryRunner.startTransaction();
 
     try {
-      const oldVote = await queryRunner.manager.findOne(Vote, {
-        where: { user: { id: userId }, voting: { id: votingId } },
-        relations: ['votingOption'],
-      });
-
-      // don't create Vote twice for the same user and VotingOption
-      if (oldVote && oldVote.votingOptionId === votingOptionId) {
-        throw new BadRequestException();
-      }
-
-      // remove old Vote and update old VotingOption fullVotesValue
-      if (oldVote && oldVote.votingOptionId !== votingOptionId) {
-        const fullVotesValue =
-          oldVote.votingOption.fullVotesValue - oldVote.value;
-        const votingOption = { ...oldVote.votingOption, fullVotesValue };
-
-        await Promise.all([
-          queryRunner.manager.save(VotingOption, votingOption),
-          queryRunner.manager.delete(Vote, oldVote.id),
-        ]);
-      }
-
       const votingOption = await queryRunner.manager.findOne(
         VotingOption,
         votingOptionId,
       );
 
+      if (!votingOption) throw new BadRequestException();
+
+      const votingId = votingOption.votingId;
+
+      const oldVote = await queryRunner.manager.findOne(Vote, {
+        where: { user: { id: userId }, voting: { id: votingId } },
+        relations: ['votingOption'],
+      });
+
+      if (oldVote) {
+        // don't create Vote twice for the same user and VotingOption
+        if (oldVote.votingOptionId === votingOptionId) {
+          throw new BadRequestException();
+        }
+
+        // remove old Vote and update old VotingOption fullVotesValue
+        if (oldVote.votingOptionId !== votingOptionId) {
+          const fullVotesValue =
+            oldVote.votingOption.fullVotesValue - oldVote.value;
+          const votingOption = { ...oldVote.votingOption, fullVotesValue };
+
+          await Promise.all([
+            queryRunner.manager.save(VotingOption, votingOption),
+            queryRunner.manager.delete(Vote, oldVote.id),
+          ]);
+        }
+      }
+
       const vote = queryRunner.manager.create(Vote, {
         user: { id: userId },
         voting: { id: votingId },
-        votingOption: { id: votingOptionId },
+        votingOption,
       });
 
       await Promise.all([
@@ -123,9 +130,9 @@ export class VotesService {
 
   private async canCreateVote(userId: string, votingOptionId: number) {
     const [user, votingOption] = await Promise.all([
-      this.usersService.findOne(userId),
+      this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingOptionRepo.findOne(votingOptionId, {
-        relations: ['voting', 'voting.user'],
+        relations: ['voting', 'voting.user', 'voting.user.credentials'],
       }),
     ]);
 
@@ -155,7 +162,7 @@ export class VotesService {
 
   private async canDeleteVote(userId: string, voteId: number) {
     const [user, vote] = await Promise.all([
-      this.usersService.findOne(userId),
+      this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.voteRepo.findOne(voteId, { relations: ['user', 'voting'] }),
     ]);
 
