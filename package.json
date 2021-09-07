@@ -18,7 +18,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "pretest:e2e": "docker-compose up -d test-db",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
+    "posttest:e2e": "docker-compose stop test-db",
+    "test:db": "cd test/db && docker-compose down && docker-compose up -d && sleep 5",
+    "generate:kinopoisk-types": "npx openapi-typescript https://kinopoiskapiunofficial.tech/documentation/api/openapi.json --output src/kinopoisk-api/kinopoisk-api.generated.ts"
   },
   "dependencies": {
     "@nestjs/common": "^7.6.13",
