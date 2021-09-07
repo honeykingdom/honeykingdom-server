@@ -1,4 +1,14 @@
 {
   "editor.formatOnSave": true,
-  "cSpell.language": "en,ru,ru-RU,en-US,en-GB"
+  "cSpell.language": "en,ru,ru-RU,en-US,en-GB",
+  "cSpell.words": [
+    "gifter",
+    "igdb",
+    "jsonb",
+    "kinopoisk",
+    "nestjs",
+    "postgres",
+    "supabase",
+    "typeorm"
+  ]
 }
