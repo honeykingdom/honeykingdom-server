@@ -311,42 +311,38 @@ describe('HoneyVotes - Users (e2e)', () => {
   });
 
   describe('refresh tokens if twitch api returned 401', () => {
-    describe('isEditor', () => {
-      test('success -> revoke old token, update tokens in the db and retry', async () => {
+    describe('success -> revoke old token, update tokens in the db and retry', () => {
+      test('isEditor', async () => {
         await testRefreshTwitchToken('editor', 'success');
       });
 
-      test('failure -> set "areTokensValid=false" and clear tokens in the db', async () => {
-        await testRefreshTwitchToken('editor', 'failure');
-      });
-    });
-
-    describe('isMod', () => {
-      test('success -> revoke old token, update tokens in the db and retry', async () => {
+      test('isMod', async () => {
         await testRefreshTwitchToken('mod', 'success');
       });
 
-      test('failure -> set "areTokensValid=false" and clear tokens in the db', async () => {
-        await testRefreshTwitchToken('mod', 'failure');
-      });
-    });
-
-    describe('isSub', () => {
-      test('success -> revoke old token, update tokens in the db and retry', async () => {
+      test('isSub', async () => {
         await testRefreshTwitchToken('sub', 'success');
       });
 
-      test('failure -> set "areTokensValid=false" and clear tokens in the db', async () => {
-        await testRefreshTwitchToken('sub', 'failure');
+      test('isFollower', async () => {
+        await testRefreshTwitchToken('follower', 'success');
       });
     });
 
-    describe('isFollower', () => {
-      test('success -> revoke old token, update tokens in the db and retry', async () => {
-        await testRefreshTwitchToken('follower', 'success');
+    describe('failure -> set "areTokensValid=false" and clear tokens in the db', () => {
+      test('isEditor', async () => {
+        await testRefreshTwitchToken('editor', 'failure');
       });
 
-      test('failure -> set "areTokensValid=false" and clear tokens in the db', async () => {
+      test('isMod', async () => {
+        await testRefreshTwitchToken('mod', 'failure');
+      });
+
+      test('isSub', async () => {
+        await testRefreshTwitchToken('sub', 'failure');
+      });
+
+      test('isFollower', async () => {
         await testRefreshTwitchToken('follower', 'failure');
       });
     });
