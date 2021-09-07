@@ -64,6 +64,7 @@ export const mockCheckUserSubscription = (
       }
     : undefined;
 
+  const statusCode = entry ? 200 : 404;
   const response: CheckUserSubscriptionResponse = {
     data: entry ? [entry] : [],
   };
@@ -71,7 +72,7 @@ export const mockCheckUserSubscription = (
   server.use(
     rest.get(
       'https://api.twitch.tv/helix/subscriptions/user',
-      (req, res, ctx) => res(ctx.status(200), ctx.json(response)),
+      (req, res, ctx) => res(ctx.status(statusCode), ctx.json(response)),
     ),
   );
 };
