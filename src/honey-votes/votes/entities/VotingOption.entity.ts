@@ -28,11 +28,11 @@ export class VotingOption {
   id: number;
 
   @ManyToOne(() => User, (user) => user.votingOptions, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @JoinColumn({ name: 'authorId' })
+  author: User;
 
-  @RelationId((votingOption: VotingOption) => votingOption.user)
-  userId: string;
+  @RelationId((votingOption: VotingOption) => votingOption.author)
+  authorId: string;
 
   @ManyToOne(() => Voting, (voting) => voting.votingOptions, {
     onDelete: 'CASCADE',

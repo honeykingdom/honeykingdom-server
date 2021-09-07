@@ -94,11 +94,11 @@ export class Voting {
   id: number;
 
   @ManyToOne(() => User, (user) => user.votingList, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @JoinColumn({ name: 'broadcasterId' })
+  broadcaster: User;
 
-  @RelationId((voting: Voting) => voting.user)
-  userId: string;
+  @RelationId((voting: Voting) => voting.broadcaster)
+  broadcasterId: string;
 
   @Column({ nullable: true, length: VOTING_TITLE_MAX_LENGTH })
   title?: string;

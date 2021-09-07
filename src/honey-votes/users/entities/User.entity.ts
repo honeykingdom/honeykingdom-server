@@ -46,13 +46,13 @@ export class User {
   // })
   // chatVoting: ChatVoting;
 
-  @OneToMany(() => Voting, (voting) => voting.user)
+  @OneToMany(() => Voting, (voting) => voting.broadcaster)
   votingList: Voting[];
 
-  @OneToMany(() => VotingOption, (votingOption) => votingOption.user)
+  @OneToMany(() => VotingOption, (votingOption) => votingOption.author)
   votingOptions: VotingOption[];
 
-  @OneToMany(() => Vote, (vote) => vote.user)
+  @OneToMany(() => Vote, (vote) => vote.author)
   votes: Vote[];
 
   @CreateDateColumn()
