@@ -1,12 +1,15 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { User } from './User.entity';
 
-export const USER_CREDENTIALS_TABLE_NAME = 'hv_user';
+export const USER_CREDENTIALS_TABLE_NAME = 'hv_user_credentials';
 
 // TODO: encrypt tokens
 @Entity(USER_CREDENTIALS_TABLE_NAME)
 export class UserCredentials {
-  @OneToOne(() => User, (user) => user.credentials, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, (user) => user.credentials, {
+    primary: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   user: User;
 
