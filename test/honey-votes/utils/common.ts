@@ -16,14 +16,9 @@ import {
   VotingOptionType,
 } from '../../../src/honey-votes/honey-votes.interface';
 import { HoneyVotesModule } from '../../../src/honey-votes/honey-votes.module';
-import {
-  User,
-  USER_TABLE_NAME,
-} from '../../../src/honey-votes/users/entities/User.entity';
-import {
-  Vote,
-  VOTE_TABLE_NAME,
-} from '../../../src/honey-votes/votes/entities/Vote.entity';
+import { User } from '../../../src/honey-votes/users/entities/User.entity';
+import { UserCredentials } from '../../../src/honey-votes/users/entities/UserCredentials.entity';
+import { Vote } from '../../../src/honey-votes/votes/entities/Vote.entity';
 import {
   UserTypesParams,
   Voting,
@@ -31,13 +26,9 @@ import {
   VOTING_CAN_MANAGE_VOTES_DEFAULT,
   VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT,
   VOTING_OPTIONS_LIMIT_DEFAULT,
-  VOTING_TABLE_NAME,
   VOTING_USER_TYPES_PARAMS_DEFAULT,
 } from '../../../src/honey-votes/votes/entities/Voting.entity';
-import {
-  VotingOption,
-  VOTING_OPTION_TABLE_NAME,
-} from '../../../src/honey-votes/votes/entities/VotingOption.entity';
+import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
 import { MockUser } from './users';
 import {
   mockCheckUserSubscription,
@@ -51,7 +42,6 @@ import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVoting
 import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
 import { signAccessToken } from './auth';
 import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';
-import { USER_CREDENTIALS_TABLE_NAME } from '../../../src/honey-votes/users/entities/UserCredentials.entity';
 
 // https://stackoverflow.com/a/61132308/4687416
 type DeepPartial<T> = {
@@ -853,11 +843,11 @@ export const getHoneyVotesTestContext = () => {
 
   afterEach(async () => {
     const tableNames = [
-      USER_CREDENTIALS_TABLE_NAME,
-      USER_TABLE_NAME,
-      VOTING_TABLE_NAME,
-      VOTING_OPTION_TABLE_NAME,
-      VOTE_TABLE_NAME,
+      UserCredentials.tableName,
+      User.tableName,
+      Voting.tableName,
+      VotingOption.tableName,
+      Vote.tableName,
     ];
 
     await ctx.connection.query(`TRUNCATE ${tableNames.join(',')} CASCADE;`);
