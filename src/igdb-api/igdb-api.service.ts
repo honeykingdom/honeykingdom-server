@@ -4,6 +4,11 @@ import { ConfigService } from '@nestjs/config';
 import { lastValueFrom } from 'rxjs';
 import { Config } from '../config/config.interface';
 
+/**
+ * There is a rate limit of 4 requests per second.
+ *
+ * https://api-docs.igdb.com/#rate-limits
+ */
 @Injectable()
 export class IgdbApiService {
   private readonly clientId: string;
