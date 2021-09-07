@@ -1,6 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import fetch from 'node-fetch';
+import { lastValueFrom } from 'rxjs';
 import { Config } from '../config/config.interface';
 import { RecentMessagesService } from '../recent-messages/recent-messages.service';
 import { RecentMessagesResponse } from '../recent-messages/recent.messages.interface';
@@ -11,6 +12,7 @@ export class RecentMessagesController {
 
   constructor(
     private readonly configService: ConfigService<Config>,
+    private readonly httpService: HttpService,
     private readonly recentMessagesService: RecentMessagesService,
   ) {
     this.defaultRecentMessagesUrl = this.configService.get<string>(
@@ -28,9 +30,9 @@ export class RecentMessagesController {
       recentMessages = this.recentMessagesService.getRecentMessages(channel);
     } else {
       const url = this.defaultRecentMessagesUrl.replace('%1', channel);
-      const response = await fetch(url);
+      const response = await lastValueFrom(this.httpService.get(url));
 
-      recentMessages = await response.json();
+      recentMessages = response.data;
     }
 
     return recentMessages;
