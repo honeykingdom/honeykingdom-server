@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import ms from 'ms';
 import { PrivateMessage } from 'twitch-js';
 import { Config } from '../config/config.interface';
 import { LinkShortenerService } from '../link-shortener/link-shortener.service';
@@ -17,7 +18,7 @@ export class HoneyBotService {
   private readonly channels: Set<string> = new Set();
   private readonly telegramChannels: Map<string, string[]> = new Map();
 
-  private readonly sendMessageInterval = 5 * 1000; // 5 sec
+  private readonly sendMessageInterval = ms('5 sec');
   private readonly messagesQueue: QueuedMessage[] = [];
 
   constructor(
