@@ -50,7 +50,7 @@ type DeepPartial<T> = {
 
 const defaultVotingParams = {
   id: expect.any(Number),
-  userId: expect.any(String),
+  broadcasterId: expect.any(String),
   title: null,
   description: null,
   canManageVotes: VOTING_CAN_MANAGE_VOTES_DEFAULT,
@@ -64,7 +64,7 @@ const defaultVotingParams = {
 
 const defaultVotingOptionParams = {
   id: expect.any(Number),
-  userId: expect.any(String),
+  authorId: expect.any(String),
   votingId: expect.any(Number),
   fullVotesValue: 0,
   type: expect.stringMatching(
@@ -88,7 +88,7 @@ const defaultVotingOptionParams = {
 
 const defaultVoteParams = {
   id: expect.any(Number),
-  userId: expect.any(String),
+  authorId: expect.any(String),
   votingId: expect.any(Number),
   votingOptionId: expect.any(Number),
   value: 1,
@@ -177,65 +177,12 @@ export const createTestCreateVoting =
     const expectedVoting = {
       ...defaultVotingParams,
       ...R.omit(['channelId'], addVotingDto),
-      userId: broadcaster.id,
+      broadcasterId: broadcaster.id,
     };
 
     const body: AddVotingDto = { channelId: broadcaster.id, ...addVotingDto };
 
     mockUserTypes(broadcaster, initiator, initiatorTypes);
-
-    // const url = `${API_BASE}/voting`;
-
-    // if (expectedStatusCode === HttpStatus.CREATED) {
-    //   await request(ctx.app.getHttpServer())
-    //     .post(url)
-    //     .set('Authorization', ctx.getAuthorizationHeader(initiator))
-    //     .send(body)
-    //     .expect(expectedStatusCode)
-    //     .expect((response) => expect(response.body).toEqual(expectedVoting));
-
-    //   expect(
-    //     await ctx.votingRepo.findOne({
-    //       where: { user: { id: broadcaster.id } },
-    //     }),
-    //   ).toEqual(expectedVoting);
-    // }
-
-    // if (expectedStatusCode === HttpStatus.BAD_REQUEST) {
-    //   await request(ctx.app.getHttpServer())
-    //     .post(url)
-    //     .set('Authorization', ctx.getAuthorizationHeader(initiator))
-    //     .send(body)
-    //     .expect(expectedStatusCode)
-    //     .expect({
-    //       statusCode: 400,
-    //       // message: expectedErrorMessage,
-    //       error: 'Bad Request',
-    //     });
-
-    //   expect(
-    //     await ctx.votingRepo.findOne({
-    //       where: { user: { id: broadcaster.id } },
-    //     }),
-    //   ).toBeUndefined();
-    // }
-
-    // if (expectedStatusCode === HttpStatus.FORBIDDEN) {
-    //   await request(ctx.app.getHttpServer())
-    //     .post(url)
-    //     .set('Authorization', ctx.getAuthorizationHeader(initiator))
-    //     .send(body)
-    //     .expect(expectedStatusCode)
-    //     .expect({ statusCode: 403, message: 'Forbidden' });
-
-    //   expect(
-    //     await ctx.votingRepo.findOne({
-    //       where: { user: { id: broadcaster.id } },
-    //     }),
-    //   ).toBeUndefined();
-    // }
-
-    // ---
 
     await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/voting`)
@@ -264,7 +211,7 @@ export const createTestCreateVoting =
       });
 
     const dbVoting = await ctx.votingRepo.findOne({
-      where: { user: { id: broadcaster.id } },
+      where: { broadcaster: { id: broadcaster.id } },
     });
 
     if (expectedStatusCode === HttpStatus.CREATED) {
@@ -298,9 +245,9 @@ export const createTestUpdateVoting =
     },
   ) => {
     const voting = await ctx.votingRepo.save({
-      user: broadcaster,
+      broadcaster,
       title: 'Test Voting',
-    });
+    } as Voting);
 
     mockUserTypes(broadcaster, initiator, initiatorTypes);
 
@@ -311,7 +258,7 @@ export const createTestUpdateVoting =
       const expectedVoting = {
         ...defaultVotingParams,
         ...updateVotingDto,
-        userId: broadcaster.id,
+        broadcasterId: broadcaster.id,
       };
 
       await request(ctx.app.getHttpServer())
@@ -328,7 +275,7 @@ export const createTestUpdateVoting =
       const updateVotingDto: UpdateVotingDto = { title: 'New Title' };
       const expectedVoting = {
         ...defaultVotingParams,
-        userId: broadcaster.id,
+        broadcasterId: broadcaster.id,
         title: 'Test Voting',
       };
 
@@ -362,9 +309,9 @@ export const createTestDeleteVoting =
     },
   ) => {
     const voting = await ctx.votingRepo.save({
-      user: broadcaster,
+      broadcaster,
       title: 'Test Voting',
-    });
+    } as Voting);
     const expectedVoting = {
       ...defaultVotingParams,
       title: 'Test Voting',
@@ -436,8 +383,8 @@ export const createTestCreateVotingOption =
         { userTypesParams: votingUserTypesParamsForbidden },
         votingParams,
       ),
-      user: broadcaster,
-    });
+      broadcaster,
+    } as Voting);
     const body: AddVotingOptionDto = {
       payload: {
         type: VotingOptionType.Custom,
@@ -448,7 +395,7 @@ export const createTestCreateVotingOption =
     };
     const expectedVotingOption = {
       ...defaultVotingOptionParams,
-      userId: initiator.id,
+      authorId: initiator.id,
       votingId: voting.id,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
@@ -549,20 +496,20 @@ export const createTestDeleteVotingOption =
     },
   ) => {
     const voting = await ctx.votingRepo.save({
-      user: broadcaster,
+      broadcaster,
       userTypesParams: votingUserTypesParamsForbidden,
       ...votingParams,
-    });
+    } as Voting);
     const votingOption = await ctx.votingOptionRepo.save({
-      user: author,
+      author,
       voting,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
-    });
+    } as VotingOption);
     const expectedVotingOption = {
       ...defaultVotingOptionParams,
       id: votingOption.id,
-      userId: author.id,
+      authorId: author.id,
       votingId: voting.id,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
@@ -641,21 +588,21 @@ export const createTestCreateVote =
         { userTypesParams: votingUserTypesParamsForbidden },
         votingParams,
       ),
-      user: broadcaster,
-    });
+      broadcaster,
+    } as Voting);
     const votingOption = await ctx.votingOptionRepo.save({
-      user: votingOptionAuthor,
+      author: votingOptionAuthor,
       voting,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
-    });
+    } as VotingOption);
     const body = {
       ...addVoteDto,
       votingOptionId: votingOption.id,
     };
     const expectedVote = {
       ...defaultVoteParams,
-      userId: initiator.id,
+      authorId: initiator.id,
       votingId: voting.id,
       votingOptionId: votingOption.id,
     };
@@ -675,7 +622,7 @@ export const createTestCreateVote =
         .expect({ success: true });
 
       expect(
-        await ctx.voteRepo.findOne({ where: { user: { id: initiator.id } } }),
+        await ctx.voteRepo.findOne({ where: { author: { id: initiator.id } } }),
       ).toEqual(expectedVote);
     }
 
@@ -689,7 +636,9 @@ export const createTestCreateVote =
 
       if (!skipDbCheck) {
         expect(
-          await ctx.voteRepo.findOne({ where: { user: { id: initiator.id } } }),
+          await ctx.voteRepo.findOne({
+            where: { author: { id: initiator.id } },
+          }),
         ).toBeUndefined();
       }
     }
@@ -704,7 +653,9 @@ export const createTestCreateVote =
 
       if (!skipDbCheck) {
         expect(
-          await ctx.voteRepo.findOne({ where: { user: { id: initiator.id } } }),
+          await ctx.voteRepo.findOne({
+            where: { author: { id: initiator.id } },
+          }),
         ).toBeUndefined();
       }
     }
@@ -748,23 +699,23 @@ export const createTestDeleteVote =
         { userTypesParams: votingUserTypesParamsForbidden },
         votingParams,
       ),
-      user: broadcaster,
-    });
+      broadcaster,
+    } as Voting);
     const votingOption = await ctx.votingOptionRepo.save({
-      user: votingOptionAuthor,
+      author: votingOptionAuthor,
       voting,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
       fullVotesValue: 1,
-    });
+    } as VotingOption);
     const vote = await ctx.voteRepo.save({
-      user: voteAuthor,
+      author: voteAuthor,
       voting,
       votingOption,
-    });
+    } as Vote);
     const expectedVote = {
       ...defaultVoteParams,
-      userId: voteAuthor.id,
+      authorId: voteAuthor.id,
       votingId: voting.id,
       votingOptionId: votingOption.id,
     };

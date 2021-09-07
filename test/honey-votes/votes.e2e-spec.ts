@@ -1,3 +1,5 @@
+import { VotingOption } from '../../src/honey-votes/votes/entities/VotingOption.entity';
+import { Vote } from '../../src/honey-votes/votes/entities/Vote.entity';
 import {
   API_BASE,
   SubTier,
@@ -312,7 +314,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
             await ctx.votingOptionRepo.save({
               ...votingOption,
               fullVotesValue: 2,
-            });
+            } as VotingOption);
 
             return async () => {
               expect(
@@ -323,7 +325,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
         });
       });
 
-      it('should not create Vote for one VotingOption for the same user twice', async () => {
+      it.only('should not create Vote for one VotingOption for the same user twice', async () => {
         const [user, viewer] = await ctx.userRepo.save(users);
 
         await testCreateVote(400, {
@@ -335,15 +337,19 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           },
           skipDbCheck: true,
           onBeforeTest: async ({ voting, votingOption }) => {
-            await ctx.voteRepo.save({ user: viewer, voting, votingOption });
+            await ctx.voteRepo.save({
+              author: viewer,
+              voting,
+              votingOption,
+            } as Vote);
             await ctx.votingOptionRepo.save({
               ...votingOption,
               fullVotesValue: 1,
-            });
+            } as VotingOption);
 
             return async () => {
               expect(
-                await ctx.voteRepo.count({ where: { user: viewer.id } }),
+                await ctx.voteRepo.count({ where: { author: viewer.id } }),
               ).toBe(1);
             };
           },
@@ -362,16 +368,16 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           },
           onBeforeTest: async ({ voting }) => {
             const votingOption2 = await ctx.votingOptionRepo.save({
-              user: viewer2,
+              author: viewer2,
               voting,
               type: VotingOptionType.Custom,
               cardTitle: 'Test VotingOption',
-            });
+            } as VotingOption);
             const vote2 = await ctx.voteRepo.save({
-              user: viewer1,
+              author: viewer1,
               voting,
               votingOption: votingOption2,
-            });
+            } as Vote);
 
             return async () => {
               expect(await ctx.voteRepo.findOne(vote2.id)).toBeUndefined();
@@ -392,17 +398,17 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           },
           onBeforeTest: async ({ voting, votingOption }) => {
             const votingOption2 = await ctx.votingOptionRepo.save({
-              user: viewer2,
+              author: viewer2,
               voting,
               type: VotingOptionType.Custom,
               cardTitle: 'Test VotingOption',
               fullVotesValue: 1,
-            });
+            } as VotingOption);
             await ctx.voteRepo.save({
-              user: viewer1,
+              author: viewer1,
               voting,
               votingOption: votingOption2,
-            });
+            } as Vote);
 
             return async () => {
               expect(

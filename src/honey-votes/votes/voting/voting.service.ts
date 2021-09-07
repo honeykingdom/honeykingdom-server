@@ -22,7 +22,7 @@ export class VotingService {
 
   async getVotingList(channelId: string) {
     return this.votingRepo.find({
-      where: { user: { id: channelId } },
+      where: { broadcaster: { id: channelId } },
       order: { createdAt: 'DESC' },
     });
   }
@@ -44,8 +44,13 @@ export class VotingService {
 
     // TODO: auto generate title?
 
-    const voting = this.votingRepo.create({ ...data, user: { id: channelId } });
-    const { user: _, ...savedVoting } = await this.votingRepo.save(voting);
+    const voting = this.votingRepo.create({
+      ...data,
+      broadcaster: { id: channelId },
+    });
+    const { broadcaster: _, ...savedVoting } = await this.votingRepo.save(
+      voting,
+    );
 
     return savedVoting;
   }
@@ -54,21 +59,21 @@ export class VotingService {
     const [user, voting] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingRepo.findOne(votingId, {
-        relations: ['user', 'user.credentials'],
+        relations: ['broadcaster', 'broadcaster.credentials'],
       }),
     ]);
     const hasAccess = await this.canUpdateOrDeleteVoting(user, voting);
 
     if (!hasAccess) throw new ForbiddenException();
 
-    return this.votingRepo.save({ ...voting, ...data });
+    return this.votingRepo.save({ ...voting, ...data } as Voting);
   }
 
   async removeVoting(userId: string, votingId: number) {
     const [user, voting] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingRepo.findOne(votingId, {
-        relations: ['user', 'user.credentials'],
+        relations: ['broadcaster', 'broadcaster.credentials'],
       }),
     ]);
     const hasAccess = await this.canUpdateOrDeleteVoting(user, voting);
@@ -110,11 +115,11 @@ export class VotingService {
   ): Promise<boolean> {
     if (!voting || !user) return false;
 
-    const isOwner = voting.user.id === user.id;
+    const isOwner = voting.broadcaster.id === user.id;
 
     if (isOwner) return true;
 
-    const isEditor = await this.usersService.isEditor(voting.user, user);
+    const isEditor = await this.usersService.isEditor(voting.broadcaster, user);
 
     return isEditor;
   }

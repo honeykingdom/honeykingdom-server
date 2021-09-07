@@ -97,7 +97,7 @@ export class UsersService {
       await this.revokeToken(dbUser.credentials.accessToken);
     }
 
-    return this.userRepo.save(user);
+    return this.userRepo.save(user as User);
   }
 
   async checkUserTypes(

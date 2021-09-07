@@ -46,7 +46,7 @@ export class VotesService {
       const votingId = votingOption.votingId;
 
       const oldVote = await queryRunner.manager.findOne(Vote, {
-        where: { user: { id: userId }, voting: { id: votingId } },
+        where: { author: { id: userId }, voting: { id: votingId } },
         relations: ['votingOption'],
       });
 
@@ -70,7 +70,7 @@ export class VotesService {
       }
 
       const vote = queryRunner.manager.create(Vote, {
-        user: { id: userId },
+        author: { id: userId },
         voting: { id: votingId },
         votingOption,
       });
@@ -132,7 +132,11 @@ export class VotesService {
     const [user, votingOption] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingOptionRepo.findOne(votingOptionId, {
-        relations: ['voting', 'voting.user', 'voting.user.credentials'],
+        relations: [
+          'voting',
+          'voting.broadcaster',
+          'voting.broadcaster.credentials',
+        ],
       }),
     ]);
 
@@ -144,15 +148,20 @@ export class VotesService {
     if (params.viewer.canVote) return true;
 
     if (
-      await this.usersService.checkUserTypes(votingOption.voting.user, user, {
-        mod: params.mod.canVote,
-        vip: params.vip.canVote,
-        subTier1: params.subTier1.canVote,
-        subTier2: params.subTier2.canVote,
-        subTier3: params.subTier3.canVote,
-        follower: params.follower.canVote,
-        minutesToFollowRequired: params.follower.minutesToFollowRequiredToVote,
-      })
+      await this.usersService.checkUserTypes(
+        votingOption.voting.broadcaster,
+        user,
+        {
+          mod: params.mod.canVote,
+          vip: params.vip.canVote,
+          subTier1: params.subTier1.canVote,
+          subTier2: params.subTier2.canVote,
+          subTier3: params.subTier3.canVote,
+          follower: params.follower.canVote,
+          minutesToFollowRequired:
+            params.follower.minutesToFollowRequiredToVote,
+        },
+      )
     ) {
       return true;
     }
@@ -163,11 +172,11 @@ export class VotesService {
   private async canDeleteVote(userId: string, voteId: number) {
     const [user, vote] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
-      this.voteRepo.findOne(voteId, { relations: ['user', 'voting'] }),
+      this.voteRepo.findOne(voteId, { relations: ['author', 'voting'] }),
     ]);
 
     if (!vote || !user) return false;
-    if (vote.user.id !== user.id) return false;
+    if (vote.author.id !== user.id) return false;
     if (!vote.voting.canManageVotes) return false;
 
     return true;

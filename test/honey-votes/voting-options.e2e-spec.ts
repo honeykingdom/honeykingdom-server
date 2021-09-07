@@ -1,4 +1,7 @@
+import { Voting } from '../../src/honey-votes/votes/entities/Voting.entity';
+import { Vote } from '../../src/honey-votes/votes/entities/Vote.entity';
 import {
+  VotingOption,
   VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTION_CARD_TITLE_MAX_LENGTH,
 } from '../../src/honey-votes/votes/entities/VotingOption.entity';
@@ -249,7 +252,9 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
 
       it('should return 403 if Voting is not assigned to this channelId', async () => {
         const [user1, user2] = await ctx.userRepo.save(users);
-        const voting = await ctx.votingRepo.save({ user: user2 });
+        const voting = await ctx.votingRepo.save({
+          broadcaster: user2,
+        } as Voting);
 
         await testCreateVotingOption(403, {
           broadcaster: user1,
@@ -370,7 +375,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             skipDbCheck: true,
             onBeforeTest: async ({ voting }) => {
               await ctx.votingOptionRepo.save({
-                user,
+                author: user,
                 voting,
                 type: VotingOptionType.KinopoiskMovie,
                 cardId: movieId,
@@ -379,7 +384,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
                 cardDescription: '',
                 cardImageUrl: '',
                 cardUrl: '',
-              });
+              } as VotingOption);
             },
           });
         });
@@ -495,7 +500,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             skipDbCheck: true,
             onBeforeTest: async ({ voting }) => {
               await ctx.votingOptionRepo.save({
-                user,
+                author: user,
                 voting,
                 type: VotingOptionType.IgdbGame,
                 cardId: gameId,
@@ -504,7 +509,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
                 cardDescription: '',
                 cardImageUrl: '',
                 cardUrl: '',
-              });
+              } as VotingOption);
             },
           });
         });
@@ -622,7 +627,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             skipDbCheck: true,
             onBeforeTest: async ({ voting }) => {
               await ctx.votingOptionRepo.save({
-                user,
+                author: user,
                 voting,
                 type: VotingOptionType.Custom,
                 cardId: null,
@@ -631,7 +636,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
                 cardDescription: null,
                 cardImageUrl: null,
                 cardUrl: null,
-              });
+              } as VotingOption);
             },
           });
         });
@@ -765,11 +770,11 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         initiator: viewer1,
         onBeforeTest: async ({ voting, votingOption }) => {
           await ctx.voteRepo.save({
-            user: viewer2,
+            author: viewer2,
             voting,
             votingOption,
             value: 1,
-          });
+          } as Vote);
         },
       });
     });
@@ -783,11 +788,11 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         initiator: user,
         onBeforeTest: async ({ voting, votingOption }) => {
           const vote = await ctx.voteRepo.save({
-            user: viewer,
+            author: viewer,
             voting,
             votingOption,
             value: 1,
-          });
+          } as Vote);
 
           return async () => {
             expect(await ctx.voteRepo.findOne(vote.id)).toBeUndefined();

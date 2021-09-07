@@ -4,6 +4,7 @@ import {
   VOTING_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTIONS_LIMIT_MIN,
   VOTING_OPTIONS_LIMIT_MAX,
+  Voting,
 } from '../../src/honey-votes/votes/entities/Voting.entity';
 import {
   API_BASE,
@@ -56,7 +57,10 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
   describe('/voting/:votingId (GET)', () => {
     it.skip('should return Voting by id', async () => {
       const [user] = await ctx.userRepo.save(users);
-      const voting = await ctx.votingRepo.save({ user, title: 'Test Voting' });
+      const voting = await ctx.votingRepo.save({
+        broadcaster: user,
+        title: 'Test Voting',
+      } as Voting);
 
       return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/${user.id}/voting/${voting.id}`)
@@ -478,7 +482,9 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
 
       it('should return 403 if Voting is assigned to this channelId', async () => {
         const [user1, user2] = await ctx.userRepo.save(users);
-        const voting = await ctx.votingRepo.save({ user: user2 });
+        const voting = await ctx.votingRepo.save({
+          broadcaster: user2,
+        } as Voting);
 
         await testUpdateVoting(403, {
           broadcaster: user1,
@@ -536,7 +542,9 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
 
       it('should return 403 if Voting is not assigned to this channelId', async () => {
         const [user1, user2] = await ctx.userRepo.save(users);
-        const voting = await ctx.votingRepo.save({ user: user2 });
+        const voting = await ctx.votingRepo.save({
+          broadcaster: user2,
+        } as Voting);
 
         await testDeleteVoting(403, {
           broadcaster: user1,

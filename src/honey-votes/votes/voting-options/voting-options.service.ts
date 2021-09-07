@@ -37,14 +37,14 @@ export class VotingOptionsService {
 
   async addVotingOption(userId: string, data: AddVotingOptionDto) {
     const { votingId, payload } = data;
-    const [user, voting] = await Promise.all([
+    const [author, voting] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingRepo.findOne(votingId, {
-        relations: ['user', 'user.credentials'],
+        relations: ['broadcaster', 'broadcaster.credentials'],
       }),
     ]);
     const hasAccess = await this.canCreateVotingOption(
-      user,
+      author,
       voting,
       payload.type,
     );
@@ -54,7 +54,7 @@ export class VotingOptionsService {
     const card = await this.getVotingOptionCard(data);
 
     const votingOption = this.votingOptionRepo.create({
-      user,
+      author,
       voting,
       type: payload.type,
       ...card,
@@ -62,7 +62,7 @@ export class VotingOptionsService {
 
     const {
       voting: _,
-      user: _1,
+      author: _1,
       ...savedVotingOption
     } = await this.votingOptionRepo.save(votingOption);
 
@@ -87,11 +87,11 @@ export class VotingOptionsService {
     if (!voting || !user) return false;
     if (!voting.canManageVotingOptions) return false;
 
-    const isOwner = voting.user.id === user.id;
+    const isOwner = voting.broadcaster.id === user.id;
 
     if (isOwner) return true;
 
-    const isEditor = await this.usersService.isEditor(voting.user, user);
+    const isEditor = await this.usersService.isEditor(voting.broadcaster, user);
 
     if (isEditor) return true;
 
@@ -108,7 +108,7 @@ export class VotingOptionsService {
     if (params.viewer.canAddOptions) return true;
 
     if (
-      await this.usersService.checkUserTypes(voting.user, user, {
+      await this.usersService.checkUserTypes(voting.broadcaster, user, {
         mod: params.mod.canAddOptions,
         vip: params.vip.canAddOptions,
         subTier1: params.subTier1.canAddOptions,
@@ -129,25 +129,29 @@ export class VotingOptionsService {
     const [user, votingOption] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingOptionRepo.findOne(votingOptionId, {
-        relations: ['voting', 'voting.user', 'voting.user.credentials'],
+        relations: [
+          'voting',
+          'voting.broadcaster',
+          'voting.broadcaster.credentials',
+        ],
       }),
     ]);
 
     if (!votingOption || !user) return false;
 
-    const isOwner = votingOption.voting.user.id === user.id;
+    const isOwner = votingOption.voting.broadcaster.id === user.id;
 
     if (isOwner) return true;
 
     const [isEditor, votesCount] = await Promise.all([
-      this.usersService.isEditor(votingOption.voting.user, user),
+      this.usersService.isEditor(votingOption.voting.broadcaster, user),
       this.voteRepo.count({ where: { votingOption: { id: votingOptionId } } }),
     ]);
 
     if (isEditor) return true;
 
     if (!votingOption.voting.canManageVotingOptions) return false;
-    if (votingOption.userId !== user.id) return false;
+    if (votingOption.authorId !== user.id) return false;
     if (votesCount > 0) return false;
 
     return true;
