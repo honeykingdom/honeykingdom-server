@@ -53,11 +53,8 @@ export class AuthController {
 
   @Get('/auth/me')
   @UseGuards(JwtAuthGuard)
-  async me(@PassportUser() user: JwtStrategyUser) {
-    const dbUser = await this.authService.getUser(user.id);
-    const { id, login, displayName, avatarUrl, areTokensValid } = dbUser;
-
-    return { id, login, displayName, avatarUrl, areTokensValid };
+  me(@PassportUser() user: JwtStrategyUser) {
+    return this.authService.getUser(user.id);
   }
 
   @Post('/auth/refresh-token')
