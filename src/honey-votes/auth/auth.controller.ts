@@ -16,20 +16,21 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TwitchAuthGuard } from './guards/twitch-auth.guard';
 import { RefreshTokenDto } from './dto/refreshTokenDto';
 import { JwtStrategyUser, TwitchStrategyUser } from './auth.interface';
+import { API_BASE } from '../honey-votes.interface';
 import { PassportUser } from './decorators/passport-user.decorator';
 
-@Controller('api/honey-votes/auth')
+@Controller(API_BASE)
 export class AuthController {
   constructor(
     private readonly configService: ConfigService<Config>,
     private readonly authService: AuthService,
   ) {}
 
-  @Get('twitch')
+  @Get('/auth/twitch')
   @UseGuards(TwitchAuthGuard)
   async twitchAuth() {}
 
-  @Get('twitch/redirect')
+  @Get('/auth/twitch/redirect')
   @UseGuards(TwitchAuthGuard)
   @Redirect()
   async twitchAuthRedirect(
@@ -42,7 +43,6 @@ export class AuthController {
 
     const { accessToken, refreshToken } = tokens;
 
-    // TODO: add expires param
     res.cookie('accessToken', accessToken, { httpOnly: false });
     res.cookie('refreshToken', refreshToken, { httpOnly: false });
 
@@ -51,21 +51,21 @@ export class AuthController {
     };
   }
 
-  @Get('me')
+  @Get('/auth/me')
   @UseGuards(JwtAuthGuard)
   async me(@PassportUser() user: JwtStrategyUser) {
     const dbUser = await this.authService.getUser(user.id);
-    const { id, login, displayName, avatarUrl } = dbUser;
+    const { id, login, displayName, avatarUrl, areTokensValid } = dbUser;
 
-    return { id, login, displayName, avatarUrl };
+    return { id, login, displayName, avatarUrl, areTokensValid };
   }
 
-  @Post('/refresh-token')
+  @Post('/auth/refresh-token')
   @UseGuards(JwtAuthGuard)
   refreshToken(
     @PassportUser() user: JwtStrategyUser,
-    @Body() refreshTokenDto: RefreshTokenDto,
+    @Body() { refreshToken }: RefreshTokenDto,
   ) {
-    return this.authService.refreshToken(user.id, refreshTokenDto.refreshToken);
+    return this.authService.refreshToken(user.id, refreshToken);
   }
 }
