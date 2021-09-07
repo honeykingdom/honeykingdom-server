@@ -55,9 +55,9 @@ export class User {
   @OneToMany(() => Vote, (vote) => vote.author)
   votes: Vote[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 }
