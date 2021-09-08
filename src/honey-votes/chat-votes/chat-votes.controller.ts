@@ -16,7 +16,7 @@ import { ChatVotesService } from './chat-votes.service';
 import { AddChatVotingDto } from './dto/addChatVotingDto';
 import { UpdateChatVotingDto } from './dto/updateChatVotingDto';
 
-@Controller(`${API_BASE}`)
+@Controller(API_BASE)
 export class ChatVotesController {
   constructor(private readonly chatVotesService: ChatVotesService) {}
 
