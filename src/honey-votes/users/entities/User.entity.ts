@@ -41,10 +41,10 @@ export class User {
   })
   credentials: UserCredentials;
 
-  // @OneToOne(() => ChatVoting, (chatVoting) => chatVoting.user, {
-  //   onDelete: 'SET NULL',
-  // })
-  // chatVoting: ChatVoting;
+  @OneToOne(() => ChatVoting, (chatVoting) => chatVoting.broadcaster, {
+    onDelete: 'SET NULL',
+  })
+  chatVoting: ChatVoting;
 
   @OneToMany(() => Voting, (voting) => voting.broadcaster)
   votingList: Voting[];
