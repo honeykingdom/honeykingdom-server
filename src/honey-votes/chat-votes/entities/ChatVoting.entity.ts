@@ -5,31 +5,40 @@ import {
   JoinColumn,
   OneToMany,
   OneToOne,
+  RelationId,
   UpdateDateColumn,
 } from 'typeorm';
 import { ChatVote } from './ChatVote.entity';
 import { User } from '../../users/entities/User.entity';
 import { TwitchUserType } from '../../honey-votes.interface';
+import { ChatVotingRestrictions } from '../dto/addChatVotingDto';
 
-export type ChatVotingRestrictions = {
-  [TwitchUserType.Viewer]: boolean;
-  /** If number, only users subscribed for at least the specified number of months can vote */
-  [TwitchUserType.Sub]: boolean | number;
-  [TwitchUserType.Mod]: boolean;
-  [TwitchUserType.Vip]: boolean;
+const CHAT_VOTING_TABLE_NAME = 'hv_chat_voting';
+
+export const DEFAULT_CHAT_VOTING_RESTRICTIONS: ChatVotingRestrictions = {
+  [TwitchUserType.Viewer]: false,
+  [TwitchUserType.SubTier1]: true,
+  [TwitchUserType.SubTier2]: true,
+  [TwitchUserType.SubTier3]: true,
+  [TwitchUserType.Mod]: true,
+  [TwitchUserType.Vip]: true,
+  subMonthsRequired: 0,
 };
 
-@Entity('hv_chat_voting')
+@Entity(CHAT_VOTING_TABLE_NAME)
 export class ChatVoting {
-  // @OneToOne(() => User, (user) => user.chatVoting, { onDelete: 'CASCADE' })
-  // @JoinColumn()
-  user: User;
-  userId: string;
+  static readonly tableName = CHAT_VOTING_TABLE_NAME;
 
-  @Column({ type: 'jsonb' })
+  @OneToOne(() => User, (user) => user.chatVoting, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  broadcaster: User;
+
+  @RelationId((chatVoting: ChatVoting) => chatVoting.broadcaster)
+  broadcasterId: string;
+
+  @Column({ type: 'jsonb', default: DEFAULT_CHAT_VOTING_RESTRICTIONS })
   restrictions: ChatVotingRestrictions;
 
-  /** Is chat listening currently enabled */
   @Column({ default: false })
   listening: boolean;
 
