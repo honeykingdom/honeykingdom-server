@@ -29,7 +29,10 @@ export const DEFAULT_CHAT_VOTING_RESTRICTIONS: ChatVotingRestrictions = {
 export class ChatVoting {
   static readonly tableName = CHAT_VOTING_TABLE_NAME;
 
-  @OneToOne(() => User, (user) => user.chatVoting, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, (user) => user.chatVoting, {
+    primary: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   broadcaster: User;
 
