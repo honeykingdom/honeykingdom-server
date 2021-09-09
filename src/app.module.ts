@@ -5,7 +5,11 @@ import { RecentMessagesModule } from './recent-messages/recent-messages.module';
 import { HerokuAwakeModule } from './heroku-awake/heroku-awake.module';
 import { HoneyBotModule } from './honey-bot/honey-bot.module';
 import { HoneyVotesModule } from './honey-votes/honey-votes.module';
-import { typeOrmMongoDbModule, typeOrmPostgresModule } from './db';
+import { typeOrmMongoDbModule, typeOrmPostgresModule } from './typeorm';
+import {
+  twitchChatAnonymousModule,
+  twitchChatHoneyKingdomModule,
+} from './twitch-chat';
 
 @Module({
   imports: [
@@ -13,6 +17,8 @@ import { typeOrmMongoDbModule, typeOrmPostgresModule } from './db';
     ConfigModule.forRoot({ validationSchema }),
     typeOrmMongoDbModule,
     typeOrmPostgresModule,
+    twitchChatAnonymousModule,
+    twitchChatHoneyKingdomModule,
     RecentMessagesModule,
     HoneyBotModule,
     HoneyVotesModule,
