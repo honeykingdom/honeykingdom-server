@@ -7,7 +7,7 @@ import { Connection, Repository } from 'typeorm';
 import { HoneyVotesModule } from '../../src/honey-votes/honey-votes.module';
 import { User } from '../../src/honey-votes/users/entities/User.entity';
 import { DatabaseModule } from '../../src/database/database.module';
-import { typeOrmPostgresModule } from '../../src/db';
+import { typeOrmPostgresModule } from '../../src/typeorm';
 import { DatabaseService } from '../../src/database/database.service';
 import { Config } from '../../src/config/config.interface';
 import { API_BASE } from '../../src/honey-votes/honey-votes.interface';

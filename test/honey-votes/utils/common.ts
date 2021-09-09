@@ -8,7 +8,7 @@ import R from 'ramda';
 import { Config } from '../../../src/config/config.interface';
 import { DatabaseModule } from '../../../src/database/database.module';
 import { DatabaseService } from '../../../src/database/database.service';
-import { typeOrmPostgresModule } from '../../../src/db';
+import { typeOrmPostgresModule } from '../../../src/typeorm';
 import {
   API_BASE,
   SubTier,
