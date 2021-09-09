@@ -1,24 +1,28 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Chat, ChatEvents, Commands, PrivateMessage } from 'twitch-js';
-import { TwitchChatModuleOptions } from './twitch-chat-options.interface';
 
-@Injectable({ scope: Scope.TRANSIENT })
+@Injectable()
 export class TwitchChatService {
-  private readonly chat: Chat;
+  logger: Logger;
 
-  constructor(options: TwitchChatModuleOptions) {
-    this.chat = new Chat({ log: { level: Infinity }, ...options });
+  constructor(
+    private readonly chat: Chat,
+    private readonly connectionName: string,
+  ) {
+    this.logger = new Logger(`TwitchChatService: ${connectionName}`);
 
-    this.chat.on(ChatEvents.CONNECTED, () => console.log('connected'));
-    this.chat.on(ChatEvents.DISCONNECTED, () => console.log('disconnected'));
+    this.chat.on(ChatEvents.CONNECTED, () => this.logger.log(`connected`));
+    this.chat.on(ChatEvents.DISCONNECTED, () =>
+      this.logger.log('disconnected'),
+    );
 
     this.chat.on(Commands.JOIN, ({ channel }) =>
-      console.log(`join: ${channel}`),
+      this.logger.log(`join ${channel}`),
     );
-  }
 
-  connect() {
-    return this.chat.connect();
+    this.chat.on(Commands.PART, ({ channel }) =>
+      this.logger.log(`part: ${channel}`),
+    );
   }
 
   joinChannel(channel: string) {
@@ -33,11 +37,11 @@ export class TwitchChatService {
     this.chat.say(channel, message);
   }
 
-  addChatListener(listener: (message: PrivateMessage) => void) {
+  on(listener: (message: PrivateMessage) => void) {
     this.chat.on(Commands.PRIVATE_MESSAGE, listener);
   }
 
-  removeChatListener(listener: (message: PrivateMessage) => void) {
+  off(listener: (message: PrivateMessage) => void) {
     this.chat.off(Commands.PRIVATE_MESSAGE, listener);
   }
 }

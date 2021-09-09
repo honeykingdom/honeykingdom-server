@@ -1,51 +1,65 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
+import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
+import { TwitchChatModuleAsyncOptions } from './twitch-chat-options.interface';
+import { TwitchChatModuleOptions } from './twitch-chat-options.interface';
+import { TwitchChatService } from './twitch-chat.service';
 import {
-  TwitchChatModuleAsyncOptions,
-  TwitchChatModuleOptions,
-} from './twitch-chat-options.interface';
+  createConnection,
+  getChatConnectionToken,
+  getChatModuleToken,
+} from './twitch-chat.utils';
+import { Chat } from 'twitch-js';
 
-@Module({
-  exports: [TwitchChatService],
-})
+@Global()
+@Module({})
 export class TwitchChatModule {
-  static register(options: TwitchChatModuleOptions): DynamicModule {
+  static forRoot(
+    connectionName: string,
+    options: TwitchChatModuleOptions = {},
+  ): DynamicModule {
+    const chatConnectionProvider: Provider = {
+      provide: getChatConnectionToken(connectionName),
+      useFactory: () => createConnection(options),
+    };
+
     return {
       module: TwitchChatModule,
-      providers: [
-        {
-          provide: TwitchChatService,
-          useFactory: () => this.createTwitchChatService(options),
-        },
-      ],
+      providers: [chatConnectionProvider],
+      exports: [chatConnectionProvider],
     };
   }
 
-  static registerAsync(options: TwitchChatModuleAsyncOptions): DynamicModule {
+  static forRootAsync(
+    connectionName: string,
+    options: TwitchChatModuleAsyncOptions,
+  ): DynamicModule {
+    const chatConnectionProvider: Provider = {
+      provide: getChatConnectionToken(connectionName),
+      useFactory: async (...rest: any) =>
+        createConnection(await options.useFactory(...rest)),
+      inject: options.inject || [],
+    };
+
     return {
       module: TwitchChatModule,
-      imports: options.imports || [],
-      providers: [
-        {
-          provide: TwitchChatService,
-          useFactory: async (args) => {
-            const twitchChatOptions = await options.useFactory(args);
-
-            return this.createTwitchChatService(twitchChatOptions);
-          },
-          inject: options.inject || [],
-        },
-      ],
+      imports: options.imports,
+      providers: [chatConnectionProvider],
+      exports: [chatConnectionProvider],
     };
   }
 
-  private static async createTwitchChatService(
-    options: TwitchChatModuleOptions,
-  ) {
-    const twitchChatService = new TwitchChatService(options);
+  static forFeature(connectionName: string): DynamicModule {
+    const provider: Provider = {
+      provide: getChatModuleToken(connectionName),
+      useFactory: (chatConnection: Chat) => {
+        return new TwitchChatService(chatConnection, connectionName);
+      },
+      inject: [getChatConnectionToken(connectionName)],
+    };
 
-    await twitchChatService.connect();
-
-    return twitchChatService;
+    return {
+      module: TwitchChatModule,
+      providers: [provider],
+      exports: [provider],
+    };
   }
 }
