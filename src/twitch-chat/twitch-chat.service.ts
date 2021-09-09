@@ -37,11 +37,11 @@ export class TwitchChatService {
     this.chat.say(channel, message);
   }
 
-  on(listener: (message: PrivateMessage) => void) {
+  addChatListener(listener: (message: PrivateMessage) => void) {
     this.chat.on(Commands.PRIVATE_MESSAGE, listener);
   }
 
-  off(listener: (message: PrivateMessage) => void) {
+  removeChatListener(listener: (message: PrivateMessage) => void) {
     this.chat.off(Commands.PRIVATE_MESSAGE, listener);
   }
 }
