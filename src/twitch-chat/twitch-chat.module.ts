@@ -50,9 +50,7 @@ export class TwitchChatModule {
   static forFeature(connectionName: string): DynamicModule {
     const provider: Provider = {
       provide: getChatModuleToken(connectionName),
-      useFactory: (chatConnection: Chat) => {
-        return new TwitchChatService(chatConnection, connectionName);
-      },
+      useFactory: (chat: Chat) => new TwitchChatService(chat, connectionName),
       inject: [getChatConnectionToken(connectionName)],
     };
 
