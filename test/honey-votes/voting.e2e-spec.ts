@@ -29,50 +29,13 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
   const testDeleteVoting = createTestDeleteVoting(ctx);
 
   describe('/voting (GET)', () => {
-    it.skip('should return voting list', async () => {
-      const [user] = await ctx.userRepo.save(users);
+    it.todo('should return voting list');
 
-      await ctx.votingRepo.save({ user, title: 'Test Voting 1' });
-      await ctx.votingRepo.save({ user, title: 'Test Voting 2' });
-
-      return request(ctx.app.getHttpServer())
-        .get(`${API_BASE}/${user.id}/voting`)
-        .expect(200)
-        .expect((response) =>
-          expect(response.body).toEqual([
-            // { ...defaultVotingParams, title: 'Test Voting 2' },
-            // { ...defaultVotingParams, title: 'Test Voting 1' },
-          ]),
-        );
-    });
-
-    it.skip('should empty array if channelId is not exists', async () => {
-      return request(ctx.app.getHttpServer())
-        .get(`${API_BASE}/${POSTGRES_MAX_INTEGER}/voting`)
-        .expect(200)
-        .expect((response) => expect(response.body).toEqual([]));
-    });
+    it.todo('should empty array if channelId is not exists');
   });
 
   describe('/voting/:votingId (GET)', () => {
-    it.skip('should return Voting by id', async () => {
-      const [user] = await ctx.userRepo.save(users);
-      const voting = await ctx.votingRepo.save({
-        broadcaster: user,
-        title: 'Test Voting',
-      } as Voting);
-
-      return request(ctx.app.getHttpServer())
-        .get(`${API_BASE}/${user.id}/voting/${voting.id}`)
-        .expect(200)
-        .expect((response) =>
-          expect(response.body).toEqual({
-            // ...defaultVotingParams,
-            id: voting.id,
-            title: 'Test Voting',
-          }),
-        );
-    });
+    it.todo('should return Voting by id');
 
     it.todo('should return 404 if channelId is not exists');
 
