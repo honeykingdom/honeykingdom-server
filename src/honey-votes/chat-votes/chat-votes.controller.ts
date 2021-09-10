@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Delete,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -53,6 +55,7 @@ export class ChatVotesController {
 
   @Post('/chat-votes/:chatVotingId/clear')
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   async clearChatVotes(
     @PassportUser() user: JwtStrategyUser,
     @Param('chatVotingId') chatVotingId: string,
