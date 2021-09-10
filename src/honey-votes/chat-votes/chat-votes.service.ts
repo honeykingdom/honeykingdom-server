@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PrivateMessage } from 'twitch-js';
@@ -81,7 +81,7 @@ export class ChatVotesService {
 
       const hasAccess = await this.canCreateChatVoting(channel, initiator);
 
-      if (!hasAccess) throw new UnauthorizedException();
+      if (!hasAccess) throw new ForbiddenException();
 
       broadcaster = channel;
     }
@@ -92,7 +92,10 @@ export class ChatVotesService {
       data.restrictions || DEFAULT_CHAT_VOTING_RESTRICTIONS,
     );
 
-    return this.chatVotingRepo.save(data);
+    const { broadcaster: _, ...savedChatVoting } =
+      await this.chatVotingRepo.save({ broadcaster, ...data } as ChatVoting);
+
+    return savedChatVoting;
   }
 
   async updateChatVoting(
@@ -105,13 +108,16 @@ export class ChatVotesService {
       chatVotingId,
     );
 
-    if (!hasAccess) throw new UnauthorizedException();
+    if (!hasAccess) throw new ForbiddenException();
 
     const broadcaster = chatVoting.broadcaster;
 
     this.onChatVotingChange(broadcaster, data.listening, data.restrictions);
 
-    await this.chatVotingRepo.update(broadcaster.id, data);
+    const { broadcaster: _, ...updatedChatVoting } =
+      await this.chatVotingRepo.save({ ...chatVoting, ...data } as ChatVoting);
+
+    return updatedChatVoting;
   }
 
   async deleteChatVoting(initiatorId: string, chatVotingId: number) {
@@ -120,13 +126,15 @@ export class ChatVotesService {
       chatVotingId,
     );
 
-    if (!hasAccess) throw new UnauthorizedException();
+    if (!hasAccess) throw new ForbiddenException();
 
     const broadcaster = chatVoting.broadcaster;
 
     this.onChatVotingChange(broadcaster, false);
 
-    return this.chatVotingRepo.delete(chatVoting.broadcaster.id);
+    await this.chatVotingRepo.delete(chatVoting.broadcaster.id);
+
+    return { success: true };
   }
 
   async clearChatVotes(initiatorId: string, chatVotingId: number) {
@@ -135,7 +143,7 @@ export class ChatVotesService {
       chatVotingId,
     );
 
-    if (!hasAccess) throw new UnauthorizedException();
+    if (!hasAccess) throw new ForbiddenException();
 
     return this.deleteChatVotes(chatVotingId);
   }
