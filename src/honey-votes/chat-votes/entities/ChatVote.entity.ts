@@ -2,9 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
-  RelationId,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserStateTags } from 'twitch-js';
@@ -21,14 +21,15 @@ type Tags = Pick<
 export class ChatVote {
   static readonly tableName = CHAT_VOTE_TABLE_NAME;
 
-  @ManyToOne(() => ChatVoting, (channel) => channel.votes, {
-    primary: true,
+  @ManyToOne(() => ChatVoting, (chatVoting) => chatVoting.votes, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'chatVotingId' })
   chatVoting: ChatVoting;
 
-  @RelationId((chatVote: ChatVote) => chatVote.chatVoting)
-  chatVotingId: number;
+  // https://github.com/typeorm/typeorm/issues/3952#issuecomment-562188666
+  @PrimaryColumn()
+  chatVotingId: string;
 
   @PrimaryColumn()
   userId: string;
