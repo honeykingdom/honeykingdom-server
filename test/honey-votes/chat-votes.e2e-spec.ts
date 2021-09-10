@@ -309,17 +309,13 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         .expect({ success: true });
 
       expect(
-        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
-      ).toBeUndefined();
-      expect(
-        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
-      ).toBeUndefined();
-      expect(
-        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
-      ).toBeUndefined();
-      expect(
-        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
-      ).toBeUndefined();
+        await Promise.all([
+          chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
+          chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
+          chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
+          chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
+        ]),
+      ).toEqual(expect.arrayContaining([undefined]));
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
@@ -330,17 +326,13 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         .expect({ statusCode: 403, message: 'Forbidden' });
 
       expect(
-        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
-      ).toBeDefined();
-      expect(
-        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
-      ).toBeDefined();
-      expect(
-        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
-      ).toBeDefined();
-      expect(
-        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
-      ).toBeDefined();
+        await Promise.all([
+          chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
+          chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
+          chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
+          chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
+        ]),
+      ).toEqual(expect.arrayContaining([expect.anything()]));
     }
 
     // @ts-expect-error
