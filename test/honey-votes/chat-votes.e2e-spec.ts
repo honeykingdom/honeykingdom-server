@@ -260,6 +260,90 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     await onAfterTest?.();
   };
 
+  const testClearChatVoting = async (
+    expectedStatusCode: HttpStatus.OK | HttpStatus.FORBIDDEN,
+    {
+      broadcaster,
+      initiator,
+      isEditor = false,
+      url,
+      onBeforeTest = () => {},
+    }: {
+      broadcaster: User;
+      initiator: User;
+      isEditor?: boolean;
+      url?: string;
+      onBeforeTest?: OnBeforeTest<{ chatVoting: ChatVoting }>;
+    },
+  ) => {
+    const chatVoting = await chatVotingRepo.save({
+      broadcaster,
+    } as ChatVoting);
+    const chatVotingId = chatVoting.broadcasterId;
+
+    const [chatVote1, chatVote2, chatVote3, chatVote4] =
+      await chatVoteRepo.save(
+        Array.from({ length: 4 }, (_, i) => ({
+          chatVotingId,
+          userId: `${i + 1}`,
+          userName: `user${i + 1}`,
+          tags: {},
+          content: `Test Vote ${i + 1}`,
+        })) as ChatVote[],
+      );
+
+    mockGetChannelEditors(isEditor ? [initiator] : []);
+
+    const onAfterTest = await onBeforeTest({ chatVoting });
+
+    const finalUrl = url || `${API_BASE}/chat-votes/${broadcaster.id}/clear`;
+
+    if (expectedStatusCode === HttpStatus.OK) {
+      await request(app.getHttpServer())
+        .post(finalUrl)
+        .set('Authorization', getAuthorizationHeader(initiator))
+        .expect(expectedStatusCode)
+        .expect({ success: true });
+
+      expect(
+        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
+      ).toBeUndefined();
+      expect(
+        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
+      ).toBeUndefined();
+      expect(
+        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
+      ).toBeUndefined();
+      expect(
+        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
+      ).toBeUndefined();
+    }
+
+    if (expectedStatusCode === HttpStatus.FORBIDDEN) {
+      await request(app.getHttpServer())
+        .post(finalUrl)
+        .set('Authorization', getAuthorizationHeader(initiator))
+        .expect(expectedStatusCode)
+        .expect({ statusCode: 403, message: 'Forbidden' });
+
+      expect(
+        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
+      ).toBeDefined();
+      expect(
+        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
+      ).toBeDefined();
+      expect(
+        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
+      ).toBeDefined();
+      expect(
+        await chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
+      ).toBeDefined();
+    }
+
+    // @ts-expect-error
+    await onAfterTest?.();
+  };
+
   const twitchChatServiceMock = {
     addChatListener: jest.fn(),
     joinChannel: jest.fn(),
@@ -549,16 +633,40 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
     describe('logic', () => {
       it('should stop listening chat', async () => {});
+
+      it('should delete all assigned ChatVote records', async () => {});
     });
   });
 
   describe('/chat-votes/:chatVotingId/clear (POST)', () => {
     describe('permissions', () => {
-      it('should clear ChatVoting by broadcaster', async () => {});
+      it('should clear ChatVoting by broadcaster', async () => {
+        const [broadcaster] = await userRepo.save(users);
 
-      it('should clear ChatVoting by editors', async () => {});
+        await testClearChatVoting(HttpStatus.OK, {
+          broadcaster,
+          initiator: broadcaster,
+        });
+      });
 
-      it('should not clear ChatVoting by other users', async () => {});
+      it('should clear ChatVoting by editors', async () => {
+        const [broadcaster, editor] = await userRepo.save(users);
+
+        await testClearChatVoting(HttpStatus.OK, {
+          broadcaster,
+          initiator: editor,
+          isEditor: true,
+        });
+      });
+
+      it('should not clear ChatVoting by other users', async () => {
+        const [broadcaster, viewer] = await userRepo.save(users);
+
+        await testClearChatVoting(HttpStatus.FORBIDDEN, {
+          broadcaster,
+          initiator: viewer,
+        });
+      });
     });
   });
 
