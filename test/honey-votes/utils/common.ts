@@ -148,7 +148,7 @@ const mockUserTypes = (
   );
 };
 
-type OnBeforeTest<T> = (
+export type OnBeforeTest<T> = (
   ctx: T,
 ) => Promise<void | OnAfterTest> | void | OnAfterTest;
 type OnAfterTest = () => Promise<void> | void;
@@ -233,8 +233,8 @@ export const createTestUpdateVoting =
     {
       broadcaster,
       initiator,
-      // updateVotingDto,
       initiatorTypes,
+      // updateVotingDto,
       url,
     }: {
       broadcaster: User;
