@@ -365,6 +365,26 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         });
       });
 
+      test('broadcasterId: wrong type', async () => {
+        const [broadcaster] = await userRepo.save(users);
+
+        await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+          addChatVotingDto: { broadcasterId: false } as any,
+        });
+      });
+
+      test('broadcasterId: not existing user', async () => {
+        const [broadcaster] = await userRepo.save(users);
+
+        await testCreateChatVoting(HttpStatus.FORBIDDEN, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+          addChatVotingDto: { broadcasterId: '1' },
+        });
+      });
+
       test('restrictions: wrong type', async () => {
         const [broadcaster] = await userRepo.save(users);
 
