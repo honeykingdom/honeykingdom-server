@@ -145,7 +145,9 @@ export class ChatVotesService {
 
     if (!hasAccess) throw new ForbiddenException();
 
-    return this.deleteChatVotes(chatVotingId);
+    await this.deleteChatVotes(chatVotingId);
+
+    return { success: true };
   }
 
   // TODO: test this
