@@ -2,16 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import { PrivateMessage } from 'twitch-js';
+import { TWITCH_CHAT_HONEYKINGDOM } from '../app.constants';
 import { Config } from '../config/config.interface';
 import { LinkShortenerService } from '../link-shortener/link-shortener.service';
 import { TelegramPost } from '../telegram-api/telegram-api.interface';
 import { TelegramApiService } from '../telegram-api/telegram-api.service';
 import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
+import { InjectChat } from '../twitch-chat/twitch-chat.decorators';
 
 type QueuedMessage = {
   channel: string;
   message: string;
 };
+
+const CHAT_CONSUMER_ID = 'HoneyBot';
 
 @Injectable()
 export class HoneyBotService {
@@ -23,6 +27,7 @@ export class HoneyBotService {
 
   constructor(
     private readonly configService: ConfigService<Config>,
+    @InjectChat(TWITCH_CHAT_HONEYKINGDOM)
     private readonly twitchChatService: TwitchChatService,
     private readonly telegramApiService: TelegramApiService,
     private readonly linkShortenerService: LinkShortenerService,
@@ -52,7 +57,7 @@ export class HoneyBotService {
   }
 
   private watchChannel(channel: string) {
-    this.twitchChatService.joinChannel(channel);
+    this.twitchChatService.joinChannel(channel, CHAT_CONSUMER_ID);
 
     const telegramChannels = this.telegramChannels.get(channel) || [];
 
