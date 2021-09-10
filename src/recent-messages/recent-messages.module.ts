@@ -6,13 +6,14 @@ import { Message } from '../recent-messages/entities/message.entity';
 import { RecentMessagesController } from '../recent-messages/recent-messages.controller';
 import { RecentMessagesService } from '../recent-messages/recent-messages.service';
 import { TwitchChatModule } from '../twitch-chat/twitch-chat.module';
+import { TWITCH_CHAT_ANONYMOUS } from '../app.constants';
 
 @Module({
   imports: [
     ConfigModule,
     HttpModule,
     TypeOrmModule.forFeature([Message]),
-    TwitchChatModule.register({}),
+    TwitchChatModule.forFeature(TWITCH_CHAT_ANONYMOUS),
   ],
   providers: [RecentMessagesService],
   controllers: [RecentMessagesController],

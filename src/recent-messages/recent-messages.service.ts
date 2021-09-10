@@ -1,12 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PrivateMessage } from 'twitch-js';
+import { TWITCH_CHAT_ANONYMOUS } from '../app.constants';
 import { Config } from '../config/config.interface';
+import { InjectChat } from '../twitch-chat/twitch-chat.decorators';
 import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
 import { Message } from '../recent-messages/entities/message.entity';
 import { RecentMessagesResponse } from '../recent-messages/recent.messages.interface';
+
+const CHAT_CONSUMER_ID = 'RecentMessages';
 
 @Injectable()
 export class RecentMessagesService {
@@ -17,9 +21,10 @@ export class RecentMessagesService {
 
   constructor(
     private readonly configService: ConfigService<Config>,
+    @InjectChat(TWITCH_CHAT_ANONYMOUS)
+    private readonly twitchChatService: TwitchChatService,
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
-    private readonly twitchChatService: TwitchChatService,
   ) {
     this.messagesLimit = Number.parseInt(
       this.configService.get<string>('RECENT_MESSAGES_LIMIT'),
@@ -30,7 +35,9 @@ export class RecentMessagesService {
       .split(';');
 
     Promise.all(
-      this.channels.map((channel) => twitchChatService.joinChannel(channel)),
+      this.channels.map((channel) =>
+        twitchChatService.joinChannel(channel, CHAT_CONSUMER_ID),
+      ),
     );
 
     Promise.all(
