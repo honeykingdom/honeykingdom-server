@@ -3,7 +3,9 @@ import { Chat, ChatEvents, Commands, PrivateMessage } from 'twitch-js';
 
 @Injectable()
 export class TwitchChatService {
-  logger: Logger;
+  private readonly logger: Logger;
+  /** Map<channel: string, connections: Set<string>> */
+  private readonly channels = new Map<string, Set<string>>();
 
   constructor(
     private readonly chat: Chat,
@@ -11,26 +13,35 @@ export class TwitchChatService {
   ) {
     this.logger = new Logger(`TwitchChatService: ${connectionName}`);
 
-    this.chat.on(ChatEvents.CONNECTED, () => this.logger.log(`connected`));
-    this.chat.on(ChatEvents.DISCONNECTED, () =>
-      this.logger.log('disconnected'),
-    );
+    chat.on(ChatEvents.CONNECTED, () => this.logger.log(`connected`));
+    chat.on(ChatEvents.DISCONNECTED, () => this.logger.log('disconnected'));
 
-    this.chat.on(Commands.JOIN, ({ channel }) =>
-      this.logger.log(`join ${channel}`),
-    );
-
-    this.chat.on(Commands.PART, ({ channel }) =>
+    chat.on(Commands.JOIN, ({ channel }) => this.logger.log(`join ${channel}`));
+    chat.on(Commands.PART, ({ channel }) =>
       this.logger.log(`part: ${channel}`),
     );
   }
 
-  joinChannel(channel: string) {
+  joinChannel(channel: string, moduleId: string) {
+    if (!this.channels.has(channel)) {
+      this.channels.set(channel, new Set());
+    }
+
+    this.channels.get(channel).add(moduleId);
+
     return this.chat.join(channel);
   }
 
-  partChannel(channel: string) {
-    return this.chat.part(channel);
+  partChannel(channel: string, moduleId: string) {
+    if (!this.channels.has(channel)) {
+      this.channels.set(channel, new Set());
+    }
+
+    this.channels.get(channel).delete(moduleId);
+
+    if (this.channels.get(channel).size === 0) {
+      return this.chat.part(channel);
+    }
   }
 
   say(channel: string, message: string) {
