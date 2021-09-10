@@ -654,14 +654,13 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         );
       });
 
-      it.only('should not do anything if listening flag is not sended', async () => {
+      it('should not do anything if listening flag is not sended', async () => {
         const [broadcaster] = await userRepo.save(users);
 
         await testUpdateChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
           initiator: broadcaster,
-          chatVotingParams: { listening: false },
-          updateChatVotingDto: { listening: false },
+          updateChatVotingDto: {},
         });
 
         expect(twitchChatServiceMock.joinChannel).not.toHaveBeenCalled();
