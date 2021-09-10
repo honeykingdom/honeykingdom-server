@@ -7,11 +7,13 @@ import {
   Post,
   Put,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { JwtStrategyUser } from '../auth/auth.interface';
 import { PassportUser } from '../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../honey-votes.interface';
+import { validationPipe } from '../honey-votes.validation';
 import { ChatVotesService } from './chat-votes.service';
 import { AddChatVotingDto } from './dto/addChatVotingDto';
 import { UpdateChatVotingDto } from './dto/updateChatVotingDto';
@@ -21,6 +23,8 @@ export class ChatVotesController {
   constructor(private readonly chatVotesService: ChatVotesService) {}
 
   @Post('/chat-votes')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(validationPipe)
   async addChatVoting(
     @PassportUser() user: JwtStrategyUser,
     @Body() data: AddChatVotingDto,
@@ -28,8 +32,9 @@ export class ChatVotesController {
     return this.chatVotesService.addChatVoting(user.id, data);
   }
 
-  @Put('chat-votes/:chatVotingId')
+  @Put('/chat-votes/:chatVotingId')
   @UseGuards(JwtAuthGuard)
+  @UsePipes(validationPipe)
   async updateChatVoting(
     @PassportUser() user: JwtStrategyUser,
     @Param('chatVotingId', ParseIntPipe) chatVotingId: number,
