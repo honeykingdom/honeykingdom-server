@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../../honey-votes.interface';
 import { AddVoteDto } from '../dto/addVoteDto';
 import { VotesService } from './votes.service';
-import { validationPipe } from '../votes.validation';
+import { validationPipe } from '../../honey-votes.validation';
 
 @Controller(API_BASE)
 export class VotesController {

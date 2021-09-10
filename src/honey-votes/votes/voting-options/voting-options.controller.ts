@@ -13,7 +13,7 @@ import { PassportUser } from '../../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../../honey-votes.interface';
 import { AddVotingOptionDto } from '../dto/addVotingOptionDto';
-import { validationPipe } from '../votes.validation';
+import { validationPipe } from '../../honey-votes.validation';
 import { VotingOptionsService } from './voting-options.service';
 
 @Controller(API_BASE)

@@ -17,7 +17,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../../honey-votes.interface';
 import { AddVotingDto } from '../dto/addVotingDto';
 import { UpdateVotingDto } from '../dto/updateVotingDto';
-import { validationPipe } from '../votes.validation';
+import { validationPipe } from '../../honey-votes.validation';
 import { VotingService } from './voting.service';
 
 @Controller(API_BASE)
