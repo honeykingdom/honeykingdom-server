@@ -137,18 +137,21 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       broadcaster,
       initiator,
       isEditor = false,
+      chatVotingParams = {},
       updateChatVotingDto,
       url,
     }: {
       broadcaster: User;
       initiator: User;
       isEditor?: boolean;
+      chatVotingParams?: Partial<ChatVoting>;
       updateChatVotingDto: UpdateChatVotingDto;
       url?: string;
     },
   ) => {
     const chatVoting = await chatVotingRepo.save({
       broadcaster,
+      ...chatVotingParams,
     } as ChatVoting);
 
     mockGetChannelEditors(isEditor ? [initiator] : []);
@@ -344,6 +347,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     await onAfterTest?.();
   };
 
+  // TODO: get rid of this mock and maybe use fake twitch chat connection or the real one
   const twitchChatServiceMock = {
     addChatListener: jest.fn(),
     joinChannel: jest.fn(),
@@ -378,6 +382,8 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     chatVoteRepo = connection.getRepository(ChatVote);
     configService = app.get<ConfigService<Config>>(ConfigService);
     jwtService = app.get<JwtService>(JwtService);
+
+    jest.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -551,9 +557,39 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     });
 
     describe('logic', () => {
-      it('should start listening chat if listening=true', async () => {});
+      it('should start listening chat if listening=true', async () => {
+        const [broadcaster] = await userRepo.save(users);
 
-      it('should not start listening chat if listening=false', async () => {});
+        await testCreateChatVoting(HttpStatus.CREATED, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+          addChatVotingDto: {
+            broadcasterId: broadcaster.id,
+            listening: true,
+          },
+        });
+
+        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledWith(
+          broadcaster.login,
+          expect.any(String),
+        );
+      });
+
+      it('should not start listening chat if listening=false', async () => {
+        const [broadcaster] = await userRepo.save(users);
+
+        await testCreateChatVoting(HttpStatus.CREATED, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+          addChatVotingDto: {
+            broadcasterId: broadcaster.id,
+            listening: false,
+          },
+        });
+
+        expect(twitchChatServiceMock.joinChannel).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -592,11 +628,53 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     });
 
     describe('logic', () => {
-      it('should start listening chat if listening switches to true', async () => {});
+      it('should start listening chat if listening switches to true', async () => {
+        const [broadcaster] = await userRepo.save(users);
 
-      it('should stop listening chat if listening switches to false', async () => {});
+        await testUpdateChatVoting(HttpStatus.OK, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+          chatVotingParams: { listening: false },
+          updateChatVotingDto: { listening: true },
+        });
 
-      it('should not do anything if listening flag is not changed', async () => {});
+        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledWith(
+          broadcaster.login,
+          expect.any(String),
+        );
+      });
+
+      it('should stop listening chat if listening switches to false', async () => {
+        const [broadcaster] = await userRepo.save(users);
+
+        await testUpdateChatVoting(HttpStatus.OK, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+          chatVotingParams: { listening: true },
+          updateChatVotingDto: { listening: false },
+        });
+
+        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledWith(
+          broadcaster.login,
+          expect.any(String),
+        );
+      });
+
+      it.only('should not do anything if listening flag is not sended', async () => {
+        const [broadcaster] = await userRepo.save(users);
+
+        await testUpdateChatVoting(HttpStatus.OK, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+          chatVotingParams: { listening: false },
+          updateChatVotingDto: { listening: false },
+        });
+
+        expect(twitchChatServiceMock.joinChannel).not.toHaveBeenCalled();
+        expect(twitchChatServiceMock.partChannel).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -632,7 +710,20 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     });
 
     describe('logic', () => {
-      it('should stop listening chat', async () => {});
+      it('should stop listening chat', async () => {
+        const [broadcaster] = await userRepo.save(users);
+
+        await testDeleteChatVoting(HttpStatus.OK, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+        });
+
+        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledWith(
+          broadcaster.login,
+          expect.any(String),
+        );
+      });
 
       it('should delete all assigned ChatVote records', async () => {});
     });
