@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PrivateMessage } from 'twitch-js';
 import { TwitchChatService } from '../../twitch-chat/twitch-chat.service';
-import { POSTGRES_CONNECTION } from '../../app.constants';
+import { InjectChat } from '../../twitch-chat/twitch-chat.decorators';
+import {
+  POSTGRES_CONNECTION,
+  TWITCH_CHAT_ANONYMOUS,
+} from '../../app.constants';
 import { ChatVote } from './entities/ChatVote.entity';
 import {
   ChatVoting,
@@ -18,11 +22,14 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/User.entity';
 import { SubTier } from '../honey-votes.interface';
 
+const CHAT_CONSUMER_ID = 'ChatVotes';
+
 @Injectable()
 export class ChatVotesService {
   private readonly restrictions = new Map<string, ChatVotingRestrictions>();
 
   constructor(
+    @InjectChat(TWITCH_CHAT_ANONYMOUS)
     private readonly twitchChatService: TwitchChatService,
     @InjectRepository(ChatVoting, POSTGRES_CONNECTION)
     private readonly chatVotingRepo: Repository<ChatVoting>,
@@ -44,7 +51,10 @@ export class ChatVotesService {
 
     chatsToListen.forEach((chatVoting) => {
       this.restrictions.set(chatVoting.broadcaster.id, chatVoting.restrictions);
-      this.twitchChatService.joinChannel(chatVoting.broadcaster.login);
+      this.twitchChatService.joinChannel(
+        chatVoting.broadcaster.login,
+        CHAT_CONSUMER_ID,
+      );
     });
 
     this.twitchChatService.addChatListener((message) =>
@@ -141,9 +151,9 @@ export class ChatVotesService {
     restrictions?: ChatVotingRestrictions,
   ) {
     if (listening === true) {
-      this.twitchChatService.joinChannel(broadcaster.login);
+      this.twitchChatService.joinChannel(broadcaster.login, CHAT_CONSUMER_ID);
     } else {
-      this.twitchChatService.partChannel(broadcaster.login);
+      this.twitchChatService.partChannel(broadcaster.login, CHAT_CONSUMER_ID);
     }
 
     if (restrictions) {
