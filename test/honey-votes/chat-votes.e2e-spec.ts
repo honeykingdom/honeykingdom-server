@@ -716,7 +716,51 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         );
       });
 
-      it('should delete all assigned ChatVote records', async () => {});
+      it('should delete all assigned ChatVote records', async () => {
+        const [broadcaster] = await userRepo.save(users);
+
+        await testDeleteChatVoting(HttpStatus.OK, {
+          broadcaster: broadcaster,
+          initiator: broadcaster,
+          onBeforeTest: async ({ chatVoting }) => {
+            const chatVotingId = chatVoting.broadcasterId;
+
+            const [chatVote1, chatVote2, chatVote3, chatVote4] =
+              await chatVoteRepo.save(
+                Array.from({ length: 4 }, (_, i) => ({
+                  chatVotingId,
+                  userId: `${i + 1}`,
+                  userName: `user${i + 1}`,
+                  tags: {},
+                  content: `Test Vote ${i + 1}`,
+                })) as ChatVote[],
+              );
+
+            return async () => {
+              expect(
+                await Promise.all([
+                  chatVoteRepo.findOne({
+                    chatVotingId,
+                    userId: chatVote1.userId,
+                  }),
+                  chatVoteRepo.findOne({
+                    chatVotingId,
+                    userId: chatVote2.userId,
+                  }),
+                  chatVoteRepo.findOne({
+                    chatVotingId,
+                    userId: chatVote3.userId,
+                  }),
+                  chatVoteRepo.findOne({
+                    chatVotingId,
+                    userId: chatVote4.userId,
+                  }),
+                ]),
+              ).toEqual(expect.arrayContaining([undefined]));
+            };
+          },
+        });
+      });
     });
   });
 
