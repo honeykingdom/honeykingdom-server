@@ -5,6 +5,7 @@ import {
   JoinColumn,
   OneToMany,
   OneToOne,
+  PrimaryColumn,
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
@@ -30,12 +31,12 @@ export class ChatVoting {
   static readonly tableName = CHAT_VOTING_TABLE_NAME;
 
   @OneToOne(() => User, (user) => user.chatVoting, {
-    primary: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
   broadcaster: User;
 
+  @PrimaryColumn()
   @RelationId((chatVoting: ChatVoting) => chatVoting.broadcaster)
   broadcasterId: string;
 
