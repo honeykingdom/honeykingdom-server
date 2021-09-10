@@ -29,6 +29,8 @@ import {
 } from '../../src/twitch-api/twitch-api.interface';
 import { AddVotingOptionDto } from '../../src/honey-votes/votes/dto/addVotingOptionDto';
 import { votingUserTypesParamsForbidden } from './utils/common';
+import { TwitchChatModule } from '../../src/twitch-chat/twitch-chat.module';
+import { twitchChatServiceMock } from './chat-votes.e2e-spec';
 
 const response400 = {
   error: 'Bad Request',
@@ -250,7 +252,12 @@ describe('HoneyVotes - Users (e2e)', () => {
         typeOrmPostgresModule,
         HoneyVotesModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(TwitchChatModule)
+      .useValue({})
+      .overrideProvider('TwitchChatModuleAnonymous')
+      .useValue(twitchChatServiceMock)
+      .compile();
 
     app = moduleFixture.createNestApplication();
 

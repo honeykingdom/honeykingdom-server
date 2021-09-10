@@ -42,6 +42,8 @@ import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVoting
 import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
 import { signAccessToken } from './auth';
 import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';
+import { TwitchChatModule } from '../../../src/twitch-chat/twitch-chat.module';
+import { twitchChatServiceMock } from '../chat-votes.e2e-spec';
 
 // https://stackoverflow.com/a/61132308/4687416
 type DeepPartial<T> = {
@@ -773,7 +775,12 @@ export const getHoneyVotesTestContext = () => {
         typeOrmPostgresModule,
         HoneyVotesModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(TwitchChatModule)
+      .useValue({})
+      .overrideProvider('TwitchChatModuleAnonymous')
+      .useValue(twitchChatServiceMock)
+      .compile();
 
     ctx.app = moduleFixture.createNestApplication();
 

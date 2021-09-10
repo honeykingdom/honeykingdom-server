@@ -19,6 +19,8 @@ import {
   SignTokenOptions,
 } from './utils/auth';
 import { MockUser, users } from './utils/users';
+import { TwitchChatModule } from '../../src/twitch-chat/twitch-chat.module';
+import { twitchChatServiceMock } from './chat-votes.e2e-spec';
 
 describe('HoneyVotes - Auth (e2e)', () => {
   let app: INestApplication;
@@ -46,7 +48,12 @@ describe('HoneyVotes - Auth (e2e)', () => {
         typeOrmPostgresModule,
         HoneyVotesModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(TwitchChatModule)
+      .useValue({})
+      .overrideProvider('TwitchChatModuleAnonymous')
+      .useValue(twitchChatServiceMock)
+      .compile();
 
     app = moduleFixture.createNestApplication();
 

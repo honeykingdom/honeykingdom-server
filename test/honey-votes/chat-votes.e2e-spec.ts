@@ -30,6 +30,13 @@ import {
 import { UpdateChatVotingDto } from '../../src/honey-votes/chat-votes/dto/updateChatVotingDto';
 import { TwitchChatModule } from '../../src/twitch-chat/twitch-chat.module';
 
+// TODO: get rid of this mock and maybe use fake twitch chat connection or the real one
+export const twitchChatServiceMock = {
+  addChatListener: jest.fn(),
+  joinChannel: jest.fn(),
+  partChannel: jest.fn(),
+};
+
 describe('HoneyVotes - ChatVotes (e2e)', () => {
   let app: INestApplication;
   let connection: Connection;
@@ -337,13 +344,6 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
     // @ts-expect-error
     await onAfterTest?.();
-  };
-
-  // TODO: get rid of this mock and maybe use fake twitch chat connection or the real one
-  const twitchChatServiceMock = {
-    addChatListener: jest.fn(),
-    joinChannel: jest.fn(),
-    partChannel: jest.fn(),
   };
 
   beforeEach(async () => {
