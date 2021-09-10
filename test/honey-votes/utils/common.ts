@@ -2,7 +2,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Connection, Repository } from 'typeorm';
+import { Connection, DeepPartial, Repository } from 'typeorm';
 import request from 'supertest';
 import R from 'ramda';
 import { Config } from '../../../src/config/config.interface';
@@ -44,11 +44,6 @@ import { signAccessToken } from './auth';
 import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';
 import { TwitchChatModule } from '../../../src/twitch-chat/twitch-chat.module';
 import { twitchChatServiceMock } from '../chat-votes.e2e-spec';
-
-// https://stackoverflow.com/a/61132308/4687416
-type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
 
 const defaultVotingParams = {
   id: expect.any(Number),
