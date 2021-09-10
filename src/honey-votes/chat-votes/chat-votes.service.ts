@@ -156,12 +156,14 @@ export class ChatVotesService {
 
   private onChatVotingChange(
     broadcaster: User,
-    listening: boolean,
+    listening?: boolean,
     restrictions?: ChatVotingRestrictions,
   ) {
     if (listening === true) {
       this.twitchChatService.joinChannel(broadcaster.login, CHAT_CONSUMER_ID);
-    } else {
+    }
+
+    if (listening === false) {
       this.twitchChatService.partChannel(broadcaster.login, CHAT_CONSUMER_ID);
     }
 
