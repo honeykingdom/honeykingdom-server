@@ -100,7 +100,7 @@ export class ChatVotesService {
 
   async updateChatVoting(
     initiatorId: string,
-    chatVotingId: number,
+    chatVotingId: string,
     data: UpdateChatVotingDto,
   ) {
     const [hasAccess, , chatVoting] = await this.canManageChatVoting(
@@ -120,7 +120,7 @@ export class ChatVotesService {
     return updatedChatVoting;
   }
 
-  async deleteChatVoting(initiatorId: string, chatVotingId: number) {
+  async deleteChatVoting(initiatorId: string, chatVotingId: string) {
     const [hasAccess, , chatVoting] = await this.canManageChatVoting(
       initiatorId,
       chatVotingId,
@@ -137,7 +137,7 @@ export class ChatVotesService {
     return { success: true };
   }
 
-  async clearChatVotes(initiatorId: string, chatVotingId: number) {
+  async clearChatVotes(initiatorId: string, chatVotingId: string) {
     const [hasAccess] = await this.canManageChatVoting(
       initiatorId,
       chatVotingId,
@@ -150,8 +150,7 @@ export class ChatVotesService {
     return { success: true };
   }
 
-  // TODO: test this
-  private deleteChatVotes(chatVotingId: number) {
+  private deleteChatVotes(chatVotingId: string) {
     return this.chatVoteRepo.delete({ chatVotingId });
   }
 
@@ -184,7 +183,7 @@ export class ChatVotesService {
 
   private async canManageChatVoting(
     initiatorId: string,
-    chatVotingId: number,
+    chatVotingId: string,
   ): Promise<[hasAccess: boolean, initiator?: User, chatVoting?: ChatVoting]> {
     const [initiator, chatVoting] = await Promise.all([
       this.usersService.findOne(initiatorId, { relations: ['credentials'] }),

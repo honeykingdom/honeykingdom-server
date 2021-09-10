@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   UseGuards,
@@ -37,7 +36,7 @@ export class ChatVotesController {
   @UsePipes(validationPipe)
   async updateChatVoting(
     @PassportUser() user: JwtStrategyUser,
-    @Param('chatVotingId', ParseIntPipe) chatVotingId: number,
+    @Param('chatVotingId') chatVotingId: string,
     @Body() data: UpdateChatVotingDto,
   ) {
     return this.chatVotesService.updateChatVoting(user.id, chatVotingId, data);
@@ -47,7 +46,7 @@ export class ChatVotesController {
   @UseGuards(JwtAuthGuard)
   async removeChatVoting(
     @PassportUser() user: JwtStrategyUser,
-    @Param('chatVotingId', ParseIntPipe) chatVotingId: number,
+    @Param('chatVotingId') chatVotingId: string,
   ) {
     return this.chatVotesService.deleteChatVoting(user.id, chatVotingId);
   }
@@ -56,7 +55,7 @@ export class ChatVotesController {
   @UseGuards(JwtAuthGuard)
   async clearChatVotes(
     @PassportUser() user: JwtStrategyUser,
-    @Param('chatVotingId', ParseIntPipe) chatVotingId: number,
+    @Param('chatVotingId') chatVotingId: string,
   ) {
     return this.chatVotesService.clearChatVotes(user.id, chatVotingId);
   }
