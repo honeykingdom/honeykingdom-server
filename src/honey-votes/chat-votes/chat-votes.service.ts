@@ -66,7 +66,7 @@ export class ChatVotesService {
   async addChatVoting(
     initiatorId: string,
     { broadcasterId, ...data }: AddChatVotingDto,
-  ) {
+  ): Promise<ChatVoting> {
     let broadcaster: User;
 
     if (broadcasterId === initiatorId) {
@@ -106,7 +106,7 @@ export class ChatVotesService {
     initiatorId: string,
     chatVotingId: string,
     data: UpdateChatVotingDto,
-  ) {
+  ): Promise<ChatVoting> {
     const [hasAccess, , chatVoting] = await this.canManageChatVoting(
       initiatorId,
       chatVotingId,
@@ -128,7 +128,10 @@ export class ChatVotesService {
     return updatedChatVoting;
   }
 
-  async deleteChatVoting(initiatorId: string, chatVotingId: string) {
+  async deleteChatVoting(
+    initiatorId: string,
+    chatVotingId: string,
+  ): Promise<void> {
     const [hasAccess, , chatVoting] = await this.canManageChatVoting(
       initiatorId,
       chatVotingId,
@@ -141,11 +144,12 @@ export class ChatVotesService {
     this.onChatVotingChange(broadcaster, false);
 
     await this.chatVotingRepo.delete(chatVoting.broadcaster.id);
-
-    return { success: true };
   }
 
-  async clearChatVotes(initiatorId: string, chatVotingId: string) {
+  async clearChatVotes(
+    initiatorId: string,
+    chatVotingId: string,
+  ): Promise<void> {
     const [hasAccess] = await this.canManageChatVoting(
       initiatorId,
       chatVotingId,
@@ -154,8 +158,6 @@ export class ChatVotesService {
     if (!hasAccess) throw new ForbiddenException();
 
     await this.deleteChatVotes(chatVotingId);
-
-    return { success: true };
   }
 
   private deleteChatVotes(chatVotingId: string) {

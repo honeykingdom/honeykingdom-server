@@ -20,14 +20,14 @@ export class VotingService {
     private readonly votingRepo: Repository<Voting>,
   ) {}
 
-  async getVotingList(channelId: string) {
+  async getVotingList(channelId: string): Promise<Voting[]> {
     return this.votingRepo.find({
       where: { broadcaster: { id: channelId } },
       order: { createdAt: 'DESC' },
     });
   }
 
-  async getVoting(votingId: number) {
+  async getVoting(votingId: number): Promise<Voting> {
     const voting = await this.votingRepo.findOne({
       where: { id: votingId },
     });
@@ -37,7 +37,10 @@ export class VotingService {
     return voting;
   }
 
-  async addVoting(userId: string, { channelId, ...data }: AddVotingDto) {
+  async addVoting(
+    userId: string,
+    { channelId, ...data }: AddVotingDto,
+  ): Promise<Voting> {
     const hasAccess = await this.canCreateVoting(userId, channelId);
 
     if (!hasAccess) throw new ForbiddenException();
@@ -54,7 +57,11 @@ export class VotingService {
     return savedVoting;
   }
 
-  async updateVoting(userId: string, votingId: number, data: UpdateVotingDto) {
+  async updateVoting(
+    userId: string,
+    votingId: number,
+    data: UpdateVotingDto,
+  ): Promise<Voting> {
     const [user, voting] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingRepo.findOne(votingId, {
@@ -68,7 +75,7 @@ export class VotingService {
     return this.votingRepo.save({ ...voting, ...data } as Voting);
   }
 
-  async removeVoting(userId: string, votingId: number) {
+  async removeVoting(userId: string, votingId: number): Promise<void> {
     const [user, voting] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingRepo.findOne(votingId, {
@@ -80,8 +87,6 @@ export class VotingService {
     if (!hasAccess) throw new ForbiddenException();
 
     await this.votingRepo.delete(votingId);
-
-    return { success: true };
   }
 
   private async canCreateVoting(

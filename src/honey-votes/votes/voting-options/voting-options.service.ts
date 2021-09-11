@@ -35,7 +35,10 @@ export class VotingOptionsService {
     private readonly voteRepo: Repository<Vote>,
   ) {}
 
-  async addVotingOption(userId: string, data: AddVotingOptionDto) {
+  async addVotingOption(
+    userId: string,
+    data: AddVotingOptionDto,
+  ): Promise<VotingOption> {
     const { votingId, payload } = data;
     const [author, voting] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
@@ -68,14 +71,15 @@ export class VotingOptionsService {
     return savedVotingOption;
   }
 
-  async removeVotingOption(userId: string, votingOptionId: number) {
+  async removeVotingOption(
+    userId: string,
+    votingOptionId: number,
+  ): Promise<void> {
     const hasAccess = await this.canDeleteVotingOption(userId, votingOptionId);
 
     if (!hasAccess) throw new ForbiddenException();
 
     await this.votingOptionRepo.delete(votingOptionId);
-
-    return { success: true };
   }
 
   private async canCreateVotingOption(

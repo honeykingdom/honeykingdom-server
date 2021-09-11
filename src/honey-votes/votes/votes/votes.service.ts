@@ -24,7 +24,7 @@ export class VotesService {
     private readonly connection: Connection,
   ) {}
 
-  async addVote(userId: string, { votingOptionId }: AddVoteDto) {
+  async addVote(userId: string, { votingOptionId }: AddVoteDto): Promise<void> {
     const hasAccess = await this.canCreateVote(userId, votingOptionId);
 
     if (!hasAccess) throw new ForbiddenException();
@@ -84,8 +84,6 @@ export class VotesService {
       ]);
 
       await queryRunner.commitTransaction();
-
-      return { success: true };
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
@@ -94,7 +92,7 @@ export class VotesService {
     }
   }
 
-  async removeVote(userId: string, voteId: number) {
+  async removeVote(userId: string, voteId: number): Promise<void> {
     const hasAccess = await this.canDeleteVote(userId, voteId);
 
     if (!hasAccess) throw new ForbiddenException();
@@ -118,8 +116,6 @@ export class VotesService {
       ]);
 
       await queryRunner.commitTransaction();
-
-      return { success: true };
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;

@@ -11,7 +11,7 @@ import {
 import { JwtStrategyUser } from '../../auth/auth.interface';
 import { PassportUser } from '../../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { API_BASE } from '../../honey-votes.interface';
+import { API_BASE, ResponseSuccess } from '../../honey-votes.interface';
 import { AddVoteDto } from '../dto/addVoteDto';
 import { VotesService } from './votes.service';
 import { validationPipe } from '../../honey-votes.validation';
@@ -26,7 +26,7 @@ export class VotesController {
   addVote(
     @PassportUser() user: JwtStrategyUser,
     @Body() addVoteDto: AddVoteDto,
-  ) {
+  ): Promise<void> {
     return this.votesService.addVote(user.id, addVoteDto);
   }
 
@@ -35,7 +35,7 @@ export class VotesController {
   removeVote(
     @PassportUser() user: JwtStrategyUser,
     @Param('voteId', ParseIntPipe) voteId: number,
-  ) {
+  ): Promise<void> {
     return this.votesService.removeVote(user.id, voteId);
   }
 }

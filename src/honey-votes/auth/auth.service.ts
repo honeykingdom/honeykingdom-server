@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { Config } from '../../config/config.interface';
+import { User } from '../users/entities/User.entity';
 import { UsersService } from '../users/users.service';
 import {
   JwtPayload,
@@ -86,7 +87,7 @@ export class AuthService {
     return this.signTokens({ sub: user.id, login: user.login });
   }
 
-  getUser(userId: string) {
+  getUser(userId: string): Promise<User> {
     return this.usersService.findOne(userId);
   }
 

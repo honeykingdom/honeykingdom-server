@@ -15,6 +15,7 @@ import { API_BASE } from '../../honey-votes.interface';
 import { AddVotingOptionDto } from '../dto/addVotingOptionDto';
 import { validationPipe } from '../../honey-votes.validation';
 import { VotingOptionsService } from './voting-options.service';
+import { VotingOption } from '../entities/VotingOption.entity';
 
 @Controller(API_BASE)
 export class VotingOptionsController {
@@ -26,7 +27,7 @@ export class VotingOptionsController {
   addVotingOption(
     @PassportUser() user: JwtStrategyUser,
     @Body() data: AddVotingOptionDto,
-  ) {
+  ): Promise<VotingOption> {
     return this.votingOptionsService.addVotingOption(user.id, data);
   }
 
@@ -35,7 +36,7 @@ export class VotingOptionsController {
   removeVotingOption(
     @PassportUser() user: JwtStrategyUser,
     @Param('votingOptionId', ParseIntPipe) votingOptionId: number,
-  ) {
+  ): Promise<void> {
     return this.votingOptionsService.removeVotingOption(
       user.id,
       votingOptionId,

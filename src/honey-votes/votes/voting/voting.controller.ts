@@ -19,25 +19,31 @@ import { AddVotingDto } from '../dto/addVotingDto';
 import { UpdateVotingDto } from '../dto/updateVotingDto';
 import { validationPipe } from '../../honey-votes.validation';
 import { VotingService } from './voting.service';
+import { Voting } from '../entities/Voting.entity';
 
 @Controller(API_BASE)
 export class VotingController {
   constructor(private readonly votingService: VotingService) {}
 
   @Get('/voting')
-  getVotingList(@Query('channelId') channelId: string) {
+  getVotingList(@Query('channelId') channelId: string): Promise<Voting[]> {
     return this.votingService.getVotingList(channelId);
   }
 
   @Get('/voting/:votingId')
-  getVoting(@Param('votingId', ParseIntPipe) votingId: number) {
+  getVoting(
+    @Param('votingId', ParseIntPipe) votingId: number,
+  ): Promise<Voting> {
     return this.votingService.getVoting(votingId);
   }
 
   @Post('/voting')
   @UseGuards(JwtAuthGuard)
   @UsePipes(validationPipe)
-  addVoting(@PassportUser() user: JwtStrategyUser, @Body() data: AddVotingDto) {
+  addVoting(
+    @PassportUser() user: JwtStrategyUser,
+    @Body() data: AddVotingDto,
+  ): Promise<Voting> {
     return this.votingService.addVoting(user.id, data);
   }
 
@@ -48,7 +54,7 @@ export class VotingController {
     @PassportUser() user: JwtStrategyUser,
     @Param('votingId', ParseIntPipe) votingId: number,
     @Body() data: UpdateVotingDto,
-  ) {
+  ): Promise<Voting> {
     return this.votingService.updateVoting(user.id, votingId, data);
   }
 
@@ -57,7 +63,7 @@ export class VotingController {
   removeVoting(
     @PassportUser() user: JwtStrategyUser,
     @Param('votingId', ParseIntPipe) votingId: number,
-  ) {
+  ): Promise<void> {
     return this.votingService.removeVoting(user.id, votingId);
   }
 }

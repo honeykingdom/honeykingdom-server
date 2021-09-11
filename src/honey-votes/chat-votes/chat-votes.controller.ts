@@ -18,6 +18,7 @@ import { validationPipe } from '../honey-votes.validation';
 import { ChatVotesService } from './chat-votes.service';
 import { AddChatVotingDto } from './dto/addChatVotingDto';
 import { UpdateChatVotingDto } from './dto/updateChatVotingDto';
+import { ChatVoting } from './entities/ChatVoting.entity';
 
 @Controller(API_BASE)
 export class ChatVotesController {
@@ -29,7 +30,7 @@ export class ChatVotesController {
   async addChatVoting(
     @PassportUser() user: JwtStrategyUser,
     @Body() data: AddChatVotingDto,
-  ) {
+  ): Promise<ChatVoting> {
     return this.chatVotesService.addChatVoting(user.id, data);
   }
 
@@ -40,7 +41,7 @@ export class ChatVotesController {
     @PassportUser() user: JwtStrategyUser,
     @Param('chatVotingId') chatVotingId: string,
     @Body() data: UpdateChatVotingDto,
-  ) {
+  ): Promise<ChatVoting> {
     return this.chatVotesService.updateChatVoting(user.id, chatVotingId, data);
   }
 
@@ -49,7 +50,7 @@ export class ChatVotesController {
   async removeChatVoting(
     @PassportUser() user: JwtStrategyUser,
     @Param('chatVotingId') chatVotingId: string,
-  ) {
+  ): Promise<void> {
     return this.chatVotesService.deleteChatVoting(user.id, chatVotingId);
   }
 
@@ -59,7 +60,7 @@ export class ChatVotesController {
   async clearChatVotes(
     @PassportUser() user: JwtStrategyUser,
     @Param('chatVotingId') chatVotingId: string,
-  ) {
+  ): Promise<void> {
     return this.chatVotesService.clearChatVotes(user.id, chatVotingId);
   }
 }

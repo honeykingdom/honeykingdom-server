@@ -5,7 +5,6 @@ import {
   Get,
   Post,
   Redirect,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -15,9 +14,14 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TwitchAuthGuard } from './guards/twitch-auth.guard';
 import { RefreshTokenDto } from './dto/refreshTokenDto';
-import { JwtStrategyUser, TwitchStrategyUser } from './auth.interface';
+import {
+  JwtStrategyUser,
+  TwitchLoginResponse,
+  TwitchStrategyUser,
+} from './auth.interface';
 import { API_BASE } from '../honey-votes.interface';
 import { PassportUser } from './decorators/passport-user.decorator';
+import { User } from '../users/entities/User.entity';
 
 @Controller(API_BASE)
 export class AuthController {
@@ -53,7 +57,7 @@ export class AuthController {
 
   @Get('/auth/me')
   @UseGuards(JwtAuthGuard)
-  me(@PassportUser() user: JwtStrategyUser) {
+  me(@PassportUser() user: JwtStrategyUser): Promise<User> {
     return this.authService.getUser(user.id);
   }
 
@@ -62,7 +66,7 @@ export class AuthController {
   refreshToken(
     @PassportUser() user: JwtStrategyUser,
     @Body() { refreshToken }: RefreshTokenDto,
-  ) {
+  ): Promise<TwitchLoginResponse> {
     return this.authService.refreshToken(user.id, refreshToken);
   }
 }
