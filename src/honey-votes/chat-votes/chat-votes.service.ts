@@ -92,8 +92,12 @@ export class ChatVotesService {
       data.restrictions || DEFAULT_CHAT_VOTING_RESTRICTIONS,
     );
 
-    const { broadcaster: _, ...savedChatVoting } =
-      await this.chatVotingRepo.save({ broadcaster, ...data } as ChatVoting);
+    const savedChatVoting = await this.chatVotingRepo.save({
+      broadcaster,
+      ...data,
+    } as ChatVoting);
+
+    delete savedChatVoting.broadcaster;
 
     return savedChatVoting;
   }
@@ -114,8 +118,12 @@ export class ChatVotesService {
 
     this.onChatVotingChange(broadcaster, data.listening, data.restrictions);
 
-    const { broadcaster: _, ...updatedChatVoting } =
-      await this.chatVotingRepo.save({ ...chatVoting, ...data } as ChatVoting);
+    const updatedChatVoting = await this.chatVotingRepo.save({
+      ...chatVoting,
+      ...data,
+    } as ChatVoting);
+
+    delete updatedChatVoting.broadcaster;
 
     return updatedChatVoting;
   }

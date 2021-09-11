@@ -44,13 +44,12 @@ export class VotingService {
 
     // TODO: auto generate title?
 
-    const voting = this.votingRepo.create({
+    const savedVoting = await this.votingRepo.save({
       ...data,
       broadcaster: { id: channelId },
-    });
-    const { broadcaster: _, ...savedVoting } = await this.votingRepo.save(
-      voting,
-    );
+    } as Voting);
+
+    delete savedVoting.broadcaster;
 
     return savedVoting;
   }

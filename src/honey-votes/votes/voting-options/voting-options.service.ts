@@ -60,11 +60,10 @@ export class VotingOptionsService {
       ...card,
     });
 
-    const {
-      voting: _,
-      author: _1,
-      ...savedVotingOption
-    } = await this.votingOptionRepo.save(votingOption);
+    const savedVotingOption = await this.votingOptionRepo.save(votingOption);
+
+    delete savedVotingOption.voting;
+    delete savedVotingOption.author;
 
     return savedVotingOption;
   }
