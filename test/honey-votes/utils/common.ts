@@ -20,7 +20,6 @@ import { User } from '../../../src/honey-votes/users/entities/User.entity';
 import { UserCredentials } from '../../../src/honey-votes/users/entities/UserCredentials.entity';
 import { Vote } from '../../../src/honey-votes/votes/entities/Vote.entity';
 import {
-  UserTypesParams,
   Voting,
   VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   VOTING_CAN_MANAGE_VOTES_DEFAULT,
@@ -37,7 +36,10 @@ import {
   mockGetUserFollows,
 } from './mock-requests';
 import { sub } from 'date-fns';
-import { AddVotingDto } from '../../../src/honey-votes/votes/dto/addVotingDto';
+import {
+  AddVotingDto,
+  UserTypesParams,
+} from '../../../src/honey-votes/votes/dto/addVotingDto';
 import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVotingDto';
 import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
 import { signAccessToken } from './auth';
@@ -785,6 +787,13 @@ export const getHoneyVotesTestContext = () => {
     ctx.votingRepo = ctx.connection.getRepository(Voting);
     ctx.votingOptionRepo = ctx.connection.getRepository(VotingOption);
     ctx.voteRepo = ctx.connection.getRepository(Vote);
+
+    // TODO: make this work
+    // ctx.connection = ctx.app.get(getConnectionToken(POSTGRES_CONNECTION));
+    // ctx.userRepo = moduleFixture.get(getRepositoryToken(User));
+    // ctx.votingRepo = moduleFixture.get(getRepositoryToken(Voting));
+    // ctx.votingOptionRepo = moduleFixture.get(getRepositoryToken(VotingOption));
+    // ctx.voteRepo = moduleFixture.get(getRepositoryToken(Vote));
 
     ctx.configService = ctx.app.get<ConfigService<Config>>(ConfigService);
     ctx.jwtService = ctx.app.get<JwtService>(JwtService);
