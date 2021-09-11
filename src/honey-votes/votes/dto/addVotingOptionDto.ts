@@ -1,3 +1,8 @@
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -19,6 +24,7 @@ import {
 
 class BaseVotingOption {
   @IsEnum(VotingOptionType)
+  @ApiProperty()
   type: VotingOptionType;
 }
 class VotingOptionMovie extends BaseVotingOption {
@@ -26,6 +32,7 @@ class VotingOptionMovie extends BaseVotingOption {
 
   @IsInt()
   @IsPositive()
+  @ApiProperty()
   id: number;
 }
 class VotingOptionGame extends BaseVotingOption {
@@ -33,6 +40,7 @@ class VotingOptionGame extends BaseVotingOption {
 
   @IsInt()
   @IsPositive()
+  @ApiProperty()
   id: number;
 }
 class VotingOptionCustom extends BaseVotingOption {
@@ -41,18 +49,21 @@ class VotingOptionCustom extends BaseVotingOption {
   @IsString()
   @IsNotEmpty()
   @MaxLength(VOTING_OPTION_CARD_TITLE_MAX_LENGTH)
+  @ApiProperty()
   title: string;
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
   @MaxLength(VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH)
+  @ApiPropertyOptional()
   description?: string;
 }
 
 export class AddVotingOptionDto {
   @IsInt()
   @IsPositive()
+  @ApiProperty()
   votingId: number;
 
   @ValidateNested()
@@ -67,5 +78,14 @@ export class AddVotingOptionDto {
       ],
     },
   })
+  @ApiProperty({
+    oneOf: [
+      { $ref: getSchemaPath(VotingOptionMovie) },
+      { $ref: getSchemaPath(VotingOptionGame) },
+      { $ref: getSchemaPath(VotingOptionCustom) },
+    ],
+  })
   payload: VotingOptionMovie | VotingOptionGame | VotingOptionCustom;
 }
+
+// TODO: fix types in swagger

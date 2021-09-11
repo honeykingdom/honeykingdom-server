@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -38,20 +39,25 @@ export class ChatVoting {
 
   @PrimaryColumn()
   @RelationId((chatVoting: ChatVoting) => chatVoting.broadcaster)
+  @ApiProperty()
   broadcasterId: string;
 
   @Column({ type: 'jsonb', default: DEFAULT_CHAT_VOTING_RESTRICTIONS })
+  @ApiProperty()
   restrictions: ChatVotingRestrictions;
 
   @Column({ default: false })
+  @ApiProperty()
   listening: boolean;
 
   @OneToMany(() => ChatVote, (chatVote) => chatVote.chatVoting)
   votes: ChatVote[];
 
   @CreateDateColumn()
+  @ApiProperty()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @ApiProperty()
   updatedAt: Date;
 }

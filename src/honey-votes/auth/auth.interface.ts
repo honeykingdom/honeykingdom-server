@@ -1,4 +1,6 @@
 // https://github.com/oauth-everything/passport-twitch/blob/master/src/ApiData/User.ts
+import { ApiProperty } from '@nestjs/swagger';
+
 // https://dev.twitch.tv/docs/api/reference#get-users
 export type TwitchUserResponse = {
   /** User’s broadcaster type: "partner", "affiliate", or "". */
@@ -52,7 +54,11 @@ export type JwtPayload = {
   // exp: number;
 };
 
-export type TwitchLoginResponse = {
+// TODO: Rename to RefreshTokenResponse
+export class TwitchLoginResponse {
+  @ApiProperty()
   accessToken: string;
+
+  @ApiProperty()
   refreshToken: string;
-};
+}

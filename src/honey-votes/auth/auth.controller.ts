@@ -9,6 +9,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiExcludeEndpoint,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Config } from '../../config/config.interface';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -23,6 +31,7 @@ import { API_BASE } from '../honey-votes.interface';
 import { PassportUser } from './decorators/passport-user.decorator';
 import { User } from '../users/entities/User.entity';
 
+@ApiTags('HoneyVotes - Auth')
 @Controller(API_BASE)
 export class AuthController {
   constructor(
@@ -32,11 +41,13 @@ export class AuthController {
 
   @Get('/auth/twitch')
   @UseGuards(TwitchAuthGuard)
+  @ApiExcludeEndpoint()
   async twitchAuth() {}
 
   @Get('/auth/twitch/redirect')
   @UseGuards(TwitchAuthGuard)
   @Redirect()
+  @ApiExcludeEndpoint()
   async twitchAuthRedirect(
     @PassportUser() user: TwitchStrategyUser,
     @Res({ passthrough: true }) res: Response,
@@ -57,12 +68,19 @@ export class AuthController {
 
   @Get('/auth/me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'OK', type: User })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   me(@PassportUser() user: JwtStrategyUser): Promise<User> {
     return this.authService.getUser(user.id);
   }
 
   @Post('/auth/refresh-token')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'OK', type: TwitchLoginResponse })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   refreshToken(
     @PassportUser() user: JwtStrategyUser,
     @Body() { refreshToken }: RefreshTokenDto,

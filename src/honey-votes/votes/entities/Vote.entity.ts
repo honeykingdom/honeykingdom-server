@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -19,6 +20,7 @@ export class Vote {
   static readonly tableName = VOTE_TABLE_NAME;
 
   @PrimaryGeneratedColumn()
+  @ApiProperty()
   id: number;
 
   @ManyToOne(() => User, (user) => user.votes, { onDelete: 'SET NULL' })
@@ -26,6 +28,7 @@ export class Vote {
   author: User;
 
   @RelationId((vote: Vote) => vote.author)
+  @ApiProperty()
   authorId: string;
 
   @ManyToOne(() => Voting, (voting) => voting.votes, { onDelete: 'CASCADE' })
@@ -33,6 +36,7 @@ export class Vote {
   voting: Voting;
 
   @RelationId((vote: Vote) => vote.voting)
+  @ApiProperty()
   votingId: number;
 
   @ManyToOne(() => VotingOption, (votingOption) => votingOption.votes, {
@@ -42,14 +46,18 @@ export class Vote {
   votingOption: VotingOption;
 
   @RelationId((vote: Vote) => vote.votingOption)
+  @ApiProperty()
   votingOptionId: number;
 
   @Column({ type: 'integer', default: 1 })
+  @ApiProperty()
   value: number;
 
   @CreateDateColumn()
+  @ApiProperty()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @ApiProperty()
   updatedAt: Date;
 }

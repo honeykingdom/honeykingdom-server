@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -29,23 +30,30 @@ export class ChatVote {
 
   // https://github.com/typeorm/typeorm/issues/3952#issuecomment-562188666
   @PrimaryColumn()
+  @ApiProperty()
   chatVotingId: string;
 
   @PrimaryColumn()
+  @ApiProperty()
   userId: string;
 
   @Column()
+  @ApiProperty()
   userName: string;
 
   @Column({ type: 'jsonb', default: {} })
+  @ApiProperty()
   tags: Tags;
 
   @Column()
+  @ApiProperty()
   content: string;
 
   @CreateDateColumn()
+  @ApiProperty()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @ApiProperty()
   updatedAt: Date;
 }

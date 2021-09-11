@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -20,19 +21,24 @@ export class User {
   static readonly tableName = USER_TABLE_NAME;
 
   @PrimaryColumn()
+  @ApiProperty()
   id: string;
 
   @Column()
+  @ApiProperty()
   login: string;
 
   @Column({ default: '' })
+  @ApiProperty()
   displayName: string;
 
   @Column()
+  @ApiProperty()
   avatarUrl: string;
 
   /** If `false` the user needs to re-login */
   @Column({ default: true })
+  @ApiProperty()
   areTokensValid: boolean;
 
   @OneToOne(() => UserCredentials, (userCredentials) => userCredentials.user, {
@@ -56,8 +62,10 @@ export class User {
   votes: Vote[];
 
   @CreateDateColumn({ select: false })
+  @ApiProperty()
   createdAt: Date;
 
   @UpdateDateColumn({ select: false })
+  @ApiProperty()
   updatedAt: Date;
 }

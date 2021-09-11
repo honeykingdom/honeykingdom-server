@@ -9,51 +9,13 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
-import { IsBoolean, IsInt, Min, ValidateNested } from 'class-validator';
 import { User } from '../../users/entities/User.entity';
 import { Vote } from './Vote.entity';
 import { TwitchUserType } from '../../honey-votes.interface';
 import { VotingOption } from './VotingOption.entity';
 import { VotingOptionType } from '../../honey-votes.interface';
-import { Type } from 'class-transformer';
-
-class UserTypeParams {
-  @IsBoolean()
-  canVote: boolean;
-  @IsBoolean()
-  canAddOptions: boolean;
-}
-class UserTypeParamsFollower extends UserTypeParams {
-  @IsInt()
-  @Min(0)
-  minutesToFollowRequiredToVote: number;
-  @IsInt()
-  @Min(0)
-  minutesToFollowRequiredToAddOptions: number;
-}
-export class UserTypesParams {
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  [TwitchUserType.Mod]: UserTypeParams;
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  [TwitchUserType.Vip]: UserTypeParams;
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  [TwitchUserType.SubTier1]: UserTypeParams;
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  [TwitchUserType.SubTier2]: UserTypeParams;
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  [TwitchUserType.SubTier3]: UserTypeParams;
-  @ValidateNested()
-  @Type(() => UserTypeParamsFollower)
-  [TwitchUserType.Follower]: UserTypeParamsFollower;
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  [TwitchUserType.Viewer]: UserTypeParams;
-}
+import { UserTypesParams } from '../dto/addVotingDto';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 const VOTING_TABLE_NAME = 'hv_voting';
 
@@ -91,6 +53,7 @@ export class Voting {
   static readonly tableName = VOTING_TABLE_NAME;
 
   @PrimaryGeneratedColumn()
+  @ApiProperty()
   id: number;
 
   @ManyToOne(() => User, (user) => user.votingList, { onDelete: 'CASCADE' })
@@ -98,21 +61,27 @@ export class Voting {
   broadcaster: User;
 
   @RelationId((voting: Voting) => voting.broadcaster)
+  @ApiProperty()
   broadcasterId: string;
 
   @Column({ nullable: true, length: VOTING_TITLE_MAX_LENGTH })
+  @ApiPropertyOptional()
   title?: string;
 
   @Column({ nullable: true, length: VOTING_DESCRIPTION_MAX_LENGTH })
+  @ApiPropertyOptional()
   description?: string;
 
   @Column({ default: VOTING_CAN_MANAGE_VOTES_DEFAULT })
+  @ApiProperty()
   canManageVotes: boolean;
 
   @Column({ default: VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT })
+  @ApiProperty()
   canManageVotingOptions: boolean;
 
   @Column({ type: 'jsonb', default: VOTING_USER_TYPES_PARAMS_DEFAULT })
+  @ApiProperty()
   userTypesParams: UserTypesParams;
 
   @Column({
@@ -121,20 +90,24 @@ export class Voting {
     array: true,
     default: VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   })
+  @ApiProperty({ enum: VotingOptionType, isArray: true })
   allowedVotingOptionTypes: VotingOptionType[];
 
   @OneToMany(() => VotingOption, (votingOption) => votingOption.voting)
   votingOptions: VotingOption[];
 
   @Column({ type: 'integer', default: VOTING_OPTIONS_LIMIT_DEFAULT })
+  @ApiProperty()
   votingOptionsLimit: number;
 
   @OneToMany(() => Vote, (vote) => vote.voting)
   votes: Vote[];
 
   @CreateDateColumn()
+  @ApiProperty()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @ApiProperty()
   updatedAt: Date;
 }
