@@ -246,8 +246,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       await request(app.getHttpServer())
         .delete(finalUrl)
         .set('Authorization', getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ success: true });
+        .expect(expectedStatusCode);
 
       expect(
         await chatVotingRepo.findOne(chatVoting.broadcasterId),
@@ -312,8 +311,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       await request(app.getHttpServer())
         .post(finalUrl)
         .set('Authorization', getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ success: true });
+        .expect(expectedStatusCode);
 
       expect(
         await Promise.all([

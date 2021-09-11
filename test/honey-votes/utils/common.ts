@@ -324,8 +324,7 @@ export const createTestDeleteVoting =
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ success: true });
+        .expect(expectedStatusCode);
 
       expect(await ctx.votingRepo.findOne(voting.id)).toBeUndefined();
     }
@@ -522,8 +521,7 @@ export const createTestDeleteVotingOption =
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ success: true });
+        .expect(expectedStatusCode);
 
       expect(
         await ctx.votingOptionRepo.findOne(votingOption.id),
@@ -615,8 +613,7 @@ export const createTestCreateVote =
         .post(url)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
         .send(body)
-        .expect(expectedStatusCode)
-        .expect({ success: true });
+        .expect(expectedStatusCode);
 
       expect(
         await ctx.voteRepo.findOne({ where: { author: { id: initiator.id } } }),
@@ -727,8 +724,7 @@ export const createTestDeleteVote =
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ success: true });
+        .expect(expectedStatusCode);
 
       expect(await ctx.voteRepo.findOne(vote.id)).toBeUndefined();
     }
