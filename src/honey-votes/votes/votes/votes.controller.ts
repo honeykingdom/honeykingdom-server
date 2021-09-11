@@ -11,7 +11,7 @@ import {
 import { JwtStrategyUser } from '../../auth/auth.interface';
 import { PassportUser } from '../../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { API_BASE, ResponseSuccess } from '../../honey-votes.interface';
+import { API_BASE } from '../../honey-votes.interface';
 import { AddVoteDto } from '../dto/addVoteDto';
 import { VotesService } from './votes.service';
 import { validationPipe } from '../../honey-votes.validation';
