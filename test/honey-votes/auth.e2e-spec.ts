@@ -76,14 +76,6 @@ describe('HoneyVotes - Auth (e2e)', () => {
     await connection.close();
   });
 
-  describe('/auth/twitch', () => {
-    it.todo('should redirect to the twitch auth page');
-  });
-
-  describe('/auth/twitch/redirect', () => {
-    it.todo('should redirect and set auth cookies');
-  });
-
   describe('/auth/me', () => {
     it('should return authenticated user', async () => {
       const [user] = await userRepo.save(users);
