@@ -107,7 +107,7 @@ export class UsersService {
         dbUser.credentials.encryptedAccessToken,
       );
 
-      if (accessToken) await this.revokeToken(accessToken);
+      if (accessToken) this.revokeToken(accessToken);
     }
 
     const {
@@ -340,15 +340,12 @@ export class UsersService {
   }
 
   private async revokeToken(accessToken: string) {
-    // TODO: don't await this operation?
-    console.log('revokeToken', accessToken);
-
-    const response = await this.twitchApiService.revokeToken({
-      token: accessToken,
-      client_id: this.clientId,
-    });
-
-    console.log('revokeToken', response);
+    try {
+      return await this.twitchApiService.revokeToken({
+        token: accessToken,
+        client_id: this.clientId,
+      });
+    } catch (e) {}
   }
 
   /**
