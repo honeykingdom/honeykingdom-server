@@ -16,7 +16,7 @@ import { Voting } from '../../../src/honey-votes/votes/entities/Voting.entity';
 import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
 import { TwitchChatModule } from '../../../src/twitch-chat/twitch-chat.module';
 import { typeOrmPostgresModule } from '../../../src/typeorm';
-import { createGetAuthorizationHeader } from './createGetAuthorizationHeader';
+import { signAccessToken, SignTokenOptions } from './auth';
 import { transformMockUserToDbUser } from './transformMockUserToDbUser';
 import { MockUser, users } from './users';
 
@@ -38,7 +38,10 @@ export type HoneyVotesTestContext = {
   chatVoteRepo: Repository<ChatVote>;
   jwtService: JwtService;
   configService: ConfigService<Config>;
-  getAuthorizationHeader: ReturnType<typeof createGetAuthorizationHeader>;
+  getAuthorizationHeader: (
+    user: Pick<MockUser, 'id' | 'login'>,
+    signTokenOptions?: SignTokenOptions,
+  ) => readonly [string, string];
   createUsers: (users?: MockUser[]) => Promise<User[]>;
 };
 
@@ -102,10 +105,19 @@ export const getHoneyVotesTestContext = () => {
     await ctx.connection.close();
   });
 
-  ctx.getAuthorizationHeader = createGetAuthorizationHeader(
-    ctx.jwtService,
-    ctx.configService,
-  );
+  ctx.getAuthorizationHeader = (
+    { id, login }: Pick<MockUser, 'id' | 'login'>,
+    signTokenOptions?: SignTokenOptions,
+  ) =>
+    [
+      'Authorization',
+      `Bearer ${signAccessToken(
+        { sub: id, login },
+        ctx.jwtService,
+        ctx.configService,
+        signTokenOptions,
+      )}`,
+    ] as const;
 
   ctx.createUsers = (allUsers = users) =>
     ctx.userRepo.save(
