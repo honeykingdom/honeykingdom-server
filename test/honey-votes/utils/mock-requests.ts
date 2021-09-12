@@ -8,8 +8,10 @@ import {
 import { server, rest } from './test-server';
 import { MockUser } from './users';
 
+type User = Pick<MockUser, 'id' | 'displayName' | 'login'>;
+
 // TODO: refactor get response functions
-export const mockGetChannelEditors = (editors: MockUser[] = []) => {
+export const mockGetChannelEditors = (editors: User[] = []) => {
   const response: GetChannelEditorsResponse = {
     data: editors.map(({ id, displayName }) => ({
       user_id: id,
@@ -25,7 +27,7 @@ export const mockGetChannelEditors = (editors: MockUser[] = []) => {
   );
 };
 
-export const mockGetModerators = (moderators: MockUser[] = []) => {
+export const mockGetModerators = (moderators: User[] = []) => {
   const response: GetModeratorsResponse = {
     data: moderators.map(({ id, login, displayName }) => ({
       user_id: id,
@@ -44,7 +46,7 @@ export const mockGetModerators = (moderators: MockUser[] = []) => {
 };
 
 export const mockCheckUserSubscription = (
-  broadcaster?: MockUser,
+  broadcaster?: User,
   tier?: SubTier,
   gifter: MockUser | null = null,
 ) => {
@@ -79,8 +81,8 @@ export const mockCheckUserSubscription = (
 };
 
 export const mockGetUserFollows = (
-  from?: MockUser,
-  to?: MockUser,
+  from?: User,
+  to?: User,
   followedAt: Date = new Date(),
 ) => {
   const entry =
