@@ -309,6 +309,10 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     await onAfterTest?.();
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('/chat-votes (POST)', () => {
     describe('permissions', () => {
       it('should create ChatVoting by broadcaster', async () => {
