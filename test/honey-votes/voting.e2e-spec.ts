@@ -1,4 +1,3 @@
-import request from 'supertest';
 import {
   VOTING_TITLE_MAX_LENGTH,
   VOTING_DESCRIPTION_MAX_LENGTH,
@@ -11,15 +10,13 @@ import {
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
 import { VotingOptionType } from '../../src/honey-votes/honey-votes.interface';
-import { users } from './utils/users';
 import {
   createTestCreateVoting,
   createTestDeleteVoting,
   createTestUpdateVoting,
-  getHoneyVotesTestContext,
 } from './utils/common';
-
-const POSTGRES_MAX_INTEGER = 2147483647;
+import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
+import { POSTGRES_MAX_INTEGER } from '../constants';
 
 describe('HoneyVotes - Votes - Voting (e2e)', () => {
   const ctx = getHoneyVotesTestContext();
@@ -47,7 +44,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
   describe('/voting (POST)', () => {
     describe('permissions', () => {
       it('should create Voting by broadcaster', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -56,7 +53,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       it('should create Voting by editors', async () => {
-        const [user, editor] = await ctx.userRepo.save(users);
+        const [user, editor] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -66,7 +63,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       it('should not create Voting by other users', async () => {
-        const [user, viewer] = await ctx.userRepo.save(users);
+        const [user, viewer] = await ctx.createUsers();
 
         await testCreateVoting(403, {
           broadcaster: user,
@@ -77,7 +74,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
 
     describe('dto validation', () => {
       test('with required params', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -87,7 +84,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('without required params', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -97,7 +94,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('with non whitelisted params', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -111,7 +108,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('title: valid', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -121,7 +118,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('title: invalid type', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -131,7 +128,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('title: too long', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -144,7 +141,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('description: valid', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -157,7 +154,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('description: invalid type', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -167,7 +164,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('description: too long', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -180,7 +177,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('canManageVotes: valid', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -190,7 +187,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('canManageVotes: invalid type', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -203,7 +200,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('canManageVotingOptions: valid', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -213,7 +210,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('canManageVotingOptions: invalid type', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -226,7 +223,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('userTypesParams: valid', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -252,7 +249,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('userTypesParams: invalid', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -273,7 +270,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('allowedVotingOptionTypes: valid', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -289,7 +286,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('allowedVotingOptionTypes: invalid type', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -302,7 +299,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('allowedVotingOptionTypes: empty array', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -312,7 +309,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('allowedVotingOptionTypes: duplicated values', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -328,7 +325,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('allowedVotingOptionTypes: items with invalid type', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -341,7 +338,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('votingOptionsLimit: valid', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
           broadcaster: user,
@@ -351,7 +348,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('votingOptionsLimit: invalid type', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -364,7 +361,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('votingOptionsLimit: not integer', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -374,7 +371,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('votingOptionsLimit: too low value', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -387,7 +384,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       test('votingOptionsLimit: too high value', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
           broadcaster: user,
@@ -404,7 +401,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
   describe('/voting/:votingId (PUT)', () => {
     describe('permissions', () => {
       it('should update Voting by broadcaster', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testUpdateVoting(200, {
           broadcaster: user,
@@ -413,7 +410,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       it('should update Voting by editors', async () => {
-        const [user, editor] = await ctx.userRepo.save(users);
+        const [user, editor] = await ctx.createUsers();
 
         await testUpdateVoting(200, {
           broadcaster: user,
@@ -423,7 +420,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       it('should not update Voting by other users', async () => {
-        const [user, viewer] = await ctx.userRepo.save(users);
+        const [user, viewer] = await ctx.createUsers();
 
         await testUpdateVoting(403, {
           broadcaster: user,
@@ -434,7 +431,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
 
     describe('request validation', () => {
       it('should return 403 if Voting is not exists', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testUpdateVoting(403, {
           broadcaster: user,
@@ -444,7 +441,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       it('should return 403 if Voting is assigned to this channelId', async () => {
-        const [user1, user2] = await ctx.userRepo.save(users);
+        const [user1, user2] = await ctx.createUsers();
         const voting = await ctx.votingRepo.save({
           broadcaster: user2,
         } as Voting);
@@ -464,7 +461,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
   describe('/voting/:votingId (DELETE)', () => {
     describe('permissions', () => {
       it('should delete Voting by broadcaster', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testDeleteVoting(200, {
           broadcaster: user,
@@ -473,7 +470,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       it('should delete Voting by editors', async () => {
-        const [user, editor] = await ctx.userRepo.save(users);
+        const [user, editor] = await ctx.createUsers();
 
         await testDeleteVoting(200, {
           broadcaster: user,
@@ -483,7 +480,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       it('should not delete Voting by other users', async () => {
-        const [user, viewer] = await ctx.userRepo.save(users);
+        const [user, viewer] = await ctx.createUsers();
 
         await testDeleteVoting(403, {
           broadcaster: user,
@@ -494,7 +491,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
 
     describe('request validation', () => {
       it('should return 403 if Voting is not exists', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testDeleteVoting(403, {
           broadcaster: user,
@@ -504,7 +501,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
       });
 
       it('should return 403 if Voting is not assigned to this channelId', async () => {
-        const [user1, user2] = await ctx.userRepo.save(users);
+        const [user1, user2] = await ctx.createUsers();
         const voting = await ctx.votingRepo.save({
           broadcaster: user2,
         } as Voting);
@@ -520,7 +517,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
     describe('logic', () => {
       it('should delete assigned VotingOptions and Votes', async () => {
         const [user, viewer1, viewer2, viewer3, viewer4] =
-          await ctx.userRepo.save(users);
+          await ctx.createUsers();
 
         await testDeleteVoting(200, {
           broadcaster: user,

@@ -1,88 +1,22 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
-import { Connection, Repository } from 'typeorm';
-import { HoneyVotesModule } from '../../src/honey-votes/honey-votes.module';
 import { User } from '../../src/honey-votes/users/entities/User.entity';
-import { DatabaseModule } from '../../src/database/database.module';
-import { typeOrmPostgresModule } from '../../src/typeorm';
-import { DatabaseService } from '../../src/database/database.service';
-import { Config } from '../../src/config/config.interface';
 import { API_BASE } from '../../src/honey-votes/honey-votes.interface';
 import { RefreshTokenDto } from '../../src/honey-votes/auth/dto/refreshTokenDto';
 import { JwtPayload } from '../../src/honey-votes/auth/auth.interface';
-import {
-  signAccessToken,
-  signRefreshToken,
-  SignTokenOptions,
-} from './utils/auth';
-import { MockUser, users } from './utils/users';
-import { TwitchChatModule } from '../../src/twitch-chat/twitch-chat.module';
-import { twitchChatServiceMock } from './chat-votes.e2e-spec';
+import { signRefreshToken } from './utils/auth';
+import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 
 describe('HoneyVotes - Auth (e2e)', () => {
-  let app: INestApplication;
-  let connection: Connection;
-  let userRepo: Repository<User>;
-  let configService: ConfigService<Config>;
-  let jwtService: JwtService;
-
-  const getAuthorizationHeader = (
-    { id, login }: MockUser,
-    signTokenOptions?: SignTokenOptions,
-  ) =>
-    `Bearer ${signAccessToken(
-      { sub: id, login },
-      jwtService,
-      configService,
-      signTokenOptions,
-    )}`;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        DatabaseModule,
-        ConfigModule.forRoot({ envFilePath: '.env.test' }),
-        typeOrmPostgresModule,
-        HoneyVotesModule,
-      ],
-    })
-      .overrideProvider(TwitchChatModule)
-      .useValue({})
-      .overrideProvider('TwitchChatModuleAnonymous')
-      .useValue(twitchChatServiceMock)
-      .compile();
-
-    app = moduleFixture.createNestApplication();
-
-    await app.init();
-
-    connection = moduleFixture
-      .get<DatabaseService>(DatabaseService)
-      .getDbHandle();
-
-    userRepo = connection.getRepository(User);
-    configService = app.get<ConfigService<Config>>(ConfigService);
-    jwtService = app.get<JwtService>(JwtService);
-  });
-
-  afterEach(async () => {
-    await connection.query(`TRUNCATE ${User.tableName} CASCADE;`);
-  });
-
-  afterAll(async () => {
-    await connection.close();
-  });
+  const ctx = getHoneyVotesTestContext();
 
   describe('/auth/me', () => {
     it('should return authenticated user', async () => {
-      const [user] = await userRepo.save(users);
+      const [user] = await ctx.createUsers();
 
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/auth/me`)
-        .set('Authorization', getAuthorizationHeader(user))
+        .set(...ctx.getAuthorizationHeader(user))
         .expect(200)
         .expect({
           id: user.id,
@@ -94,35 +28,35 @@ describe('HoneyVotes - Auth (e2e)', () => {
     });
 
     it('should return 401 if there is no token', async () => {
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/auth/me`)
         .expect(HttpStatus.UNAUTHORIZED);
     });
 
     it('should return 401 if token is expired', async () => {
-      const [user] = await userRepo.save(users);
+      const [user] = await ctx.createUsers();
 
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/auth/me`)
-        .set('Authorization', getAuthorizationHeader(user, { expired: true }))
+        .set(...ctx.getAuthorizationHeader(user, { expired: true }))
         .expect(HttpStatus.UNAUTHORIZED);
     });
   });
 
   describe('/auth/refresh-token', () => {
     it('should refresh a valid token', async () => {
-      const [user] = await userRepo.save(users);
+      const [user] = await ctx.createUsers();
       const refreshTokenDto: RefreshTokenDto = {
         refreshToken: signRefreshToken(
           { sub: user.id, login: user.login },
-          jwtService,
-          configService,
+          ctx.jwtService,
+          ctx.configService,
         ),
       };
 
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .post(`${API_BASE}/auth/refresh-token`)
-        .set('Authorization', getAuthorizationHeader(user))
+        .set(...ctx.getAuthorizationHeader(user))
         .send(refreshTokenDto)
         .expect(201)
         .expect((response) => {
@@ -131,10 +65,10 @@ describe('HoneyVotes - Auth (e2e)', () => {
           expect(accessToken).toBeDefined();
           expect(refreshToken).toBeDefined();
 
-          const accessTokenPayload = jwtService.decode(
+          const accessTokenPayload = ctx.jwtService.decode(
             accessToken,
           ) as JwtPayload;
-          const refreshTokenPayload = jwtService.decode(
+          const refreshTokenPayload = ctx.jwtService.decode(
             refreshToken,
           ) as JwtPayload;
 
@@ -146,17 +80,17 @@ describe('HoneyVotes - Auth (e2e)', () => {
     });
 
     it('should return 401 if user is not authorized', async () => {
-      const [user] = await userRepo.save(users);
+      const [user] = await ctx.createUsers();
 
       const refreshTokenDto: RefreshTokenDto = {
         refreshToken: signRefreshToken(
           { sub: user.id, login: user.login },
-          jwtService,
-          configService,
+          ctx.jwtService,
+          ctx.configService,
         ),
       };
 
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .post(`${API_BASE}/auth/refresh-token`)
         .set('Authorization', 'Bearer not-valid-access-token')
         .send(refreshTokenDto)
@@ -164,32 +98,32 @@ describe('HoneyVotes - Auth (e2e)', () => {
     });
 
     it('should return 400 if refresh token is invalid', async () => {
-      const [user] = await userRepo.save(users);
+      const [user] = await ctx.createUsers();
       const refreshTokenDto: RefreshTokenDto = {
         refreshToken: 'not-valid-refresh-token',
       };
 
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .post(`${API_BASE}/auth/refresh-token`)
-        .set('Authorization', getAuthorizationHeader(user))
+        .set(...ctx.getAuthorizationHeader(user))
         .send(refreshTokenDto)
         .expect(400);
     });
 
     it('should return 400 if refresh token is expired', async () => {
-      const [user] = await userRepo.save(users);
+      const [user] = await ctx.createUsers();
       const refreshTokenDto: RefreshTokenDto = {
         refreshToken: signRefreshToken(
           { sub: user.id, login: user.login },
-          jwtService,
-          configService,
+          ctx.jwtService,
+          ctx.configService,
           { expired: true },
         ),
       };
 
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .post(`${API_BASE}/auth/refresh-token`)
-        .set('Authorization', getAuthorizationHeader(user))
+        .set(...ctx.getAuthorizationHeader(user))
         .send(refreshTokenDto)
         .expect(400);
     });

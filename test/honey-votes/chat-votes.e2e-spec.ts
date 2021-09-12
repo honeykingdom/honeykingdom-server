@@ -1,19 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
-import { Connection, Repository } from 'typeorm';
-import { signAccessToken, SignTokenOptions } from './utils/auth';
-import { MockUser, users } from './utils/users';
 import { mockGetChannelEditors } from './utils/mock-requests';
 import { OnBeforeTest } from './utils/common';
-import { HoneyVotesModule } from '../../src/honey-votes/honey-votes.module';
 import { User } from '../../src/honey-votes/users/entities/User.entity';
-import { DatabaseModule } from '../../src/database/database.module';
-import { typeOrmPostgresModule } from '../../src/typeorm';
-import { DatabaseService } from '../../src/database/database.service';
-import { Config } from '../../src/config/config.interface';
 import {
   API_BASE,
   TwitchUserType,
@@ -28,7 +17,7 @@ import {
   ChatVotingRestrictions,
 } from '../../src/honey-votes/chat-votes/dto/addChatVotingDto';
 import { UpdateChatVotingDto } from '../../src/honey-votes/chat-votes/dto/updateChatVotingDto';
-import { TwitchChatModule } from '../../src/twitch-chat/twitch-chat.module';
+import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 
 // TODO: get rid of this mock and maybe use fake twitch chat connection or the real one
 export const twitchChatServiceMock = {
@@ -38,13 +27,7 @@ export const twitchChatServiceMock = {
 };
 
 describe('HoneyVotes - ChatVotes (e2e)', () => {
-  let app: INestApplication;
-  let connection: Connection;
-  let userRepo: Repository<User>;
-  let chatVotingRepo: Repository<ChatVoting>;
-  let chatVoteRepo: Repository<ChatVote>;
-  let configService: ConfigService<Config>;
-  let jwtService: JwtService;
+  const ctx = getHoneyVotesTestContext();
 
   const chatVotingRestrictionsForbidden: ChatVotingRestrictions = {
     [TwitchUserType.Viewer]: false,
@@ -60,17 +43,6 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     restrictions: DEFAULT_CHAT_VOTING_RESTRICTIONS,
     listening: false,
   };
-
-  const getAuthorizationHeader = (
-    { id, login }: MockUser,
-    signTokenOptions?: SignTokenOptions,
-  ) =>
-    `Bearer ${signAccessToken(
-      { sub: id, login },
-      jwtService,
-      configService,
-      signTokenOptions,
-    )}`;
 
   const testCreateChatVoting = async (
     expectedStatusCode:
@@ -98,9 +70,9 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
     mockGetChannelEditors(isEditor ? [initiator] : []);
 
-    await request(app.getHttpServer())
+    await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/chat-votes`)
-      .set('Authorization', getAuthorizationHeader(initiator))
+      .set(...ctx.getAuthorizationHeader(initiator))
       .send(addChatVotingDto)
       .expect(expectedStatusCode)
       .expect((response) => {
@@ -124,7 +96,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         }
       });
 
-    const chatVoting = await chatVotingRepo.findOne(broadcaster.id);
+    const chatVoting = await ctx.chatVotingRepo.findOne(broadcaster.id);
 
     if (expectedStatusCode === HttpStatus.CREATED) {
       expect(chatVoting).toEqual(expectedChatVoting);
@@ -156,7 +128,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       url?: string;
     },
   ) => {
-    const chatVoting = await chatVotingRepo.save({
+    const chatVoting = await ctx.chatVotingRepo.save({
       broadcaster,
       ...chatVotingParams,
     } as ChatVoting);
@@ -175,18 +147,18 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         broadcasterId: broadcaster.id,
       };
 
-      await request(app.getHttpServer())
+      await request(ctx.app.getHttpServer())
         .put(finalUrl)
-        .set('Authorization', getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(updateChatVotingDto)
         .expect(expectedStatusCode)
         .expect((response) =>
           expect(response.body).toEqual(expectedChatVoting),
         );
 
-      expect(await chatVotingRepo.findOne(chatVoting.broadcasterId)).toEqual(
-        expectedChatVoting,
-      );
+      expect(
+        await ctx.chatVotingRepo.findOne(chatVoting.broadcasterId),
+      ).toEqual(expectedChatVoting);
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
@@ -197,15 +169,15 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         broadcasterId: broadcaster.id,
       };
 
-      await request(app.getHttpServer())
+      await request(ctx.app.getHttpServer())
         .put(finalUrl)
-        .set('Authorization', getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(updateChatVotingDto)
         .expect(expectedStatusCode);
 
-      expect(await chatVotingRepo.findOne(chatVoting.broadcasterId)).toEqual(
-        expectedChatVoting,
-      );
+      expect(
+        await ctx.chatVotingRepo.findOne(chatVoting.broadcasterId),
+      ).toEqual(expectedChatVoting);
     }
   };
 
@@ -225,7 +197,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       onBeforeTest?: OnBeforeTest<{ chatVoting: ChatVoting }>;
     },
   ) => {
-    const chatVoting = await chatVotingRepo.save({
+    const chatVoting = await ctx.chatVotingRepo.save({
       broadcaster,
     } as ChatVoting);
     const expectedVoting = {
@@ -242,25 +214,25 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     const finalUrl = url || `${API_BASE}/chat-votes/${broadcaster.id}`;
 
     if (expectedStatusCode === HttpStatus.OK) {
-      await request(app.getHttpServer())
+      await request(ctx.app.getHttpServer())
         .delete(finalUrl)
-        .set('Authorization', getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(
-        await chatVotingRepo.findOne(chatVoting.broadcasterId),
+        await ctx.chatVotingRepo.findOne(chatVoting.broadcasterId),
       ).toBeUndefined();
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
-      await request(app.getHttpServer())
+      await request(ctx.app.getHttpServer())
         .delete(finalUrl)
-        .set('Authorization', getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
-      expect(await chatVotingRepo.findOne(chatVoting.broadcasterId)).toEqual(
-        expectedVoting,
-      );
+      expect(
+        await ctx.chatVotingRepo.findOne(chatVoting.broadcasterId),
+      ).toEqual(expectedVoting);
     }
 
     // @ts-expect-error
@@ -283,13 +255,13 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       onBeforeTest?: OnBeforeTest<{ chatVoting: ChatVoting }>;
     },
   ) => {
-    const chatVoting = await chatVotingRepo.save({
+    const chatVoting = await ctx.chatVotingRepo.save({
       broadcaster,
     } as ChatVoting);
     const chatVotingId = chatVoting.broadcasterId;
 
     const [chatVote1, chatVote2, chatVote3, chatVote4] =
-      await chatVoteRepo.save(
+      await ctx.chatVoteRepo.save(
         Array.from({ length: 4 }, (_, i) => ({
           chatVotingId,
           userId: `${i + 1}`,
@@ -306,33 +278,33 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     const finalUrl = url || `${API_BASE}/chat-votes/${broadcaster.id}/clear`;
 
     if (expectedStatusCode === HttpStatus.OK) {
-      await request(app.getHttpServer())
+      await request(ctx.app.getHttpServer())
         .post(finalUrl)
-        .set('Authorization', getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(
         await Promise.all([
-          chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
-          chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
-          chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
-          chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
+          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
+          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
+          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
+          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
         ]),
       ).toEqual(expect.arrayContaining([undefined]));
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
-      await request(app.getHttpServer())
+      await request(ctx.app.getHttpServer())
         .post(finalUrl)
-        .set('Authorization', getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(
         await Promise.all([
-          chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
-          chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
-          chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
-          chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
+          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
+          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
+          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
+          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
         ]),
       ).toEqual(expect.arrayContaining([expect.anything()]));
     }
@@ -341,56 +313,10 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     await onAfterTest?.();
   };
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        DatabaseModule,
-        ConfigModule.forRoot({ envFilePath: '.env.test' }),
-        typeOrmPostgresModule,
-        HoneyVotesModule,
-      ],
-    })
-      .overrideProvider(TwitchChatModule)
-      .useValue({})
-      .overrideProvider('TwitchChatModuleAnonymous')
-      .useValue(twitchChatServiceMock)
-      .compile();
-
-    app = moduleFixture.createNestApplication();
-
-    await app.init();
-
-    connection = moduleFixture
-      .get<DatabaseService>(DatabaseService)
-      .getDbHandle();
-
-    userRepo = connection.getRepository(User);
-    chatVotingRepo = connection.getRepository(ChatVoting);
-    chatVoteRepo = connection.getRepository(ChatVote);
-    configService = app.get<ConfigService<Config>>(ConfigService);
-    jwtService = app.get<JwtService>(JwtService);
-
-    jest.clearAllMocks();
-  });
-
-  afterEach(async () => {
-    const tableNames = [
-      ChatVote.tableName,
-      ChatVoting.tableName,
-      User.tableName,
-    ];
-
-    await connection.query(`TRUNCATE ${tableNames.join(',')} CASCADE;`);
-  });
-
-  afterAll(async () => {
-    await connection.close();
-  });
-
   describe('/chat-votes (POST)', () => {
     describe('permissions', () => {
       it('should create ChatVoting by broadcaster', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
@@ -400,7 +326,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should create ChatVoting by editors', async () => {
-        const [broadcaster, editor] = await userRepo.save(users);
+        const [broadcaster, editor] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
@@ -411,7 +337,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should not create ChatVoting by other users', async () => {
-        const [broadcaster, viewer] = await userRepo.save(users);
+        const [broadcaster, viewer] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.FORBIDDEN, {
           broadcaster: broadcaster,
@@ -423,7 +349,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
     describe('dto validation', () => {
       it('should create ChatVoting with all required fields', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
@@ -433,7 +359,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should not create ChatVoting without all required fields', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
           broadcaster: broadcaster,
@@ -443,7 +369,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       test('broadcasterId: wrong type', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
           broadcaster: broadcaster,
@@ -453,7 +379,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       test('broadcasterId: not existing user', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.FORBIDDEN, {
           broadcaster: broadcaster,
@@ -463,7 +389,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       test('restrictions: wrong type', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
           broadcaster: broadcaster,
@@ -476,7 +402,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       test('restrictions: missing fields', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
           broadcaster: broadcaster,
@@ -496,7 +422,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       test('restrictions: valid', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
@@ -517,7 +443,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       test('listening: wrong type', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
           broadcaster: broadcaster,
@@ -530,7 +456,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       test('listening: valid', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
@@ -545,7 +471,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
     describe('logic', () => {
       it('should start listening chat if listening=true', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
@@ -564,7 +490,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should not start listening chat if listening=false', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
@@ -583,7 +509,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
   describe('/chat-votes/:chatVotingId (PUT)', () => {
     describe('permissions', () => {
       it('should update ChatVoting by broadcaster', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testUpdateChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -593,7 +519,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should update ChatVoting by editors', async () => {
-        const [broadcaster, editor] = await userRepo.save(users);
+        const [broadcaster, editor] = await ctx.createUsers();
 
         await testUpdateChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -604,7 +530,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should not update ChatVoting by other users', async () => {
-        const [broadcaster, viewer] = await userRepo.save(users);
+        const [broadcaster, viewer] = await ctx.createUsers();
 
         await testUpdateChatVoting(HttpStatus.FORBIDDEN, {
           broadcaster: broadcaster,
@@ -616,7 +542,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
     describe('logic', () => {
       it('should start listening chat if listening switches to true', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testUpdateChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -633,7 +559,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should stop listening chat if listening switches to false', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testUpdateChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -650,7 +576,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should not do anything if listening flag is not sended', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testUpdateChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -667,7 +593,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
   describe('/chat-votes/:chatVotingId (DELETE)', () => {
     describe('permissions', () => {
       it('should delete ChatVoting by broadcaster', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testDeleteChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -676,7 +602,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should delete ChatVoting by editors', async () => {
-        const [broadcaster, editor] = await userRepo.save(users);
+        const [broadcaster, editor] = await ctx.createUsers();
 
         await testDeleteChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -686,7 +612,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should not delete ChatVoting by other users', async () => {
-        const [broadcaster, viewer] = await userRepo.save(users);
+        const [broadcaster, viewer] = await ctx.createUsers();
 
         await testDeleteChatVoting(HttpStatus.FORBIDDEN, {
           broadcaster: broadcaster,
@@ -697,7 +623,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
     describe('logic', () => {
       it('should stop listening chat', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testDeleteChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -712,7 +638,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should delete all assigned ChatVote records', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testDeleteChatVoting(HttpStatus.OK, {
           broadcaster: broadcaster,
@@ -721,7 +647,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
             const chatVotingId = chatVoting.broadcasterId;
 
             const [chatVote1, chatVote2, chatVote3, chatVote4] =
-              await chatVoteRepo.save(
+              await ctx.chatVoteRepo.save(
                 Array.from({ length: 4 }, (_, i) => ({
                   chatVotingId,
                   userId: `${i + 1}`,
@@ -734,19 +660,19 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
             return async () => {
               expect(
                 await Promise.all([
-                  chatVoteRepo.findOne({
+                  ctx.chatVoteRepo.findOne({
                     chatVotingId,
                     userId: chatVote1.userId,
                   }),
-                  chatVoteRepo.findOne({
+                  ctx.chatVoteRepo.findOne({
                     chatVotingId,
                     userId: chatVote2.userId,
                   }),
-                  chatVoteRepo.findOne({
+                  ctx.chatVoteRepo.findOne({
                     chatVotingId,
                     userId: chatVote3.userId,
                   }),
-                  chatVoteRepo.findOne({
+                  ctx.chatVoteRepo.findOne({
                     chatVotingId,
                     userId: chatVote4.userId,
                   }),
@@ -762,7 +688,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
   describe('/chat-votes/:chatVotingId/clear (POST)', () => {
     describe('permissions', () => {
       it('should clear ChatVoting by broadcaster', async () => {
-        const [broadcaster] = await userRepo.save(users);
+        const [broadcaster] = await ctx.createUsers();
 
         await testClearChatVoting(HttpStatus.OK, {
           broadcaster,
@@ -771,7 +697,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should clear ChatVoting by editors', async () => {
-        const [broadcaster, editor] = await userRepo.save(users);
+        const [broadcaster, editor] = await ctx.createUsers();
 
         await testClearChatVoting(HttpStatus.OK, {
           broadcaster,
@@ -781,7 +707,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       });
 
       it('should not clear ChatVoting by other users', async () => {
-        const [broadcaster, viewer] = await userRepo.save(users);
+        const [broadcaster, viewer] = await ctx.createUsers();
 
         await testClearChatVoting(HttpStatus.FORBIDDEN, {
           broadcaster,

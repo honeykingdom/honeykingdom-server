@@ -11,17 +11,15 @@ import {
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
 import { VotingOptionType } from '../../src/honey-votes/honey-votes.interface';
-import { users } from './utils/users';
 import { mockGetFilmData, mockIgdbGames } from './utils/mock-requests';
 import { movie371 } from '../kinopoisk-api.mock';
 import { game379 } from '../igdb-api.mock';
 import {
   createTestCreateVotingOption,
   createTestDeleteVotingOption,
-  getHoneyVotesTestContext,
 } from './utils/common';
-
-const POSTGRES_MAX_INTEGER = 2147483647;
+import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
+import { POSTGRES_MAX_INTEGER } from '../constants';
 
 describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
   const ctx = getHoneyVotesTestContext();
@@ -32,7 +30,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
   describe('/voting-options (POST)', () => {
     describe('permissions', () => {
       it('should always create VotingOption by broadcaster', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -41,7 +39,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should always create VotingOption by editors', async () => {
-        const [user, editor] = await ctx.userRepo.save(users);
+        const [user, editor] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -51,7 +49,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should create VotingOption by mods', async () => {
-        const [user, moderator] = await ctx.userRepo.save(users);
+        const [user, moderator] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -66,7 +64,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should not create VotingOption by mods', async () => {
-        const [user, moderator] = await ctx.userRepo.save(users);
+        const [user, moderator] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -80,7 +78,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       // it('should not create VotingOption by vips', async () => {});
 
       it('should create VotingOption by subTier1', async () => {
-        const [user, subTier1] = await ctx.userRepo.save(users);
+        const [user, subTier1] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -95,7 +93,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should not create VotingOption by subTier1', async () => {
-        const [user, subTier1] = await ctx.userRepo.save(users);
+        const [user, subTier1] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -105,7 +103,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should create VotingOption by subTier2', async () => {
-        const [user, subTier2] = await ctx.userRepo.save(users);
+        const [user, subTier2] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -120,7 +118,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should not create VotingOption by subTier2', async () => {
-        const [user, subTier2] = await ctx.userRepo.save(users);
+        const [user, subTier2] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -130,7 +128,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should create VotingOption by subTier3', async () => {
-        const [user, subTier3] = await ctx.userRepo.save(users);
+        const [user, subTier3] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -145,7 +143,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should not create VotingOption by subTier3', async () => {
-        const [user, subTier3] = await ctx.userRepo.save(users);
+        const [user, subTier3] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -155,7 +153,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should create VotingOption by any follower', async () => {
-        const [user, follower] = await ctx.userRepo.save(users);
+        const [user, follower] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -170,7 +168,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should not create VotingOption by any follower', async () => {
-        const [user, follower] = await ctx.userRepo.save(users);
+        const [user, follower] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -180,7 +178,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should create VotingOption by follower with required minutes to follow', async () => {
-        const [user, follower] = await ctx.userRepo.save(users);
+        const [user, follower] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -198,7 +196,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should not create VotingOption by follower without required minutes to follow', async () => {
-        const [user, follower] = await ctx.userRepo.save(users);
+        const [user, follower] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -216,7 +214,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should create VotingOption by any user', async () => {
-        const [user, viewer] = await ctx.userRepo.save(users);
+        const [user, viewer] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
@@ -230,7 +228,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should not create VotingOption by any user', async () => {
-        const [user, viewer] = await ctx.userRepo.save(users);
+        const [user, viewer] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -241,7 +239,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
 
     describe('dto validation', () => {
       it('should return 403 if Voting is not exists', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -251,7 +249,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should return 403 if Voting is not assigned to this channelId', async () => {
-        const [user1, user2] = await ctx.userRepo.save(users);
+        const [user1, user2] = await ctx.createUsers();
         const voting = await ctx.votingRepo.save({
           broadcaster: user2,
         } as Voting);
@@ -267,7 +265,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
     describe('KinopoiskMovie', () => {
       describe('dto validation', () => {
         it('with required fields', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const movieId = 371;
 
           mockGetFilmData(movieId, movie371);
@@ -290,7 +288,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('without required fields', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const movieId = 371;
 
           mockGetFilmData(movieId, movie371);
@@ -305,7 +303,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('id: invalid type', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const movieId = 371;
 
           mockGetFilmData(movieId, movie371);
@@ -320,7 +318,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('id: not integer', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const movieId = 371;
 
           mockGetFilmData(movieId, movie371);
@@ -338,7 +336,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('id: non existing', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const movieId = 1;
 
           mockGetFilmData(movieId, '', { statusCode: 404 });
@@ -358,7 +356,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
 
       describe('logic', () => {
         it('should not create VotingOption if its already exists with same id', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const movieId = 371;
 
           mockGetFilmData(movieId, movie371);
@@ -394,7 +392,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
     describe('IgdbGame', () => {
       describe('dto validation', () => {
         it('with required fields', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const gameId = 379;
 
           mockIgdbGames([game379]);
@@ -417,7 +415,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('without required fields', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           mockIgdbGames([game379]);
 
@@ -431,7 +429,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('id: invalid type', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           mockIgdbGames([game379]);
 
@@ -445,7 +443,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('id: not integer', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           mockIgdbGames([game379]);
 
@@ -462,7 +460,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('id: non existing', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const movieId = 1;
 
           mockIgdbGames([]);
@@ -483,7 +481,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       // logic
       describe('logic', () => {
         it('should not create VotingOption if its already exists with same id', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
           const gameId = 379;
 
           mockIgdbGames([game379]);
@@ -519,7 +517,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
     describe('Custom', () => {
       describe('dto validation', () => {
         it('with required fields', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           await testCreateVotingOption(201, {
             broadcaster: user,
@@ -538,7 +536,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('without required fields', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -550,7 +548,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('title: invalid type', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -562,7 +560,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('title: too long', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -577,7 +575,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('description: invalid type', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -593,7 +591,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
 
         it('description: too long', async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -613,7 +611,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
 
       describe('logic', () => {
         it("should not create VotingOption if it's already exists with same title", async () => {
-          const [user] = await ctx.userRepo.save(users);
+          const [user] = await ctx.createUsers();
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -645,7 +643,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
 
     describe('logic', () => {
       it('should not create VotingOption if canManageVotingOptions is disabled', async () => {
-        const [user, viewer] = await ctx.userRepo.save(users);
+        const [user, viewer] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
@@ -672,7 +670,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
   describe('/voting-options/:votingOptionId (DELETE)', () => {
     describe('permissions', () => {
       it('should delete any VotingOption by broadcaster', async () => {
-        const [user, viewer] = await ctx.userRepo.save(users);
+        const [user, viewer] = await ctx.createUsers();
 
         await testDeleteVotingOption(200, {
           broadcaster: user,
@@ -682,7 +680,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should delete any VotingOption by broadcaster if canManageVotingOptions is disabled', async () => {
-        const [user, viewer] = await ctx.userRepo.save(users);
+        const [user, viewer] = await ctx.createUsers();
 
         await testDeleteVotingOption(200, {
           broadcaster: user,
@@ -693,7 +691,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should delete any VotingOption by editors', async () => {
-        const [user, viewer, editor] = await ctx.userRepo.save(users);
+        const [user, viewer, editor] = await ctx.createUsers();
 
         await testDeleteVotingOption(200, {
           broadcaster: user,
@@ -704,7 +702,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should delete any VotingOption by editors if canManageVotingOptions is disabled', async () => {
-        const [user, viewer, editor] = await ctx.userRepo.save(users);
+        const [user, viewer, editor] = await ctx.createUsers();
 
         await testDeleteVotingOption(200, {
           broadcaster: user,
@@ -716,7 +714,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       });
 
       it('should not delete not own VotingOption', async () => {
-        const [user, viewer1, viewer2] = await ctx.userRepo.save(users);
+        const [user, viewer1, viewer2] = await ctx.createUsers();
 
         await testDeleteVotingOption(403, {
           broadcaster: user,
@@ -728,7 +726,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
 
     describe('request validation', () => {
       it('should return 403 if VotingOption is not exists', async () => {
-        const [user] = await ctx.userRepo.save(users);
+        const [user] = await ctx.createUsers();
 
         await testDeleteVotingOption(403, {
           broadcaster: user,
@@ -741,7 +739,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
 
     // logic
     it('should not delete own VotingOption if canManageVotingOptions is disabled', async () => {
-      const [user, viewer] = await ctx.userRepo.save(users);
+      const [user, viewer] = await ctx.createUsers();
 
       await testDeleteVotingOption(403, {
         broadcaster: user,
@@ -752,7 +750,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
     });
 
     it('should delete own VotingOption if it has no votes', async () => {
-      const [user, viewer] = await ctx.userRepo.save(users);
+      const [user, viewer] = await ctx.createUsers();
 
       await testDeleteVotingOption(200, {
         broadcaster: user,
@@ -762,7 +760,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
     });
 
     it('should not delete own VotingOption if it has votes', async () => {
-      const [user, viewer1, viewer2] = await ctx.userRepo.save(users);
+      const [user, viewer1, viewer2] = await ctx.createUsers();
 
       await testDeleteVotingOption(403, {
         broadcaster: user,
@@ -780,7 +778,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
     });
 
     it('should delete assigned Votes when deleting VotingOption', async () => {
-      const [user, viewer] = await ctx.userRepo.save(users);
+      const [user, viewer] = await ctx.createUsers();
 
       await testDeleteVotingOption(200, {
         broadcaster: user,

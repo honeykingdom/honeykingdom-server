@@ -1,20 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
-import { Connection, DeepPartial, Repository } from 'typeorm';
+import { DeepPartial } from 'typeorm';
 import R from 'ramda';
 import { server, rest } from './utils/test-server';
-import { MockUser, users } from './utils/users';
-import { signAccessToken, SignTokenOptions } from './utils/auth';
-import { typeOrmPostgresModule } from '../../src/typeorm';
-import { HoneyVotesModule } from '../../src/honey-votes/honey-votes.module';
-import { User } from '../../src/honey-votes/users/entities/User.entity';
+import { users } from './utils/users';
 import { Voting } from '../../src/honey-votes/votes/entities/Voting.entity';
-import { DatabaseModule } from '../../src/database/database.module';
-import { DatabaseService } from '../../src/database/database.service';
-import { Config } from '../../src/config/config.interface';
 import {
   API_BASE,
   VotingOptionType,
@@ -29,8 +18,7 @@ import {
 } from '../../src/twitch-api/twitch-api.interface';
 import { AddVotingOptionDto } from '../../src/honey-votes/votes/dto/addVotingOptionDto';
 import { votingUserTypesParamsForbidden } from './utils/common';
-import { TwitchChatModule } from '../../src/twitch-chat/twitch-chat.module';
-import { twitchChatServiceMock } from './chat-votes.e2e-spec';
+import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 
 const response400 = {
   error: 'Bad Request',
@@ -49,23 +37,7 @@ const refreshTokenResponse: RefreshTokenResponse = {
 };
 
 describe('HoneyVotes - Users (e2e)', () => {
-  let app: INestApplication;
-  let connection: Connection;
-  let userRepo: Repository<User>;
-  let votingRepo: Repository<Voting>;
-  let configService: ConfigService<Config>;
-  let jwtService: JwtService;
-
-  const getAuthorizationHeader = (
-    { id, login }: MockUser,
-    signTokenOptions?: SignTokenOptions,
-  ) =>
-    `Bearer ${signAccessToken(
-      { sub: id, login },
-      jwtService,
-      configService,
-      signTokenOptions,
-    )}`;
+  const ctx = getHoneyVotesTestContext();
 
   type UserType = 'editor' | 'mod' | 'sub' | 'follower';
 
@@ -119,11 +91,11 @@ describe('HoneyVotes - Users (e2e)', () => {
     initiatorParams: { areTokensValid: boolean } = { areTokensValid: true },
   ) => {
     const [rawBroadcaster, rawInitiator] = users;
-    const [broadcaster, initiator] = await userRepo.save([
+    const [broadcaster, initiator] = await ctx.createUsers([
       { ...rawBroadcaster, ...broadcasterParams },
       { ...rawInitiator, ...initiatorParams },
     ]);
-    const voting = await votingRepo.save({
+    const voting = await ctx.votingRepo.save({
       userTypesParams: R.mergeDeepRight(
         votingUserTypesParamsForbidden,
         mergeUserTypeParams[type],
@@ -209,9 +181,9 @@ describe('HoneyVotes - Users (e2e)', () => {
       mockRefreshTokenFailure(urls[type]);
     }
 
-    await request(app.getHttpServer())
+    await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/voting-options`)
-      .set('Authorization', getAuthorizationHeader(initiator))
+      .set(...ctx.getAuthorizationHeader(initiator))
       .send(body)
       .expect(result === 'success' ? 201 : 401);
 
@@ -221,7 +193,9 @@ describe('HoneyVotes - Users (e2e)', () => {
     // isFollower - doesn't matter but uses initiator credentials
     const userId =
       type === 'editor' || type === 'mod' ? broadcaster.id : initiator.id;
-    const user = await userRepo.findOne(userId, { relations: ['credentials'] });
+    const user = await ctx.userRepo.findOne(userId, {
+      relations: ['credentials'],
+    });
 
     if (result === 'success') {
       expect(user).toMatchObject({
@@ -244,70 +218,35 @@ describe('HoneyVotes - Users (e2e)', () => {
     }
   };
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        DatabaseModule,
-        ConfigModule.forRoot({ envFilePath: '.env.test' }),
-        typeOrmPostgresModule,
-        HoneyVotesModule,
-      ],
-    })
-      .overrideProvider(TwitchChatModule)
-      .useValue({})
-      .overrideProvider('TwitchChatModuleAnonymous')
-      .useValue(twitchChatServiceMock)
-      .compile();
-
-    app = moduleFixture.createNestApplication();
-
-    await app.init();
-
-    connection = moduleFixture
-      .get<DatabaseService>(DatabaseService)
-      .getDbHandle();
-
-    userRepo = connection.getRepository(User);
-    votingRepo = connection.getRepository(Voting);
-    configService = app.get<ConfigService<Config>>(ConfigService);
-    jwtService = app.get<JwtService>(JwtService);
-  });
-
-  afterEach(async () => {
-    await connection.query(`TRUNCATE ${User.tableName} CASCADE;`);
-  });
-
-  afterAll(async () => {
-    await connection.close();
-  });
-
   describe('/users (GET)', () => {
     const omitUser = R.omit(['credentials', 'createdAt', 'updatedAt']);
 
     it('should return user by id', async () => {
-      const [user] = await userRepo.save(users);
+      const [user] = await ctx.createUsers();
 
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users?id=${user.id}`)
         .expect(200)
         .expect(omitUser(user));
     });
 
     it('should return user by login', async () => {
-      const [user] = await userRepo.save(users);
+      const [user] = await ctx.createUsers();
 
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users?login=${user.login}`)
         .expect(200)
         .expect(omitUser(user));
     });
 
     it('should return 400 if id or login is not specified', async () => {
-      return request(app.getHttpServer()).get(`${API_BASE}/users`).expect(400);
+      return request(ctx.app.getHttpServer())
+        .get(`${API_BASE}/users`)
+        .expect(400);
     });
 
     it('should return 404 if user is not exists', async () => {
-      return request(app.getHttpServer())
+      return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users?id=1`)
         .expect(404);
     });

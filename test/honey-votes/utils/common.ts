@@ -1,23 +1,14 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { Test, TestingModule } from '@nestjs/testing';
-import { Connection, DeepPartial, Repository } from 'typeorm';
+import { HttpStatus } from '@nestjs/common';
+import { DeepPartial } from 'typeorm';
 import request from 'supertest';
 import R from 'ramda';
-import { Config } from '../../../src/config/config.interface';
-import { DatabaseModule } from '../../../src/database/database.module';
-import { DatabaseService } from '../../../src/database/database.service';
-import { typeOrmPostgresModule } from '../../../src/typeorm';
 import {
   API_BASE,
   SubTier,
   TwitchUserType,
   VotingOptionType,
 } from '../../../src/honey-votes/honey-votes.interface';
-import { HoneyVotesModule } from '../../../src/honey-votes/honey-votes.module';
 import { User } from '../../../src/honey-votes/users/entities/User.entity';
-import { UserCredentials } from '../../../src/honey-votes/users/entities/UserCredentials.entity';
 import { Vote } from '../../../src/honey-votes/votes/entities/Vote.entity';
 import {
   Voting,
@@ -28,7 +19,6 @@ import {
   VOTING_USER_TYPES_PARAMS_DEFAULT,
 } from '../../../src/honey-votes/votes/entities/Voting.entity';
 import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
-import { MockUser } from './users';
 import {
   mockCheckUserSubscription,
   mockGetChannelEditors,
@@ -42,10 +32,8 @@ import {
 } from '../../../src/honey-votes/votes/dto/addVotingDto';
 import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVotingDto';
 import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
-import { signAccessToken } from './auth';
 import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';
-import { TwitchChatModule } from '../../../src/twitch-chat/twitch-chat.module';
-import { twitchChatServiceMock } from '../chat-votes.e2e-spec';
+import { HoneyVotesTestContext } from './getHoneyVotesTestContext';
 
 const defaultVotingParams = {
   id: expect.any(Number),
@@ -185,7 +173,7 @@ export const createTestCreateVoting =
 
     await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/voting`)
-      .set('Authorization', ctx.getAuthorizationHeader(initiator))
+      .set(...ctx.getAuthorizationHeader(initiator))
       .send(body)
       .expect(expectedStatusCode)
       .expect((response) => {
@@ -262,7 +250,7 @@ export const createTestUpdateVoting =
 
       await request(ctx.app.getHttpServer())
         .put(finalUrl)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(updateVotingDto)
         .expect(expectedStatusCode)
         .expect((response) => expect(response.body).toEqual(expectedVoting));
@@ -280,7 +268,7 @@ export const createTestUpdateVoting =
 
       await request(ctx.app.getHttpServer())
         .put(finalUrl)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(updateVotingDto)
         .expect(expectedStatusCode);
 
@@ -324,7 +312,7 @@ export const createTestDeleteVoting =
     if (expectedStatusCode === HttpStatus.OK) {
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(await ctx.votingRepo.findOne(voting.id)).toBeUndefined();
@@ -333,7 +321,7 @@ export const createTestDeleteVoting =
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(await ctx.votingRepo.findOne(voting.id)).toEqual(expectedVoting);
@@ -407,7 +395,7 @@ export const createTestCreateVotingOption =
     if (expectedStatusCode === HttpStatus.CREATED) {
       await request(ctx.app.getHttpServer())
         .post(url)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(body)
         .expect(expectedStatusCode)
         .expect((response) =>
@@ -426,7 +414,7 @@ export const createTestCreateVotingOption =
     if (expectedStatusCode === HttpStatus.BAD_REQUEST) {
       await request(ctx.app.getHttpServer())
         .post(url)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(body)
         .expect(expectedStatusCode)
         .expect((response) => {
@@ -448,7 +436,7 @@ export const createTestCreateVotingOption =
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
       await request(ctx.app.getHttpServer())
         .post(url)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(body)
         .expect(expectedStatusCode);
 
@@ -519,7 +507,7 @@ export const createTestDeleteVotingOption =
     if (expectedStatusCode === HttpStatus.OK) {
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(
@@ -530,7 +518,7 @@ export const createTestDeleteVotingOption =
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(await ctx.votingOptionRepo.findOne(votingOption.id)).toEqual(
@@ -609,7 +597,7 @@ export const createTestCreateVote =
     if (expectedStatusCode === HttpStatus.CREATED) {
       await request(ctx.app.getHttpServer())
         .post(url)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(body)
         .expect(expectedStatusCode);
 
@@ -621,7 +609,7 @@ export const createTestCreateVote =
     if (expectedStatusCode === HttpStatus.BAD_REQUEST) {
       await request(ctx.app.getHttpServer())
         .post(url)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(body)
         .expect(expectedStatusCode);
 
@@ -637,7 +625,7 @@ export const createTestCreateVote =
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
       await request(ctx.app.getHttpServer())
         .post(url)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .send(body)
         .expect(expectedStatusCode);
 
@@ -719,7 +707,7 @@ export const createTestDeleteVote =
     if (expectedStatusCode === HttpStatus.OK) {
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(await ctx.voteRepo.findOne(vote.id)).toBeUndefined();
@@ -728,7 +716,7 @@ export const createTestDeleteVote =
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
-        .set('Authorization', ctx.getAuthorizationHeader(initiator))
+        .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
       expect(await ctx.voteRepo.findOne(vote.id)).toEqual(expectedVote);
@@ -737,83 +725,3 @@ export const createTestDeleteVote =
     // @ts-expect-error
     await onAfterTest?.();
   };
-
-type HoneyVotesTestContext = {
-  app: INestApplication;
-  connection: Connection;
-  userRepo: Repository<User>;
-  votingRepo: Repository<Voting>;
-  votingOptionRepo: Repository<VotingOption>;
-  voteRepo: Repository<Vote>;
-  jwtService: JwtService;
-  configService: ConfigService<Config>;
-  getAuthorizationHeader: (user: MockUser) => string;
-};
-
-export const getHoneyVotesTestContext = () => {
-  const ctx: HoneyVotesTestContext = {} as any;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        DatabaseModule,
-        ConfigModule.forRoot({ envFilePath: '.env.test' }),
-        typeOrmPostgresModule,
-        HoneyVotesModule,
-      ],
-    })
-      .overrideProvider(TwitchChatModule)
-      .useValue({})
-      .overrideProvider('TwitchChatModuleAnonymous')
-      .useValue(twitchChatServiceMock)
-      .compile();
-
-    ctx.app = moduleFixture.createNestApplication();
-
-    await ctx.app.init();
-
-    ctx.connection = moduleFixture
-      .get<DatabaseService>(DatabaseService)
-      .getDbHandle();
-
-    ctx.userRepo = ctx.connection.getRepository(User);
-    ctx.votingRepo = ctx.connection.getRepository(Voting);
-    ctx.votingOptionRepo = ctx.connection.getRepository(VotingOption);
-    ctx.voteRepo = ctx.connection.getRepository(Vote);
-
-    // TODO: make this work
-    // ctx.connection = ctx.app.get(getConnectionToken(POSTGRES_CONNECTION));
-    // ctx.userRepo = moduleFixture.get(getRepositoryToken(User));
-    // ctx.votingRepo = moduleFixture.get(getRepositoryToken(Voting));
-    // ctx.votingOptionRepo = moduleFixture.get(getRepositoryToken(VotingOption));
-    // ctx.voteRepo = moduleFixture.get(getRepositoryToken(Vote));
-
-    ctx.configService = ctx.app.get<ConfigService<Config>>(ConfigService);
-    ctx.jwtService = ctx.app.get<JwtService>(JwtService);
-  });
-
-  afterEach(async () => {
-    const tableNames = [
-      UserCredentials.tableName,
-      User.tableName,
-      Voting.tableName,
-      VotingOption.tableName,
-      Vote.tableName,
-    ];
-
-    await ctx.connection.query(`TRUNCATE ${tableNames.join(',')} CASCADE;`);
-  });
-
-  afterAll(async () => {
-    await ctx.connection.close();
-  });
-
-  ctx.getAuthorizationHeader = ({ id, login }: MockUser) =>
-    `Bearer ${signAccessToken(
-      { sub: id, login },
-      ctx.jwtService,
-      ctx.configService,
-    )}`;
-
-  return ctx;
-};
