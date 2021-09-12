@@ -84,6 +84,14 @@ describe('HoneyVotes - Users (e2e)', () => {
     );
   };
 
+  const mockRevokeToken = (responseCode: 200 | 400 = 200) => {
+    server.use(
+      rest.post('https://id.twitch.tv/oauth2/revoke', (req, res, ctx) =>
+        res(ctx.status(responseCode)),
+      ),
+    );
+  };
+
   const testRefreshTwitchToken = async (
     type: UserType,
     result: 'success' | 'failure',
@@ -181,6 +189,8 @@ describe('HoneyVotes - Users (e2e)', () => {
       mockRefreshTokenFailure(urls[type]);
     }
 
+    mockRevokeToken();
+
     await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/voting-options`)
       .set(...ctx.getAuthorizationHeader(initiator))
@@ -200,8 +210,8 @@ describe('HoneyVotes - Users (e2e)', () => {
     if (result === 'success') {
       expect(user).toMatchObject({
         credentials: {
-          accessToken: refreshTokenResponse.access_token,
-          refreshToken: refreshTokenResponse.refresh_token,
+          encryptedAccessToken: expect.any(String),
+          encryptedRefreshToken: expect.any(String),
         },
         areTokensValid: true,
       });
@@ -210,8 +220,8 @@ describe('HoneyVotes - Users (e2e)', () => {
     if (result === 'failure') {
       expect(user).toMatchObject({
         credentials: {
-          accessToken: '',
-          refreshToken: '',
+          encryptedAccessToken: expect.any(String),
+          encryptedRefreshToken: expect.any(String),
         },
         areTokensValid: false,
       });
