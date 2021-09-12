@@ -115,12 +115,16 @@ export class UsersService {
       ...rest
     } = user;
 
+    const encryptedAccessToken = accessToken
+      ? encrypt(accessToken, this.cryptoSecret)
+      : '';
+    const encryptedRefreshToken = refreshToken
+      ? encrypt(refreshToken, this.cryptoSecret)
+      : '';
+
     return this.userRepo.save({
       ...rest,
-      credentials: {
-        encryptedAccessToken: encrypt(accessToken, this.cryptoSecret),
-        encryptedRefreshToken: encrypt(refreshToken, this.cryptoSecret),
-      },
+      credentials: { encryptedAccessToken, encryptedRefreshToken },
     } as User);
   }
 
