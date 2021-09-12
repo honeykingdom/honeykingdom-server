@@ -29,8 +29,8 @@ import { AddChatVotingDto } from './dto/addChatVotingDto';
 import { UpdateChatVotingDto } from './dto/updateChatVotingDto';
 import { ChatVoting } from './entities/ChatVoting.entity';
 
-@ApiBearerAuth()
 @ApiTags('HoneyVotes - Chat Votes')
+@ApiBearerAuth()
 @Controller(API_BASE)
 export class ChatVotesController {
   constructor(private readonly chatVotesService: ChatVotesService) {}

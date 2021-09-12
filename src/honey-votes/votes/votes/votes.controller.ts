@@ -25,14 +25,14 @@ import { AddVoteDto } from '../dto/addVoteDto';
 import { VotesService } from './votes.service';
 import { validationPipe } from '../../honey-votes.validation';
 
-@ApiBearerAuth()
 @ApiTags('HoneyVotes - Votes')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller(API_BASE)
 export class VotesController {
   constructor(private readonly votesService: VotesService) {}
 
   @Post('/votes')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(validationPipe)
   @ApiCreatedResponse({ description: 'Created' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -46,7 +46,6 @@ export class VotesController {
   }
 
   @Delete('/votes/:voteId')
-  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'OK' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })

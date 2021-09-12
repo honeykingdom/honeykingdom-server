@@ -26,14 +26,14 @@ import { validationPipe } from '../../honey-votes.validation';
 import { VotingOptionsService } from './voting-options.service';
 import { VotingOption } from '../entities/VotingOption.entity';
 
-@ApiBearerAuth()
 @ApiTags('HoneyVotes - Votes')
+@ApiBearerAuth()
 @Controller(API_BASE)
+@UseGuards(JwtAuthGuard)
 export class VotingOptionsController {
   constructor(private readonly votingOptionsService: VotingOptionsService) {}
 
   @Post('/voting-options')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(validationPipe)
   @ApiCreatedResponse({ description: 'Created', type: VotingOption })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -47,7 +47,6 @@ export class VotingOptionsController {
   }
 
   @Delete('/voting-options/:votingOptionId')
-  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'OK' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
