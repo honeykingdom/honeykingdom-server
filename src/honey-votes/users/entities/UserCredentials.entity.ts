@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { User } from './User.entity';
 
 const USER_CREDENTIALS_TABLE_NAME = 'hv_user_credentials';
@@ -20,12 +20,12 @@ export class UserCredentials {
    * when a user changes their password or disconnects an app
    */
   @Column()
-  accessToken: string;
+  encryptedAccessToken: string;
 
   /**
    * Twitch refreshToken never expires but it can become invalid
    * when a user changes their password or disconnects an app
    */
   @Column()
-  refreshToken: string;
+  encryptedRefreshToken: string;
 }

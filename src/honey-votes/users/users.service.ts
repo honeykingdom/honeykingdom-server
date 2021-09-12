@@ -21,6 +21,7 @@ import {
   GetUserFollowsResponse,
   RefreshTokenResponse,
 } from '../../twitch-api/twitch-api.interface';
+import { decrypt, encrypt } from '../../crypto/crypto';
 
 type CheckUserTypesInput = {
   [TwitchUserType.Editor]?: boolean;
@@ -35,13 +36,14 @@ type CheckUserTypesInput = {
 
 type StoreUserInput = Pick<User, 'id' | 'login' | 'displayName' | 'avatarUrl'> &
   Partial<Pick<User, 'areTokensValid'>> & {
-    credentials: Omit<UserCredentials, 'user'>;
+    credentials: { accessToken: string; refreshToken: string };
   };
 
 @Injectable()
 export class UsersService {
   private readonly clientId: string;
   private readonly clientSecret: string;
+  private readonly cryptoSecret: string;
 
   // TODO: cache requests
   // private readonly editorIds = new Map<string, Set<string>>();
@@ -58,6 +60,9 @@ export class UsersService {
     this.clientSecret = configService.get<string>(
       'HONEY_VOTES_TWITCH_CLIENT_SECRET',
     );
+    this.cryptoSecret = this.configService.get('HONEY_VOTES_CRYPTO_SECRET', {
+      infer: true,
+    });
   }
 
   async getChannelByLogin(login: string): Promise<User> {
@@ -97,11 +102,30 @@ export class UsersService {
   async store(user: StoreUserInput) {
     const dbUser = await this.findOne(user.id, { relations: ['credentials'] });
 
-    if (dbUser?.credentials?.accessToken) {
-      await this.revokeToken(dbUser.credentials.accessToken);
+    if (dbUser?.credentials?.encryptedAccessToken) {
+      const accessToken = this.decryptToken(
+        dbUser.credentials.encryptedAccessToken,
+      );
+
+      if (accessToken) await this.revokeToken(accessToken);
     }
 
-    return this.userRepo.save(user as User);
+    const {
+      credentials: { accessToken, refreshToken },
+      ...rest
+    } = user;
+
+    return this.userRepo.save({
+      ...rest,
+      credentials: {
+        encryptedAccessToken: encrypt(accessToken, this.cryptoSecret),
+        encryptedRefreshToken: encrypt(refreshToken, this.cryptoSecret),
+      },
+    } as User);
+  }
+
+  decryptToken(token: string) {
+    return decrypt(token, this.cryptoSecret);
   }
 
   async checkUserTypes(
@@ -121,10 +145,10 @@ export class UsersService {
       types.editor ? this.isEditor(channel, user) : undefined,
       types.mod ? this.isMod(channel, user) : undefined,
       types.vip ? this.isVip(channel, user) : undefined,
-      sub ? this.isSub(channel, user) : { isSub: undefined },
+      sub ? this.isSub(channel, user) : { isSub: false, tier: SubTier.t1 },
       types.follower
         ? this.isFollower(channel, user)
-        : { isFollower: undefined },
+        : { isFollower: false, minutesFollowed: 0 },
     ]);
 
     if (
@@ -167,7 +191,7 @@ export class UsersService {
     if (!user.areTokensValid) throw new UnauthorizedException();
 
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
-    let accessToken = user.credentials.accessToken;
+    let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
 
     // TODO: remove loops or add iteration limit
     while (true) {
@@ -184,7 +208,9 @@ export class UsersService {
 
           if (updatedUser === null) throw new UnauthorizedException();
 
-          accessToken = updatedUser.credentials.accessToken;
+          accessToken = this.decryptToken(
+            updatedUser.credentials.encryptedAccessToken,
+          );
         } else {
           return { isSub: false };
         }
@@ -204,7 +230,7 @@ export class UsersService {
     if (!user.areTokensValid) throw new UnauthorizedException();
 
     let response: AxiosResponse<GetUserFollowsResponse>;
-    let accessToken = user.credentials.accessToken;
+    let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
 
     while (true) {
       try {
@@ -220,7 +246,9 @@ export class UsersService {
 
           if (updatedUser === null) throw new UnauthorizedException();
 
-          accessToken = updatedUser.credentials.accessToken;
+          accessToken = this.decryptToken(
+            updatedUser.credentials.encryptedAccessToken,
+          );
         } else {
           return { isFollower: false };
         }
@@ -239,7 +267,9 @@ export class UsersService {
     if (!channel.areTokensValid) throw new UnauthorizedException();
 
     let response: AxiosResponse<GetChannelEditorsResponse>;
-    let accessToken = channel.credentials.accessToken;
+    let accessToken = this.decryptToken(
+      channel.credentials.encryptedAccessToken,
+    );
 
     while (true) {
       try {
@@ -255,7 +285,9 @@ export class UsersService {
 
           if (updatedUser === null) throw new UnauthorizedException();
 
-          accessToken = updatedUser.credentials.accessToken;
+          accessToken = this.decryptToken(
+            updatedUser.credentials.encryptedAccessToken,
+          );
         } else {
           return new Set();
         }
@@ -269,7 +301,9 @@ export class UsersService {
     if (!channel.areTokensValid) throw new UnauthorizedException();
 
     let response: AxiosResponse<GetModeratorsResponse>;
-    let accessToken = channel.credentials.accessToken;
+    let accessToken = this.decryptToken(
+      channel.credentials.encryptedAccessToken,
+    );
 
     while (true) {
       try {
@@ -285,7 +319,9 @@ export class UsersService {
 
           if (updatedUser === null) throw new UnauthorizedException();
 
-          accessToken = updatedUser.credentials.accessToken;
+          accessToken = this.decryptToken(
+            updatedUser.credentials.encryptedAccessToken,
+          );
         } else {
           return new Set();
         }
@@ -321,7 +357,7 @@ export class UsersService {
 
     try {
       response = await this.twitchApiService.refreshToken({
-        refresh_token: user.credentials.refreshToken,
+        refresh_token: user.credentials.encryptedRefreshToken,
         client_id: this.clientId,
         client_secret: this.clientSecret,
       });
