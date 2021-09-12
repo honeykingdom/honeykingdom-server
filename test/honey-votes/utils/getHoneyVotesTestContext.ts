@@ -16,10 +16,16 @@ import { Voting } from '../../../src/honey-votes/votes/entities/Voting.entity';
 import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
 import { TwitchChatModule } from '../../../src/twitch-chat/twitch-chat.module';
 import { typeOrmPostgresModule } from '../../../src/typeorm';
-import { twitchChatServiceMock } from '../chat-votes.e2e-spec';
 import { createGetAuthorizationHeader } from './createGetAuthorizationHeader';
 import { transformMockUserToDbUser } from './transformMockUserToDbUser';
 import { MockUser, users } from './users';
+
+// TODO: get rid of this mock and maybe use fake twitch chat connection or the real one
+export const twitchChatServiceMock = {
+  addChatListener: jest.fn(),
+  joinChannel: jest.fn(),
+  partChannel: jest.fn(),
+};
 
 export type HoneyVotesTestContext = {
   app: INestApplication;

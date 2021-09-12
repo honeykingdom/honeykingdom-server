@@ -17,14 +17,10 @@ import {
   ChatVotingRestrictions,
 } from '../../src/honey-votes/chat-votes/dto/addChatVotingDto';
 import { UpdateChatVotingDto } from '../../src/honey-votes/chat-votes/dto/updateChatVotingDto';
-import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
-
-// TODO: get rid of this mock and maybe use fake twitch chat connection or the real one
-export const twitchChatServiceMock = {
-  addChatListener: jest.fn(),
-  joinChannel: jest.fn(),
-  partChannel: jest.fn(),
-};
+import {
+  getHoneyVotesTestContext,
+  twitchChatServiceMock,
+} from './utils/getHoneyVotesTestContext';
 
 describe('HoneyVotes - ChatVotes (e2e)', () => {
   const ctx = getHoneyVotesTestContext();
