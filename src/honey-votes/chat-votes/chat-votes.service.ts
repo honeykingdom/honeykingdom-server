@@ -22,8 +22,6 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/User.entity';
 import { SubTier } from '../honey-votes.interface';
 
-const CHAT_CONSUMER_ID = 'ChatVotes';
-
 @Injectable()
 export class ChatVotesService {
   private readonly restrictions = new Map<string, ChatVotingRestrictions>();
@@ -53,7 +51,7 @@ export class ChatVotesService {
       this.restrictions.set(chatVoting.broadcaster.id, chatVoting.restrictions);
       this.twitchChatService.joinChannel(
         chatVoting.broadcaster.login,
-        CHAT_CONSUMER_ID,
+        ChatVotesService.name,
       );
     });
 
@@ -170,11 +168,17 @@ export class ChatVotesService {
     restrictions?: ChatVotingRestrictions,
   ) {
     if (listening === true) {
-      this.twitchChatService.joinChannel(broadcaster.login, CHAT_CONSUMER_ID);
+      this.twitchChatService.joinChannel(
+        broadcaster.login,
+        ChatVotesService.name,
+      );
     }
 
     if (listening === false) {
-      this.twitchChatService.partChannel(broadcaster.login, CHAT_CONSUMER_ID);
+      this.twitchChatService.partChannel(
+        broadcaster.login,
+        ChatVotesService.name,
+      );
     }
 
     if (restrictions) {

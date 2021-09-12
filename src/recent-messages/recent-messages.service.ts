@@ -10,8 +10,6 @@ import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
 import { Message } from '../recent-messages/entities/message.entity';
 import { RecentMessagesResponse } from '../recent-messages/recent.messages.interface';
 
-const CHAT_CONSUMER_ID = 'RecentMessages';
-
 @Injectable()
 export class RecentMessagesService {
   private readonly messagesLimit: number;
@@ -36,7 +34,7 @@ export class RecentMessagesService {
 
     Promise.all(
       this.channels.map((channel) =>
-        twitchChatService.joinChannel(channel, CHAT_CONSUMER_ID),
+        twitchChatService.joinChannel(channel, RecentMessagesService.name),
       ),
     );
 

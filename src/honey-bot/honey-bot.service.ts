@@ -15,8 +15,6 @@ type QueuedMessage = {
   message: string;
 };
 
-const CHAT_CONSUMER_ID = 'HoneyBot';
-
 @Injectable()
 export class HoneyBotService {
   private readonly channels: Set<string> = new Set();
@@ -57,7 +55,7 @@ export class HoneyBotService {
   }
 
   private watchChannel(channel: string) {
-    this.twitchChatService.joinChannel(channel, CHAT_CONSUMER_ID);
+    this.twitchChatService.joinChannel(channel, HoneyBotService.name);
 
     const telegramChannels = this.telegramChannels.get(channel) || [];
 
