@@ -11,10 +11,7 @@ export class TwitchChatService {
     private readonly chat: Chat,
     private readonly connectionName: string,
   ) {
-    this.logger = new Logger(`TwitchChatService: ${connectionName}`);
-
-    chat.on(ChatEvents.CONNECTED, () => this.logger.log(`connected`));
-    chat.on(ChatEvents.DISCONNECTED, () => this.logger.log('disconnected'));
+    this.logger = new Logger(`TwitchChat: ${connectionName}`);
 
     chat.on(Commands.JOIN, ({ channel }) => this.logger.log(`join ${channel}`));
     chat.on(Commands.PART, ({ channel }) =>

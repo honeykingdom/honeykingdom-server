@@ -18,7 +18,7 @@ export class TwitchChatModule {
   ): DynamicModule {
     const chatConnectionProvider: Provider = {
       provide: getChatConnectionToken(connectionName),
-      useFactory: () => createConnection(options),
+      useFactory: () => createConnection(options, connectionName),
     };
 
     return {
@@ -35,7 +35,7 @@ export class TwitchChatModule {
     const chatConnectionProvider: Provider = {
       provide: getChatConnectionToken(connectionName),
       useFactory: async (...rest: any) =>
-        createConnection(await options.useFactory(...rest)),
+        createConnection(await options.useFactory(...rest), connectionName),
       inject: options.inject || [],
     };
 

@@ -1,4 +1,5 @@
-import { Chat } from 'twitch-js';
+import { Logger } from '@nestjs/common';
+import { Chat, ChatEvents } from 'twitch-js';
 import { TwitchChatModuleOptions } from './twitch-chat-options.interface';
 import {
   TWITCH_CHAT_CONNECTION,
@@ -11,11 +12,15 @@ export const getChatModuleToken = (connectionName: string) =>
 export const getChatConnectionToken = (connectionName: string) =>
   `${TWITCH_CHAT_CONNECTION}${connectionName}`;
 
-export const createConnection = async ({
-  token,
-  username,
-}: TwitchChatModuleOptions) => {
+export const createConnection = async (
+  { token, username }: TwitchChatModuleOptions,
+  connectionName: string,
+) => {
   const chat = new Chat({ log: { level: Infinity }, token, username });
+  const logger = new Logger(`TwitchChat: ${connectionName}`);
+
+  chat.on(ChatEvents.CONNECTED, () => logger.log('connected'));
+  chat.on(ChatEvents.DISCONNECTED, () => logger.log('disconnected'));
 
   await chat.connect();
 
