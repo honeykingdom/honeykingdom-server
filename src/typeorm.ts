@@ -31,6 +31,7 @@ export const typeOrmPostgresModule = TypeOrmModule.forRootAsync({
     entities: honeyVotesEntities,
     synchronize:
       configService.get('NODE_ENV', { infer: true }) !== 'production',
+    dropSchema: configService.get('NODE_ENV', { infer: true }) === 'test',
     // logging: configService.get('NODE_ENV', { infer: true }) !== 'production',
     // https://stackoverflow.com/questions/58220333
     keepConnectionAlive:
