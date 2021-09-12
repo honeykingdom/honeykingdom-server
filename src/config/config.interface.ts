@@ -37,6 +37,7 @@ export interface Config {
   HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME: string;
   HONEY_VOTES_TWITCH_CLIENT_ID: string;
   HONEY_VOTES_TWITCH_CLIENT_SECRET: string;
+  HONEY_VOTES_CRYPTO_SECRET: string;
 
   KINOPOISK_API_KEY: string;
 
@@ -83,6 +84,7 @@ export const validationSchema = Joi.object({
   HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME: Joi.string().required(),
   HONEY_VOTES_TWITCH_CLIENT_ID: Joi.string().required(),
   HONEY_VOTES_TWITCH_CLIENT_SECRET: Joi.string().required(),
+  HONEY_VOTES_CRYPTO_SECRET: Joi.string().length(32).required(),
 
   KINOPOISK_API_KEY: Joi.string().required(),
 
