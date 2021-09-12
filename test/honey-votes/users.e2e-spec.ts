@@ -303,17 +303,13 @@ describe('HoneyVotes - Users (e2e)', () => {
     });
 
     it('should return 400 if id or login is not specified', async () => {
-      return request(app.getHttpServer())
-        .get(`${API_BASE}/users`)
-        .expect(400)
-        .expect({ statusCode: 400, message: 'Bad Request' });
+      return request(app.getHttpServer()).get(`${API_BASE}/users`).expect(400);
     });
 
     it('should return 404 if user is not exists', async () => {
       return request(app.getHttpServer())
         .get(`${API_BASE}/users?id=1`)
-        .expect(404)
-        .expect({ statusCode: 404, message: 'Not Found' });
+        .expect(404);
     });
   });
 

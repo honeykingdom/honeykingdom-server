@@ -104,8 +104,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
     it('should return 401 if there is no token', async () => {
       return request(app.getHttpServer())
         .get(`${API_BASE}/auth/me`)
-        .expect(HttpStatus.UNAUTHORIZED)
-        .expect({ statusCode: 401, message: 'Unauthorized' });
+        .expect(HttpStatus.UNAUTHORIZED);
     });
 
     it('should return 401 if token is expired', async () => {
@@ -114,8 +113,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
       return request(app.getHttpServer())
         .get(`${API_BASE}/auth/me`)
         .set('Authorization', getAuthorizationHeader(user, { expired: true }))
-        .expect(HttpStatus.UNAUTHORIZED)
-        .expect({ statusCode: 401, message: 'Unauthorized' });
+        .expect(HttpStatus.UNAUTHORIZED);
     });
   });
 
@@ -170,8 +168,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
         .post(`${API_BASE}/auth/refresh-token`)
         .set('Authorization', 'Bearer not-valid-access-token')
         .send(refreshTokenDto)
-        .expect(401)
-        .expect({ statusCode: 401, message: 'Unauthorized' });
+        .expect(401);
     });
 
     it('should return 400 if refresh token is invalid', async () => {
@@ -184,8 +181,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
         .post(`${API_BASE}/auth/refresh-token`)
         .set('Authorization', getAuthorizationHeader(user))
         .send(refreshTokenDto)
-        .expect(400)
-        .expect({ statusCode: 400, message: 'Bad Request' });
+        .expect(400);
     });
 
     it('should return 400 if refresh token is expired', async () => {
@@ -203,8 +199,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
         .post(`${API_BASE}/auth/refresh-token`)
         .set('Authorization', getAuthorizationHeader(user))
         .send(refreshTokenDto)
-        .expect(400)
-        .expect({ statusCode: 400, message: 'Bad Request' });
+        .expect(400);
     });
   });
 });

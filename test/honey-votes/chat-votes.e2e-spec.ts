@@ -201,8 +201,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         .put(finalUrl)
         .set('Authorization', getAuthorizationHeader(initiator))
         .send(updateChatVotingDto)
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       expect(await chatVotingRepo.findOne(chatVoting.broadcasterId)).toEqual(
         expectedChatVoting,
@@ -257,8 +256,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       await request(app.getHttpServer())
         .delete(finalUrl)
         .set('Authorization', getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       expect(await chatVotingRepo.findOne(chatVoting.broadcasterId)).toEqual(
         expectedVoting,
@@ -327,8 +325,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       await request(app.getHttpServer())
         .post(finalUrl)
         .set('Authorization', getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       expect(
         await Promise.all([

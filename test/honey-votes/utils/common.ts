@@ -282,8 +282,7 @@ export const createTestUpdateVoting =
         .put(finalUrl)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
         .send(updateVotingDto)
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       expect(await ctx.votingRepo.findOne(voting.id)).toEqual(expectedVoting);
     }
@@ -335,8 +334,7 @@ export const createTestDeleteVoting =
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       expect(await ctx.votingRepo.findOne(voting.id)).toEqual(expectedVoting);
     }
@@ -452,8 +450,7 @@ export const createTestCreateVotingOption =
         .post(url)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
         .send(body)
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       if (!skipDbCheck) {
         expect(
@@ -534,8 +531,7 @@ export const createTestDeleteVotingOption =
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       expect(await ctx.votingOptionRepo.findOne(votingOption.id)).toEqual(
         expectedVotingOption,
@@ -627,8 +623,7 @@ export const createTestCreateVote =
         .post(url)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
         .send(body)
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 400, message: 'Bad Request' });
+        .expect(expectedStatusCode);
 
       if (!skipDbCheck) {
         expect(
@@ -644,8 +639,7 @@ export const createTestCreateVote =
         .post(url)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
         .send(body)
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       if (!skipDbCheck) {
         expect(
@@ -735,8 +729,7 @@ export const createTestDeleteVote =
       await request(ctx.app.getHttpServer())
         .delete(finalUrl)
         .set('Authorization', ctx.getAuthorizationHeader(initiator))
-        .expect(expectedStatusCode)
-        .expect({ statusCode: 403, message: 'Forbidden' });
+        .expect(expectedStatusCode);
 
       expect(await ctx.voteRepo.findOne(vote.id)).toEqual(expectedVote);
     }
