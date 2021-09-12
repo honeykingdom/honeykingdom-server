@@ -18,8 +18,8 @@ export const users: MockUser[] = [
     avatarUrl:
       'https://static-cdn.jtvnw.net/jtv_user_pictures/dmitryscaletta-profile_image-41b036d0ef640053-300x300.jpeg',
     credentials: {
-      accessToken: '',
-      refreshToken: '',
+      accessToken: '8g8lFEPeBhlhr0lzdXDyGkdgyW7D0n3j',
+      refreshToken: '85VRPBr97eniIy6MQkmAs2RhgVgNC5Gs',
     },
   },
   {
@@ -29,8 +29,8 @@ export const users: MockUser[] = [
     avatarUrl:
       'https://static-cdn.jtvnw.net/user-default-pictures-uv/75305d54-c7cc-40d1-bb9c-91fbe85943c7-profile_image-300x300.png',
     credentials: {
-      accessToken: '',
-      refreshToken: '',
+      accessToken: '5rIB03aCBDLGw2jVEriQiF2QqERFKfDy',
+      refreshToken: 'LygBCFpZn61RMxPrn0IkgxGGdI8HPVRj',
     },
   },
   {
@@ -41,8 +41,8 @@ export const users: MockUser[] = [
     avatarUrl:
       'https://static-cdn.jtvnw.net/jtv_user_pictures/lasqa-profile_image-49dc25f1e724dbd6-300x300.jpeg',
     credentials: {
-      accessToken: '',
-      refreshToken: '',
+      accessToken: 's1rrwu7zBvVoD1PfXXGKg4GKkYqgq0yo',
+      refreshToken: 'BLSCkcvcFeZLWSmC2x1NBwrSHUiKTYJe',
     },
   },
   {
@@ -53,8 +53,8 @@ export const users: MockUser[] = [
     avatarUrl:
       'https://static-cdn.jtvnw.net/jtv_user_pictures/1386b312-d06d-4a21-b314-45bde3713090-profile_image-300x300.png',
     credentials: {
-      accessToken: '',
-      refreshToken: '',
+      accessToken: 'AYVfcOlj4xs0vW42Aqn2TvqAGTP56Ijp',
+      refreshToken: 'r2ZS07kTFu8zjZuPqzeHvdowFXK8gfoz',
     },
   },
   {
@@ -65,8 +65,8 @@ export const users: MockUser[] = [
     avatarUrl:
       'https://static-cdn.jtvnw.net/jtv_user_pictures/melharucos-profile_image-ee8c1b7c466b0686-300x300.png',
     credentials: {
-      accessToken: '',
-      refreshToken: '',
+      accessToken: '3FJdWDN5AyCEmE2o06PDRWWeohcjBdEC',
+      refreshToken: '9bRtdY0mGNRUOIO3dXQ9CDjt7W7vaxZ9',
     },
   },
 ];
