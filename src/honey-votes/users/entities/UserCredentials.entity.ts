@@ -3,7 +3,6 @@ import { User } from './User.entity';
 
 const USER_CREDENTIALS_TABLE_NAME = 'hv_user_credentials';
 
-// TODO: encrypt tokens
 @Entity(USER_CREDENTIALS_TABLE_NAME)
 export class UserCredentials {
   static readonly tableName = USER_CREDENTIALS_TABLE_NAME;
