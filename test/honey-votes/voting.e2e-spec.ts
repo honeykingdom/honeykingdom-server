@@ -127,7 +127,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         });
       });
 
-      test('title: too long', async () => {
+      test.skip('title: too long', async () => {
         const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
@@ -163,7 +163,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         });
       });
 
-      test('description: too long', async () => {
+      test.skip('description: too long', async () => {
         const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
@@ -337,7 +337,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         });
       });
 
-      test('votingOptionsLimit: valid', async () => {
+      test.skip('votingOptionsLimit: valid', async () => {
         const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {

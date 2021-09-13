@@ -468,7 +468,6 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
       });
 
-      // logic
       describe('logic', () => {
         it('should not create VotingOption if its already exists with same id', async () => {
           const [user] = await ctx.createUsers();
@@ -523,9 +522,10 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           });
         });
 
-        it('without required fields', async () => {
+        it.skip('without required fields', async () => {
           const [user] = await ctx.createUsers();
 
+          // TODO: payload already pass in the testCreateVotingOption function
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
