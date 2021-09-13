@@ -6,7 +6,7 @@ import { User } from '../users/entities/User.entity';
 import { UsersService } from '../users/users.service';
 import {
   JwtPayload,
-  TwitchLoginResponse,
+  RefreshTokenResponse,
   TwitchStrategyUser,
 } from './auth.interface';
 
@@ -40,7 +40,7 @@ export class AuthService {
 
   async twitchLogin(
     user: TwitchStrategyUser,
-  ): Promise<TwitchLoginResponse | null> {
+  ): Promise<RefreshTokenResponse | null> {
     if (!user) return null;
 
     const {
@@ -66,7 +66,7 @@ export class AuthService {
   async refreshToken(
     userId: string,
     refreshToken: string,
-  ): Promise<TwitchLoginResponse> {
+  ): Promise<RefreshTokenResponse> {
     const user = await this.usersService.findOne(userId);
 
     if (!user) throw new BadRequestException();
@@ -91,7 +91,7 @@ export class AuthService {
     return this.usersService.findOne(userId);
   }
 
-  private signTokens(payload: JwtPayload): TwitchLoginResponse {
+  private signTokens(payload: JwtPayload): RefreshTokenResponse {
     return {
       accessToken: this.jwtService.sign(payload, this.accessTokenSignOptions),
       refreshToken: this.jwtService.sign(payload, this.refreshTokenSignOptions),

@@ -24,7 +24,7 @@ import { TwitchAuthGuard } from './guards/twitch-auth.guard';
 import { RefreshTokenDto } from './dto/refreshTokenDto';
 import {
   JwtStrategyUser,
-  TwitchLoginResponse,
+  RefreshTokenResponse,
   TwitchStrategyUser,
 } from './auth.interface';
 import { API_BASE } from '../honey-votes.interface';
@@ -78,13 +78,13 @@ export class AuthController {
   @Post('/auth/refresh-token')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'OK', type: TwitchLoginResponse })
+  @ApiOkResponse({ description: 'OK', type: RefreshTokenResponse })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   refreshToken(
     @PassportUser() user: JwtStrategyUser,
     @Body() { refreshToken }: RefreshTokenDto,
-  ): Promise<TwitchLoginResponse> {
+  ): Promise<RefreshTokenResponse> {
     return this.authService.refreshToken(user.id, refreshToken);
   }
 }

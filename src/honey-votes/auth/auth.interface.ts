@@ -54,8 +54,7 @@ export type JwtPayload = {
   // exp: number;
 };
 
-// TODO: Rename to RefreshTokenResponse
-export class TwitchLoginResponse {
+export class RefreshTokenResponse {
   @ApiProperty()
   accessToken: string;
 
