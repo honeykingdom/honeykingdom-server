@@ -274,7 +274,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: { type: VotingOptionType.KinopoiskMovie, id: movieId },
+              type: VotingOptionType.KinopoiskMovie,
+              [VotingOptionType.KinopoiskMovie]: { id: movieId },
             },
             expectedVotingOptionParams: {
               type: VotingOptionType.KinopoiskMovie,
@@ -296,9 +297,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
-              payload: { type: VotingOptionType.KinopoiskMovie },
-            } as any,
+            addVotingOptionDto: { type: VotingOptionType.KinopoiskMovie },
           });
         });
 
@@ -312,8 +311,9 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: { type: VotingOptionType.KinopoiskMovie, id: false },
-            } as any,
+              type: VotingOptionType.KinopoiskMovie,
+              [VotingOptionType.KinopoiskMovie]: { id: false as any },
+            },
           });
         });
 
@@ -327,10 +327,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.KinopoiskMovie,
-                id: 371.5,
-              },
+              type: VotingOptionType.KinopoiskMovie,
+              [VotingOptionType.KinopoiskMovie]: { id: 371.5 },
             },
           });
         });
@@ -345,10 +343,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.KinopoiskMovie,
-                id: movieId,
-              },
+              type: VotingOptionType.KinopoiskMovie,
+              [VotingOptionType.KinopoiskMovie]: { id: movieId },
             },
           });
         });
@@ -365,10 +361,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.KinopoiskMovie,
-                id: movieId,
-              },
+              type: VotingOptionType.KinopoiskMovie,
+              [VotingOptionType.KinopoiskMovie]: { id: movieId },
             },
             skipDbCheck: true,
             onBeforeTest: async ({ voting }) => {
@@ -401,7 +395,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: { type: VotingOptionType.IgdbGame, id: gameId },
+              type: VotingOptionType.IgdbGame,
+              [VotingOptionType.IgdbGame]: { id: gameId },
             },
             expectedVotingOptionParams: {
               type: VotingOptionType.IgdbGame,
@@ -422,9 +417,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
-              payload: { type: VotingOptionType.IgdbGame },
-            } as any,
+            addVotingOptionDto: { type: VotingOptionType.IgdbGame },
           });
         });
 
@@ -437,8 +430,9 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: { type: VotingOptionType.IgdbGame, id: false },
-            } as any,
+              type: VotingOptionType.IgdbGame,
+              [VotingOptionType.IgdbGame]: { id: false as any },
+            },
           });
         });
 
@@ -451,17 +445,15 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.IgdbGame,
-                id: 379.5,
-              },
+              type: VotingOptionType.IgdbGame,
+              [VotingOptionType.IgdbGame]: { id: 379.5 },
             },
           });
         });
 
         it('id: non existing', async () => {
           const [user] = await ctx.createUsers();
-          const movieId = 1;
+          const gameId = 1;
 
           mockIgdbGames([]);
 
@@ -469,10 +461,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.IgdbGame,
-                id: movieId,
-              },
+              type: VotingOptionType.IgdbGame,
+              [VotingOptionType.IgdbGame]: { id: gameId },
             },
           });
         });
@@ -490,10 +480,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.IgdbGame,
-                id: gameId,
-              },
+              type: VotingOptionType.IgdbGame,
+              [VotingOptionType.IgdbGame]: { id: gameId },
             },
             skipDbCheck: true,
             onBeforeTest: async ({ voting }) => {
@@ -523,8 +511,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.Custom,
+              type: VotingOptionType.Custom,
+              [VotingOptionType.Custom]: {
                 title: 'Test VotingOption',
               },
             },
@@ -541,9 +529,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
-              payload: { type: VotingOptionType.Custom },
-            } as any,
+            addVotingOptionDto: { type: VotingOptionType.Custom },
           });
         });
 
@@ -566,8 +552,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.Custom,
+              type: VotingOptionType.Custom,
+              [VotingOptionType.Custom]: {
                 title: Array(VOTING_OPTION_CARD_TITLE_MAX_LENGTH + 2).join('0'),
               },
             },
@@ -581,11 +567,11 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.Custom,
+              type: VotingOptionType.Custom,
+              [VotingOptionType.Custom]: {
                 title: 'Test VotingOption',
-                description: false,
-              } as any,
+                description: false as any,
+              },
             },
           });
         });
@@ -597,8 +583,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.Custom,
+              type: VotingOptionType.Custom,
+              [VotingOptionType.Custom]: {
                 title: 'Test VotingOption',
                 description: Array(
                   VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH + 2,
@@ -617,10 +603,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             broadcaster: user,
             initiator: user,
             addVotingOptionDto: {
-              payload: {
-                type: VotingOptionType.Custom,
-                title: 'Test VotingOption',
-              },
+              type: VotingOptionType.Custom,
+              [VotingOptionType.Custom]: { title: 'Test VotingOption' },
             },
             skipDbCheck: true,
             onBeforeTest: async ({ voting }) => {
