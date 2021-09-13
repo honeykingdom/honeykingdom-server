@@ -75,21 +75,6 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         if (expectedStatusCode === HttpStatus.CREATED) {
           expect(response.body).toEqual(expectedChatVoting);
         }
-
-        if (expectedStatusCode === HttpStatus.BAD_REQUEST) {
-          expect(response.body).toMatchObject({
-            statusCode: 400,
-            message: expect.any(Array),
-            error: 'Bad Request',
-          });
-        }
-
-        if (expectedStatusCode === HttpStatus.FORBIDDEN) {
-          expect(response.body).toEqual({
-            statusCode: 403,
-            message: 'Forbidden',
-          });
-        }
       });
 
     const chatVoting = await ctx.chatVotingRepo.findOne(broadcaster.id);

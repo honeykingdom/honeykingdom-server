@@ -180,21 +180,6 @@ export const createTestCreateVoting =
         if (expectedStatusCode === HttpStatus.CREATED) {
           expect(response.body).toEqual(expectedVoting);
         }
-
-        if (expectedStatusCode === HttpStatus.BAD_REQUEST) {
-          expect(response.body).toMatchObject({
-            statusCode: 400,
-            message: expect.any(Array),
-            error: 'Bad Request',
-          });
-        }
-
-        if (expectedStatusCode === HttpStatus.FORBIDDEN) {
-          expect(response.body).toEqual({
-            statusCode: 403,
-            message: 'Forbidden',
-          });
-        }
       });
 
     const dbVoting = await ctx.votingRepo.findOne({
@@ -370,10 +355,8 @@ export const createTestCreateVotingOption =
       broadcaster,
     } as Voting);
     const body: AddVotingOptionDto = {
-      payload: {
-        type: VotingOptionType.Custom,
-        title: 'Test VotingOption',
-      },
+      type: VotingOptionType.Custom,
+      [VotingOptionType.Custom]: { title: 'Test VotingOption' },
       votingId: voting.id,
       ...addVotingOptionDto,
     };
@@ -416,13 +399,7 @@ export const createTestCreateVotingOption =
         .post(url)
         .set(...ctx.getAuthorizationHeader(initiator))
         .send(body)
-        .expect(expectedStatusCode)
-        .expect((response) => {
-          expect(response.body).toMatchObject({
-            statusCode: 400,
-            message: expect.anything(),
-          });
-        });
+        .expect(expectedStatusCode);
 
       if (!skipDbCheck) {
         expect(
