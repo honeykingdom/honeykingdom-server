@@ -113,7 +113,8 @@ describe('HoneyVotes - Users (e2e)', () => {
 
     const body: AddVotingOptionDto = {
       votingId: voting.id,
-      payload: { type: VotingOptionType.Custom, title: 'Test Voting' },
+      type: VotingOptionType.Custom,
+      [VotingOptionType.Custom]: { title: 'Test Voting' },
     };
 
     let response200: any;
