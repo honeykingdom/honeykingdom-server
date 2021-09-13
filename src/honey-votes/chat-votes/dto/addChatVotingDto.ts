@@ -51,7 +51,6 @@ export class AddChatVotingDtoBase {
 
   @IsOptional()
   @IsBoolean()
-  @ApiProperty()
   @ApiPropertyOptional()
   listening?: boolean;
 }

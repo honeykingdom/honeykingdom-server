@@ -21,64 +21,8 @@ import {
   VOTING_OPTIONS_LIMIT_MIN,
   VOTING_TITLE_MAX_LENGTH,
 } from '../entities/Voting.entity';
-import { TwitchUserType, VotingOptionType } from '../../honey-votes.interface';
-
-class UserTypeParams {
-  @IsBoolean()
-  @ApiProperty()
-  canVote: boolean;
-
-  @IsBoolean()
-  @ApiProperty()
-  canAddOptions: boolean;
-}
-class UserTypeParamsFollower extends UserTypeParams {
-  @IsInt()
-  @Min(0)
-  @ApiProperty()
-  minutesToFollowRequiredToVote: number;
-
-  @IsInt()
-  @Min(0)
-  @ApiProperty()
-  minutesToFollowRequiredToAddOptions: number;
-}
-export class UserTypesParams {
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  @ApiProperty()
-  [TwitchUserType.Mod]: UserTypeParams;
-
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  @ApiProperty()
-  [TwitchUserType.Vip]: UserTypeParams;
-
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  @ApiProperty()
-  [TwitchUserType.SubTier1]: UserTypeParams;
-
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  @ApiProperty()
-  [TwitchUserType.SubTier2]: UserTypeParams;
-
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  @ApiProperty()
-  [TwitchUserType.SubTier3]: UserTypeParams;
-
-  @ValidateNested()
-  @Type(() => UserTypeParamsFollower)
-  @ApiProperty()
-  [TwitchUserType.Follower]: UserTypeParamsFollower;
-
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  @ApiProperty()
-  [TwitchUserType.Viewer]: UserTypeParams;
-}
+import { VotingOptionType } from '../../honey-votes.interface';
+import { UserTypesParams } from './UserTypesParams';
 
 export class AddVotingDtoBase {
   @IsString()

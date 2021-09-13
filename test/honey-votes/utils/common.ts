@@ -26,10 +26,8 @@ import {
   mockGetUserFollows,
 } from './mock-requests';
 import { sub } from 'date-fns';
-import {
-  AddVotingDto,
-  UserTypesParams,
-} from '../../../src/honey-votes/votes/dto/addVotingDto';
+import { AddVotingDto } from '../../../src/honey-votes/votes/dto/addVotingDto';
+import { UserTypesParams } from '../../../src/honey-votes/votes/dto/UserTypesParams';
 import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVotingDto';
 import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
 import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';

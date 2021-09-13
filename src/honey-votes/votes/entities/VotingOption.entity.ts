@@ -9,11 +9,11 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '../../users/entities/User.entity';
 import { VotingOptionType } from '../../honey-votes.interface';
 import { Vote } from './Vote.entity';
 import { Voting } from './Voting.entity';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 const VOTING_OPTION_TABLE_NAME = 'hv_voting_option';
 

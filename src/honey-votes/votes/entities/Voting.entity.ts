@@ -9,13 +9,13 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '../../users/entities/User.entity';
 import { Vote } from './Vote.entity';
 import { TwitchUserType } from '../../honey-votes.interface';
 import { VotingOption } from './VotingOption.entity';
 import { VotingOptionType } from '../../honey-votes.interface';
-import { UserTypesParams } from '../dto/addVotingDto';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { UserTypesParams } from '../dto/UserTypesParams';
 
 const VOTING_TABLE_NAME = 'hv_voting';
 
