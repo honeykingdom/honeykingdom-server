@@ -39,18 +39,17 @@ export class VotingOptionsService {
     userId: string,
     data: AddVotingOptionDto,
   ): Promise<VotingOption> {
-    const { votingId, payload } = data;
+    const { votingId, type } = data;
+
+    if (!data[type]) throw new BadRequestException();
+
     const [author, voting] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingRepo.findOne(votingId, {
         relations: ['broadcaster', 'broadcaster.credentials'],
       }),
     ]);
-    const hasAccess = await this.canCreateVotingOption(
-      author,
-      voting,
-      payload.type,
-    );
+    const hasAccess = await this.canCreateVotingOption(author, voting, type);
 
     if (!hasAccess) throw new ForbiddenException();
 
@@ -59,7 +58,7 @@ export class VotingOptionsService {
     const votingOption = this.votingOptionRepo.create({
       author,
       voting,
-      type: payload.type,
+      type,
       ...card,
     });
 
@@ -160,25 +159,30 @@ export class VotingOptionsService {
     return true;
   }
 
-  private async getVotingOptionCard({ votingId, payload }: AddVotingOptionDto) {
+  private async getVotingOptionCard(data: AddVotingOptionDto) {
+    const payload = data[data.type];
+
+    type Custom = AddVotingOptionDto[VotingOptionType.Custom];
+    type WithId = AddVotingOptionDto[VotingOptionType.KinopoiskMovie];
+
     const where =
-      payload.type === VotingOptionType.KinopoiskMovie ||
-      payload.type === VotingOptionType.IgdbGame
-        ? { cardId: payload.id }
-        : { cardTitle: payload.title };
+      data.type === VotingOptionType.KinopoiskMovie ||
+      data.type === VotingOptionType.IgdbGame
+        ? { cardId: (payload as WithId).id }
+        : { cardTitle: (payload as Custom).title };
 
     const sameVotingOption = await this.votingOptionRepo.findOne({
-      where: { voting: { id: votingId }, ...where },
+      where: { voting: { id: data.votingId }, ...where },
     });
 
     if (sameVotingOption) throw new BadRequestException();
 
-    if (payload.type === VotingOptionType.KinopoiskMovie) {
-      return await this.getKinopoiskMovieCard(payload.id);
+    if (data.type === VotingOptionType.KinopoiskMovie) {
+      return await this.getKinopoiskMovieCard((payload as WithId).id);
     }
 
-    if (payload.type === VotingOptionType.IgdbGame) {
-      return await this.getIgdbGameCard(payload.id);
+    if (data.type === VotingOptionType.IgdbGame) {
+      return await this.getIgdbGameCard((payload as WithId).id);
     }
 
     return this.getCustomCard(payload);

@@ -1,8 +1,4 @@
-import {
-  ApiProperty,
-  ApiPropertyOptional,
-  getSchemaPath,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -20,32 +16,19 @@ import {
   VOTING_OPTION_CARD_TITLE_MAX_LENGTH,
 } from '../entities/VotingOption.entity';
 
-// https://stackoverflow.com/a/61401118/4687416
-
-class BaseVotingOption {
-  @IsEnum(VotingOptionType)
-  @ApiProperty()
-  type: VotingOptionType;
-}
-class VotingOptionMovie extends BaseVotingOption {
-  type: VotingOptionType.KinopoiskMovie;
-
+class VotingOptionKinopoiskMovie {
   @IsInt()
   @IsPositive()
   @ApiProperty()
   id: number;
 }
-class VotingOptionGame extends BaseVotingOption {
-  type: VotingOptionType.IgdbGame;
-
+class VotingOptionIgdbGame {
   @IsInt()
   @IsPositive()
   @ApiProperty()
   id: number;
 }
-class VotingOptionCustom extends BaseVotingOption {
-  type: VotingOptionType.Custom;
-
+class VotingOptionCustom {
   @IsString()
   @IsNotEmpty()
   @MaxLength(VOTING_OPTION_CARD_TITLE_MAX_LENGTH)
@@ -66,26 +49,25 @@ export class AddVotingOptionDto {
   @ApiProperty()
   votingId: number;
 
-  @ValidateNested()
-  @Type(() => BaseVotingOption, {
-    keepDiscriminatorProperty: true,
-    discriminator: {
-      property: 'type',
-      subTypes: [
-        { value: VotingOptionMovie, name: VotingOptionType.KinopoiskMovie },
-        { value: VotingOptionGame, name: VotingOptionType.IgdbGame },
-        { value: VotingOptionCustom, name: VotingOptionType.Custom },
-      ],
-    },
-  })
-  @ApiProperty({
-    oneOf: [
-      { $ref: getSchemaPath(VotingOptionMovie) },
-      { $ref: getSchemaPath(VotingOptionGame) },
-      { $ref: getSchemaPath(VotingOptionCustom) },
-    ],
-  })
-  payload: VotingOptionMovie | VotingOptionGame | VotingOptionCustom;
-}
+  @IsEnum(VotingOptionType)
+  @ApiProperty()
+  type: VotingOptionType;
 
-// TODO: fix types in swagger
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => VotingOptionKinopoiskMovie)
+  @ApiPropertyOptional()
+  [VotingOptionType.KinopoiskMovie]?: VotingOptionKinopoiskMovie;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => VotingOptionIgdbGame)
+  @ApiPropertyOptional()
+  [VotingOptionType.IgdbGame]?: VotingOptionIgdbGame;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => VotingOptionCustom)
+  @ApiPropertyOptional()
+  [VotingOptionType.Custom]?: VotingOptionCustom;
+}
