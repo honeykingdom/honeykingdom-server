@@ -5,6 +5,12 @@ import { Strategy } from 'passport-twitch-strategy';
 import { Config } from '../../../config/config.interface';
 import { TwitchStrategyUser, TwitchUserResponse } from '../auth.interface';
 
+const scope = [
+  'channel:read:subscriptions',
+  'channel:read:editors',
+  'moderation:read',
+];
+
 @Injectable()
 export class TwitchStrategy extends PassportStrategy(Strategy, 'twitch') {
   constructor(configService: ConfigService<Config>) {
@@ -16,11 +22,7 @@ export class TwitchStrategy extends PassportStrategy(Strategy, 'twitch') {
         'HONEY_VOTES_TWITCH_CLIENT_SECRET',
       ),
       callbackURL: `${baseUrl}/api/honey-votes/auth/twitch/redirect`,
-      scope: [
-        'channel:read:subscriptions',
-        'channel:read:editors',
-        'moderation:read',
-      ],
+      scope,
     });
   }
 
@@ -29,6 +31,6 @@ export class TwitchStrategy extends PassportStrategy(Strategy, 'twitch') {
     refreshToken: string,
     profile: TwitchUserResponse,
   ): TwitchStrategyUser {
-    return { ...profile, accessToken, refreshToken };
+    return { ...profile, scope, accessToken, refreshToken };
   }
 }

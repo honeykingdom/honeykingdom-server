@@ -14,6 +14,9 @@ export class UserCredentials {
   @JoinColumn()
   user: User;
 
+  @Column({ type: 'varchar', array: true })
+  scope: string[];
+
   /**
    * Twitch accessToken have an expiration time and also can become invalid
    * when a user changes their password or disconnects an app

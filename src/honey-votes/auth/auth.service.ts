@@ -44,6 +44,7 @@ export class AuthService {
 
     const {
       id,
+      scope,
       accessToken,
       refreshToken,
       login,
@@ -56,7 +57,7 @@ export class AuthService {
       login,
       displayName,
       avatarUrl,
-      credentials: { accessToken, refreshToken },
+      credentials: { accessToken, refreshToken, scope },
     });
 
     return this.signTokens({ sub: id, login });

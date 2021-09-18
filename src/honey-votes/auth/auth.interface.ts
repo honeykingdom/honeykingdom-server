@@ -38,6 +38,7 @@ export type TwitchUserResponse = {
 };
 
 export type TwitchStrategyUser = TwitchUserResponse & {
+  scope: string[];
   accessToken: string;
   refreshToken: string;
 };

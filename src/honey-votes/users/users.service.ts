@@ -36,7 +36,11 @@ type CheckUserTypesInput = {
 
 type StoreUserInput = Pick<User, 'id' | 'login' | 'displayName' | 'avatarUrl'> &
   Partial<Pick<User, 'areTokensValid'>> & {
-    credentials: { accessToken: string; refreshToken: string };
+    credentials: {
+      scope: string[];
+      accessToken: string;
+      refreshToken: string;
+    };
   };
 
 @Injectable()
@@ -402,7 +406,7 @@ export class UsersService {
       if (e.response.status === 400) {
         await this.store({
           ...user,
-          credentials: { accessToken: '', refreshToken: '' },
+          credentials: { accessToken: '', refreshToken: '', scope: [] },
           areTokensValid: false,
         });
 
@@ -415,6 +419,7 @@ export class UsersService {
       credentials: {
         accessToken: response.data.access_token,
         refreshToken: response.data.refresh_token,
+        scope: response.data.scope,
       },
       areTokensValid: true,
     });
