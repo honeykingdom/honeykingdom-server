@@ -24,7 +24,7 @@ export type RefreshTokenParams = {
 export type RefreshTokenResponse = {
   access_token: string;
   refresh_token: string;
-  scope: string;
+  scope: string[];
 };
 export type RefreshTokenError400 = {
   status: 400;
