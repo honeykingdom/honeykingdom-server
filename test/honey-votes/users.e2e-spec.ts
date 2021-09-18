@@ -1,9 +1,11 @@
+import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { DeepPartial } from 'typeorm';
 import R from 'ramda';
 import { server, rest } from './utils/test-server';
 import { users } from './utils/users';
 import { Voting } from '../../src/honey-votes/votes/entities/Voting.entity';
+import { User } from '../../src/honey-votes/users/entities/User.entity';
 import {
   API_BASE,
   VotingOptionType,
@@ -260,6 +262,39 @@ describe('HoneyVotes - Users (e2e)', () => {
       return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users?id=1`)
         .expect(404);
+    });
+  });
+
+  describe('/users/me (GET)', () => {
+    it('should return authenticated user', async () => {
+      const [user] = await ctx.createUsers();
+
+      return request(ctx.app.getHttpServer())
+        .get(`${API_BASE}/users/me`)
+        .set(...ctx.getAuthorizationHeader(user))
+        .expect(200)
+        .expect({
+          id: user.id,
+          login: user.login,
+          displayName: user.displayName,
+          avatarUrl: user.avatarUrl,
+          areTokensValid: true,
+        } as Partial<User>);
+    });
+
+    it('should return 401 if there is no token', async () => {
+      return request(ctx.app.getHttpServer())
+        .get(`${API_BASE}/users/me`)
+        .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('should return 401 if token is expired', async () => {
+      const [user] = await ctx.createUsers();
+
+      return request(ctx.app.getHttpServer())
+        .get(`${API_BASE}/users/me`)
+        .set(...ctx.getAuthorizationHeader(user, { expired: true }))
+        .expect(HttpStatus.UNAUTHORIZED);
     });
   });
 

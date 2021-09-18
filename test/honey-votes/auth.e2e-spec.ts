@@ -10,40 +10,7 @@ import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 describe('HoneyVotes - Auth (e2e)', () => {
   const ctx = getHoneyVotesTestContext();
 
-  describe('/auth/me', () => {
-    it('should return authenticated user', async () => {
-      const [user] = await ctx.createUsers();
-
-      return request(ctx.app.getHttpServer())
-        .get(`${API_BASE}/auth/me`)
-        .set(...ctx.getAuthorizationHeader(user))
-        .expect(200)
-        .expect({
-          id: user.id,
-          login: user.login,
-          displayName: user.displayName,
-          avatarUrl: user.avatarUrl,
-          areTokensValid: true,
-        } as Partial<User>);
-    });
-
-    it('should return 401 if there is no token', async () => {
-      return request(ctx.app.getHttpServer())
-        .get(`${API_BASE}/auth/me`)
-        .expect(HttpStatus.UNAUTHORIZED);
-    });
-
-    it('should return 401 if token is expired', async () => {
-      const [user] = await ctx.createUsers();
-
-      return request(ctx.app.getHttpServer())
-        .get(`${API_BASE}/auth/me`)
-        .set(...ctx.getAuthorizationHeader(user, { expired: true }))
-        .expect(HttpStatus.UNAUTHORIZED);
-    });
-  });
-
-  describe('/auth/refresh-token', () => {
+  describe('/auth/refresh-token (POST)', () => {
     it('should refresh a valid token', async () => {
       const [user] = await ctx.createUsers();
       const refreshTokenDto: RefreshTokenDto = {
