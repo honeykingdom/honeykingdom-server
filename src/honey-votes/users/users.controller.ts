@@ -56,7 +56,7 @@ export class UsersController {
   @Get('/users/me/:channelId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: 'OK', type: User })
+  @ApiOkResponse({ description: 'OK', type: UserRoles })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Not found' })
   getUserRoles(
