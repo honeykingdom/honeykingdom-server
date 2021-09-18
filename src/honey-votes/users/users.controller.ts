@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Controller,
   Get,
+  Param,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import { PassportUser } from '../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../honey-votes.interface';
 import { User } from './entities/User.entity';
+import { UserRoles } from './users.interface';
 import { UsersService } from './users.service';
 
 @ApiTags('HoneyVotes - Users')
@@ -49,5 +51,18 @@ export class UsersController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   me(@PassportUser() user: JwtStrategyUser): Promise<User> {
     return this.usersService.findOne(user.id);
+  }
+
+  @Get('/users/me/:channelId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'OK', type: User })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Not found' })
+  getUserRoles(
+    @PassportUser() user: JwtStrategyUser,
+    @Param('channelId') channelId: string,
+  ): Promise<UserRoles> {
+    return this.usersService.getUserRoles(user.id, channelId);
   }
 }

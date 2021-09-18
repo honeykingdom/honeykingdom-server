@@ -13,7 +13,6 @@ import { Config } from '../../config/config.interface';
 import { TwitchApiService } from '../../twitch-api/twitch-api.service';
 import { SubTier, TwitchUserType } from '../honey-votes.interface';
 import { User } from './entities/User.entity';
-import { UserCredentials } from './entities/UserCredentials.entity';
 import {
   CheckUserSubscriptionResponse,
   GetChannelEditorsResponse,
@@ -22,6 +21,7 @@ import {
   RefreshTokenResponse,
 } from '../../twitch-api/twitch-api.interface';
 import { decrypt, encrypt } from '../../crypto/crypto';
+import { UserRoles } from './users.interface';
 
 type CheckUserTypesInput = {
   [TwitchUserType.Editor]?: boolean;
@@ -79,6 +79,40 @@ export class UsersService {
     if (!channel) throw new NotFoundException();
 
     return channel;
+  }
+
+  async getUserRoles(userId: string, channelId: string): Promise<UserRoles> {
+    const [user, channel] = await Promise.all([
+      this.findOne(userId),
+      this.findOne(channelId),
+    ]);
+
+    if (!user || !channel) throw new NotFoundException();
+
+    const [
+      isEditor,
+      isMod,
+      isVip,
+      { isSub, tier },
+      { isFollower, minutesFollowed },
+    ] = await Promise.all([
+      this.isEditor(channel, user),
+      this.isMod(channel, user),
+      this.isVip(channel, user),
+      this.isSub(channel, user),
+      this.isFollower(channel, user),
+    ]);
+
+    return {
+      isEditor,
+      isMod,
+      isVip,
+      isSubTier1: isSub && tier === SubTier.t1,
+      isSubTier2: isSub && tier === SubTier.t2,
+      isSubTier3: isSub && tier === SubTier.t3,
+      isFollower,
+      minutesFollowed,
+    };
   }
 
   async findOne(
@@ -152,7 +186,7 @@ export class UsersService {
       sub ? this.isSub(channel, user) : { isSub: false, tier: SubTier.t1 },
       types.follower
         ? this.isFollower(channel, user)
-        : { isFollower: false, minutesFollowed: 0 },
+        : { isFollower: false, minutesFollowed: null },
     ]);
 
     if (
@@ -191,7 +225,7 @@ export class UsersService {
   async isSub(
     channel: User,
     user: User,
-  ): Promise<{ isSub: boolean; tier?: SubTier }> {
+  ): Promise<{ isSub: boolean; tier: SubTier | null }> {
     if (!user.areTokensValid) throw new UnauthorizedException();
 
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
@@ -216,7 +250,7 @@ export class UsersService {
             updatedUser.credentials.encryptedAccessToken,
           );
         } else {
-          return { isSub: false };
+          return { isSub: false, tier: null };
         }
       }
     }
@@ -230,7 +264,7 @@ export class UsersService {
   async isFollower(
     channel: User,
     user: User,
-  ): Promise<{ isFollower: boolean; minutesFollowed?: number }> {
+  ): Promise<{ isFollower: boolean; minutesFollowed: number | null }> {
     if (!user.areTokensValid) throw new UnauthorizedException();
 
     let response: AxiosResponse<GetUserFollowsResponse>;
@@ -254,12 +288,14 @@ export class UsersService {
             updatedUser.credentials.encryptedAccessToken,
           );
         } else {
-          return { isFollower: false };
+          return { isFollower: false, minutesFollowed: null };
         }
       }
     }
 
-    if (response.data.total === 0) return { isFollower: false };
+    if (response.data.total === 0) {
+      return { isFollower: false, minutesFollowed: null };
+    }
 
     const followedAt = new Date(response.data.data[0].followed_at);
     const minutesFollowed = differenceInMinutes(new Date(), followedAt);
