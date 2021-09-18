@@ -29,7 +29,6 @@ import {
 } from './auth.interface';
 import { API_BASE } from '../honey-votes.interface';
 import { PassportUser } from './decorators/passport-user.decorator';
-import { User } from '../users/entities/User.entity';
 
 @ApiTags('HoneyVotes - Auth')
 @Controller(API_BASE)
@@ -64,15 +63,6 @@ export class AuthController {
     return {
       url: this.configService.get<string>('HONEY_VOTES_REDIRECT_FRONTEND_URL'),
     };
-  }
-
-  @Get('/auth/me')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'OK', type: User })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  me(@PassportUser() user: JwtStrategyUser): Promise<User> {
-    return this.authService.getUser(user.id);
   }
 
   @Post('/auth/refresh-token')

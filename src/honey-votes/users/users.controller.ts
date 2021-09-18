@@ -1,11 +1,22 @@
-import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiQuery,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { JwtStrategyUser } from '../auth/auth.interface';
+import { PassportUser } from '../auth/decorators/passport-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../honey-votes.interface';
 import { User } from './entities/User.entity';
 import { UsersService } from './users.service';
@@ -29,5 +40,14 @@ export class UsersController {
     if (login) return this.usersService.getChannelByLogin(login);
 
     throw new BadRequestException();
+  }
+
+  @Get('/users/me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'OK', type: User })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  me(@PassportUser() user: JwtStrategyUser): Promise<User> {
+    return this.usersService.findOne(user.id);
   }
 }
