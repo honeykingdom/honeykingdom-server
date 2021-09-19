@@ -162,7 +162,11 @@ export class UsersService {
 
     return this.userRepo.save({
       ...rest,
-      credentials: { encryptedAccessToken, encryptedRefreshToken },
+      credentials: {
+        scope: user.credentials.scope,
+        encryptedAccessToken,
+        encryptedRefreshToken,
+      },
     } as User);
   }
 
