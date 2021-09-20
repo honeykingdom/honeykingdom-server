@@ -87,8 +87,8 @@ export class UsersService {
 
   async getUserRoles(userId: string, channelId: string): Promise<UserRoles> {
     const [user, channel] = await Promise.all([
-      this.findOne(userId),
-      this.findOne(channelId),
+      this.findOne(userId, { relations: ['credentials'] }),
+      this.findOne(channelId, { relations: ['credentials'] }),
     ]);
 
     if (!user || !channel) throw new NotFoundException();
