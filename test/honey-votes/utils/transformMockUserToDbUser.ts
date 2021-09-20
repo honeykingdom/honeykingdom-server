@@ -6,6 +6,7 @@ export const transformMockUserToDbUser =
   ({ credentials, ...rest }: MockUser) => ({
     ...rest,
     credentials: {
+      scope: credentials.scope,
       encryptedAccessToken: encrypt(credentials.accessToken, secret),
       encryptedRefreshToken: encrypt(credentials.refreshToken, secret),
     },

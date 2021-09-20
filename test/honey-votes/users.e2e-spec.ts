@@ -35,7 +35,7 @@ const response401: UnauthorizedResponse = {
 const refreshTokenResponse: RefreshTokenResponse = {
   access_token: 'new-access-token',
   refresh_token: 'new-refresh-token',
-  scope: '',
+  scope: [],
 };
 
 describe('HoneyVotes - Users (e2e)', () => {
