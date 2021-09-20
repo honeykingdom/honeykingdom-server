@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -27,6 +27,7 @@ export const DEFAULT_CHAT_VOTING_RESTRICTIONS: ChatVotingRestrictions = {
   subMonthsRequired: 0,
 };
 
+@ApiExtraModels(ChatVote)
 @Entity(CHAT_VOTING_TABLE_NAME)
 export class ChatVoting {
   static readonly tableName = CHAT_VOTING_TABLE_NAME;
