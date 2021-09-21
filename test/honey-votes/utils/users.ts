@@ -1,3 +1,5 @@
+import { scope } from '../../../src/honey-votes/auth/strategies/twitch.strategy';
+
 export type MockUser = {
   id: string;
   login: string;
@@ -10,12 +12,6 @@ export type MockUser = {
     refreshToken: string;
   };
 };
-
-const scope = [
-  'channel:read:subscriptions',
-  'channel:read:editors',
-  'moderation:read',
-];
 
 export const users: MockUser[] = [
   {

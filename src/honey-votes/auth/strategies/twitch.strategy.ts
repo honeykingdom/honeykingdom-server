@@ -5,10 +5,10 @@ import { Strategy } from 'passport-twitch-strategy';
 import { Config } from '../../../config/config.interface';
 import { TwitchStrategyUser, TwitchUserResponse } from '../auth.interface';
 
-const scope = [
-  'channel:read:subscriptions',
-  'channel:read:editors',
-  'moderation:read',
+export const scope = [
+  'channel:read:editors', // getChannelEditors
+  'user:read:subscriptions', // checkUserSubscription
+  'moderation:read', // getModerators
 ];
 
 @Injectable()
