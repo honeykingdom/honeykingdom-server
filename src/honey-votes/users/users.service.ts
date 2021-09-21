@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -45,6 +46,8 @@ type StoreUserInput = Pick<User, 'id' | 'login' | 'displayName' | 'avatarUrl'> &
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   private readonly clientId: string;
   private readonly clientSecret: string;
   private readonly cryptoSecret: string;
@@ -250,6 +253,8 @@ export class UsersService {
         break;
       } catch (e) {
         if (e.response.status === 401) {
+          this.logger.log(`isSub: invalid access token. User: ${user.login}`);
+
           const updatedUser = await this.refreshToken(user);
 
           if (updatedUser === null) throw new UnauthorizedException();
@@ -257,7 +262,14 @@ export class UsersService {
           accessToken = this.decryptToken(
             updatedUser.credentials.encryptedAccessToken,
           );
+        } else if (e.response.status === 404) {
+          return { isSub: false, tier: null };
         } else {
+          this.logger.error(
+            `isSub: unknown error. User: ${user.login}`,
+            e.stack,
+          );
+
           return { isSub: false, tier: null };
         }
       }
@@ -288,6 +300,10 @@ export class UsersService {
         break;
       } catch (e) {
         if (e.response.status === 401) {
+          this.logger.log(
+            `isFollower: invalid access token. User: ${user.login}`,
+          );
+
           const updatedUser = await this.refreshToken(user);
 
           if (updatedUser === null) throw new UnauthorizedException();
@@ -296,6 +312,11 @@ export class UsersService {
             updatedUser.credentials.encryptedAccessToken,
           );
         } else {
+          this.logger.error(
+            `isFollower: unknown error. User: ${user.login}`,
+            e.stack,
+          );
+
           return { isFollower: false, minutesFollowed: null };
         }
       }
@@ -329,6 +350,10 @@ export class UsersService {
         break;
       } catch (e) {
         if (e.response.status === 401) {
+          this.logger.log(
+            `getChannelEditors: invalid access token. User: ${channel.login}`,
+          );
+
           const updatedUser = await this.refreshToken(channel);
 
           if (updatedUser === null) throw new UnauthorizedException();
@@ -337,6 +362,11 @@ export class UsersService {
             updatedUser.credentials.encryptedAccessToken,
           );
         } else {
+          this.logger.error(
+            `getChannelEditors: unknown error. User: ${channel.login}`,
+            e.stack,
+          );
+
           return new Set();
         }
       }
@@ -363,6 +393,10 @@ export class UsersService {
         break;
       } catch (e) {
         if (e.response.status === 401) {
+          this.logger.log(
+            `getChannelMods: invalid access token. User: ${channel.login}`,
+          );
+
           const updatedUser = await this.refreshToken(channel);
 
           if (updatedUser === null) throw new UnauthorizedException();
@@ -371,6 +405,11 @@ export class UsersService {
             updatedUser.credentials.encryptedAccessToken,
           );
         } else {
+          this.logger.error(
+            `getChannelMods: invalid access token. User: ${channel.login}`,
+            e.stack,
+          );
+
           return new Set();
         }
       }
@@ -414,6 +453,8 @@ export class UsersService {
           areTokensValid: false,
         });
 
+        this.logger.log(`refreshToken: Failed. User: ${user.login}`);
+
         return null;
       }
     }
@@ -427,6 +468,8 @@ export class UsersService {
       },
       areTokensValid: true,
     });
+
+    this.logger.log(`refreshToken: Success. User: ${user.login}`);
 
     return newUser;
   }
