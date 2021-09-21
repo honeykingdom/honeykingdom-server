@@ -237,7 +237,13 @@ export class UsersService {
     channel: User,
     user: User,
   ): Promise<{ isSub: boolean; tier: SubTier | null }> {
-    if (!user.areTokensValid) throw new UnauthorizedException();
+    if (!user.areTokensValid) {
+      this.logger.log(
+        `isSub: areTokensValid === false. User: ${channel.login}`,
+      );
+
+      throw new UnauthorizedException();
+    }
 
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
     let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
@@ -285,7 +291,13 @@ export class UsersService {
     channel: User,
     user: User,
   ): Promise<{ isFollower: boolean; minutesFollowed: number | null }> {
-    if (!user.areTokensValid) throw new UnauthorizedException();
+    if (!user.areTokensValid) {
+      this.logger.log(
+        `isFollower: areTokensValid === false. User: ${channel.login}`,
+      );
+
+      throw new UnauthorizedException();
+    }
 
     let response: AxiosResponse<GetUserFollowsResponse>;
     let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
@@ -333,7 +345,13 @@ export class UsersService {
   }
 
   async getChannelEditors(channel: User): Promise<Set<string>> {
-    if (!channel.areTokensValid) throw new UnauthorizedException();
+    if (!channel.areTokensValid) {
+      this.logger.log(
+        `getChannelEditors: areTokensValid === false. User: ${channel.login}`,
+      );
+
+      throw new UnauthorizedException();
+    }
 
     let response: AxiosResponse<GetChannelEditorsResponse>;
     let accessToken = this.decryptToken(
@@ -376,7 +394,13 @@ export class UsersService {
   }
 
   private async getChannelMods(channel: User): Promise<Set<string>> {
-    if (!channel.areTokensValid) throw new UnauthorizedException();
+    if (!channel.areTokensValid) {
+      this.logger.log(
+        `getChannelMods: areTokensValid === false. User: ${channel.login}`,
+      );
+
+      throw new UnauthorizedException();
+    }
 
     let response: AxiosResponse<GetModeratorsResponse>;
     let accessToken = this.decryptToken(
