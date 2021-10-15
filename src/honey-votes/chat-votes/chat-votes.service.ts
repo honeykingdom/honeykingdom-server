@@ -265,7 +265,7 @@ export class ChatVotesService {
 
     // TODO: omit twitch voting badges
     this.chatVoteRepo.save({
-      chatVoting: { id: roomId } as any,
+      chatVotingId: roomId,
       content,
       userId,
       userName: username,
