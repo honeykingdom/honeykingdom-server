@@ -14,7 +14,7 @@ import { VotingOptionType } from '../../honey-votes.interface';
 import {
   VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTION_CARD_TITLE_MAX_LENGTH,
-} from '../entities/VotingOption.entity';
+} from '../votes.constants';
 
 class VotingOptionKinopoiskMovie {
   @IsInt()

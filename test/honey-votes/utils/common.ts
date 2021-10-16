@@ -2,6 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { DeepPartial } from 'typeorm';
 import request from 'supertest';
 import R from 'ramda';
+import { sub } from 'date-fns';
 import {
   API_BASE,
   SubTier,
@@ -10,27 +11,26 @@ import {
 } from '../../../src/honey-votes/honey-votes.interface';
 import { User } from '../../../src/honey-votes/users/entities/User.entity';
 import { Vote } from '../../../src/honey-votes/votes/entities/Vote.entity';
+import { Voting } from '../../../src/honey-votes/votes/entities/Voting.entity';
+import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
+import { AddVotingDto } from '../../../src/honey-votes/votes/dto/addVotingDto';
+import { UserTypesParams } from '../../../src/honey-votes/votes/dto/UserTypesParams';
+import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVotingDto';
+import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
+import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';
 import {
-  Voting,
   VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   VOTING_CAN_MANAGE_VOTES_DEFAULT,
   VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT,
   VOTING_OPTIONS_LIMIT_DEFAULT,
   VOTING_USER_TYPES_PARAMS_DEFAULT,
-} from '../../../src/honey-votes/votes/entities/Voting.entity';
-import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
+} from '../../../src/honey-votes/votes/votes.constants';
 import {
   mockCheckUserSubscription,
   mockGetChannelEditors,
   mockGetModerators,
   mockGetUserFollows,
 } from './mock-requests';
-import { sub } from 'date-fns';
-import { AddVotingDto } from '../../../src/honey-votes/votes/dto/addVotingDto';
-import { UserTypesParams } from '../../../src/honey-votes/votes/dto/UserTypesParams';
-import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVotingDto';
-import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
-import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';
 import { HoneyVotesTestContext } from './getHoneyVotesTestContext';
 
 const defaultVotingParams = {

@@ -15,13 +15,13 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { VotingOptionType } from '../../honey-votes.interface';
 import {
   VOTING_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTIONS_LIMIT_MAX,
   VOTING_OPTIONS_LIMIT_MIN,
   VOTING_TITLE_MAX_LENGTH,
-} from '../entities/Voting.entity';
-import { VotingOptionType } from '../../honey-votes.interface';
+} from '../votes.constants';
 import { UserTypesParams } from './UserTypesParams';
 
 export class AddVotingDtoBase {

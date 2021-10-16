@@ -1,16 +1,16 @@
 import { Voting } from '../../src/honey-votes/votes/entities/Voting.entity';
 import { Vote } from '../../src/honey-votes/votes/entities/Vote.entity';
-import {
-  VotingOption,
-  VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH,
-  VOTING_OPTION_CARD_TITLE_MAX_LENGTH,
-} from '../../src/honey-votes/votes/entities/VotingOption.entity';
+import { VotingOption } from '../../src/honey-votes/votes/entities/VotingOption.entity';
 import {
   API_BASE,
   SubTier,
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
 import { VotingOptionType } from '../../src/honey-votes/honey-votes.interface';
+import {
+  VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH,
+  VOTING_OPTION_CARD_TITLE_MAX_LENGTH,
+} from '../../src/honey-votes/votes/votes.constants';
 import { mockGetFilmData, mockIgdbGames } from './utils/mock-requests';
 import { movie371 } from '../kinopoisk-api.mock';
 import { game379 } from '../igdb-api.mock';
