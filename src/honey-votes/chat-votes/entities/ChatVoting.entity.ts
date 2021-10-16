@@ -54,11 +54,11 @@ export class ChatVoting {
   @OneToMany(() => ChatVote, (chatVote) => chatVote.chatVoting)
   votes: ChatVote[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   @ApiProperty()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   @ApiProperty()
   updatedAt: Date;
 }

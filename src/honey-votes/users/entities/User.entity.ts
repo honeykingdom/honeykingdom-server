@@ -61,11 +61,11 @@ export class User {
   @OneToMany(() => Vote, (vote) => vote.author)
   votes: Vote[];
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn({ type: 'timestamptz', select: false })
   @ApiProperty()
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @UpdateDateColumn({ type: 'timestamptz', select: false })
   @ApiProperty()
   updatedAt: Date;
 }

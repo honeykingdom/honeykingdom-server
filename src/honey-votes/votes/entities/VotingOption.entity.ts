@@ -83,11 +83,11 @@ export class VotingOption {
   cardUrl?: string;
   // end card
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   @ApiProperty()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   @ApiProperty()
   updatedAt: Date;
 }

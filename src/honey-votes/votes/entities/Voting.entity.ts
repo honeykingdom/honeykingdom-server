@@ -103,11 +103,11 @@ export class Voting {
   @OneToMany(() => Vote, (vote) => vote.voting)
   votes: Vote[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   @ApiProperty()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   @ApiProperty()
   updatedAt: Date;
 }
