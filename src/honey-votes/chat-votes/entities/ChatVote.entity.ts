@@ -10,8 +10,7 @@ import {
 } from 'typeorm';
 import { UserStateTags } from 'twitch-js';
 import { ChatVoting } from './ChatVoting.entity';
-
-const CHAT_VOTE_TABLE_NAME = 'hv_chat_vote';
+import { CHAT_VOTE_TABLE_NAME } from '../chat-votes.constants';
 
 type Tags = Pick<
   UserStateTags,

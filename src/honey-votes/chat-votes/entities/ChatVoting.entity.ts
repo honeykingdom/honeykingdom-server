@@ -12,20 +12,15 @@ import {
 } from 'typeorm';
 import { ChatVote } from './ChatVote.entity';
 import { User } from '../../users/entities/User.entity';
-import { TwitchUserType } from '../../honey-votes.interface';
-import { ChatVotingRestrictions } from '../dto/addChatVotingDto';
-
-const CHAT_VOTING_TABLE_NAME = 'hv_chat_voting';
-
-export const DEFAULT_CHAT_VOTING_RESTRICTIONS: ChatVotingRestrictions = {
-  [TwitchUserType.Viewer]: false,
-  [TwitchUserType.SubTier1]: true,
-  [TwitchUserType.SubTier2]: true,
-  [TwitchUserType.SubTier3]: true,
-  [TwitchUserType.Mod]: true,
-  [TwitchUserType.Vip]: true,
-  subMonthsRequired: 0,
-};
+import {
+  ChatVotingCommands,
+  ChatVotingRestrictions,
+} from '../dto/addChatVotingDto';
+import {
+  CHAT_VOTING_COMMANDS_DEFAULT,
+  CHAT_VOTING_RESTRICTIONS_DEFAULT,
+  CHAT_VOTING_TABLE_NAME,
+} from '../chat-votes.constants';
 
 @ApiExtraModels(ChatVote)
 @Entity(CHAT_VOTING_TABLE_NAME)
@@ -43,7 +38,7 @@ export class ChatVoting {
   @ApiProperty()
   broadcasterId: string;
 
-  @Column({ type: 'jsonb', default: DEFAULT_CHAT_VOTING_RESTRICTIONS })
+  @Column({ type: 'jsonb', default: CHAT_VOTING_RESTRICTIONS_DEFAULT })
   @ApiProperty()
   restrictions: ChatVotingRestrictions;
 
