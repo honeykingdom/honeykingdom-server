@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PrivateMessage } from 'twitch-js';
@@ -9,10 +13,7 @@ import {
   TWITCH_CHAT_ANONYMOUS,
 } from '../../app.constants';
 import { ChatVote } from './entities/ChatVote.entity';
-import {
-  ChatVoting,
-  DEFAULT_CHAT_VOTING_RESTRICTIONS,
-} from './entities/ChatVoting.entity';
+import { ChatVoting } from './entities/ChatVoting.entity';
 import { UpdateChatVotingDto } from './dto/updateChatVotingDto';
 import {
   AddChatVotingDto,
@@ -21,10 +22,14 @@ import {
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/User.entity';
 import { SubTier } from '../honey-votes.interface';
+import {
+  CHAT_VOTING_COMMANDS_DEFAULT,
+  CHAT_VOTING_RESTRICTIONS_DEFAULT,
+} from './chat-votes.constants';
 
 @Injectable()
 export class ChatVotesService {
-  private readonly restrictions = new Map<string, ChatVotingRestrictions>();
+  private readonly chatVotingList = new Map<string, ChatVoting>();
 
   constructor(
     @InjectChat(TWITCH_CHAT_ANONYMOUS)
@@ -48,7 +53,7 @@ export class ChatVotesService {
     );
 
     chatsToListen.forEach((chatVoting) => {
-      this.restrictions.set(chatVoting.broadcaster.id, chatVoting.restrictions);
+      this.chatVotingList.set(chatVoting.broadcaster.id, chatVoting);
       this.twitchChatService.joinChannel(
         chatVoting.broadcaster.login,
         ChatVotesService.name,
@@ -70,11 +75,10 @@ export class ChatVotesService {
     if (broadcasterId === initiatorId) {
       broadcaster = await this.usersService.findOne(broadcasterId);
     } else {
+      const options = { relations: ['credentials'] };
       const [channel, initiator] = await Promise.all([
-        this.usersService.findOne(broadcasterId, {
-          relations: ['credentials'],
-        }),
-        this.usersService.findOne(initiatorId, { relations: ['credentials'] }),
+        this.usersService.findOne(broadcasterId, options),
+        this.usersService.findOne(initiatorId, options),
       ]);
 
       const hasAccess = await this.canCreateChatVoting(channel, initiator);
@@ -84,11 +88,13 @@ export class ChatVotesService {
       broadcaster = channel;
     }
 
-    this.onChatVotingChange(
-      broadcaster,
-      data.listening,
-      data.restrictions || DEFAULT_CHAT_VOTING_RESTRICTIONS,
-    );
+    ChatVotesService.validateChatVoting(data);
+
+    this.onChatVotingChange(broadcaster, {
+      listening: data.listening,
+      restrictions: data.restrictions || CHAT_VOTING_RESTRICTIONS_DEFAULT,
+      commands: data.commands || CHAT_VOTING_COMMANDS_DEFAULT,
+    });
 
     const savedChatVoting = await this.chatVotingRepo.save({
       broadcaster,
@@ -114,7 +120,9 @@ export class ChatVotesService {
 
     const broadcaster = chatVoting.broadcaster;
 
-    this.onChatVotingChange(broadcaster, data.listening, data.restrictions);
+    ChatVotesService.validateChatVoting(data);
+
+    this.onChatVotingChange(broadcaster, data);
 
     const updatedChatVoting = await this.chatVotingRepo.save({
       ...chatVoting,
@@ -139,7 +147,7 @@ export class ChatVotesService {
 
     const broadcaster = chatVoting.broadcaster;
 
-    this.onChatVotingChange(broadcaster, false);
+    this.onChatVotingChange(broadcaster, { listening: false });
 
     await this.chatVotingRepo.delete(chatVoting.broadcaster.id);
   }
@@ -164,8 +172,7 @@ export class ChatVotesService {
 
   private onChatVotingChange(
     broadcaster: User,
-    listening?: boolean,
-    restrictions?: ChatVotingRestrictions,
+    { listening, restrictions, commands }: UpdateChatVotingDto,
   ) {
     if (listening === true) {
       this.twitchChatService.joinChannel(
@@ -182,7 +189,15 @@ export class ChatVotesService {
     }
 
     if (restrictions) {
-      this.restrictions.set(broadcaster.id, restrictions);
+      const chatVoting = this.chatVotingList.get(broadcaster.id);
+
+      this.chatVotingList.set(broadcaster.id, { ...chatVoting, restrictions });
+    }
+
+    if (commands) {
+      const chatVoting = this.chatVotingList.get(broadcaster.id);
+
+      this.chatVotingList.set(broadcaster.id, { ...chatVoting, commands });
     }
   }
 
@@ -240,11 +255,11 @@ export class ChatVotesService {
       tags: { badgeInfo, badges, color, displayName, emotes, roomId, userId },
     } = privateMessage;
 
-    const restrictions = this.restrictions.get(roomId);
+    const chatVoting = this.chatVotingList.get(roomId);
 
-    if (!restrictions) return;
+    if (!chatVoting) return;
 
-    if (message === '!clearvotes') {
+    if (message === chatVoting.commands.clearVotes) {
       this.canClearVotes(userId, roomId).then(
         (hasAccess) => {
           if (hasAccess) this.deleteChatVotes(roomId);
@@ -255,18 +270,22 @@ export class ChatVotesService {
       return;
     }
 
-    if (!message.startsWith('%')) return;
+    if (!message.startsWith(chatVoting.commands.vote)) return;
 
-    const content = message.slice(1).trim();
+    const vote = message.slice(chatVoting.commands.vote.length).trim();
 
-    if (!content) return;
+    if (!vote) return;
 
-    if (!ChatVotesService.isUserCanVote(privateMessage, restrictions)) return;
+    if (
+      !ChatVotesService.isUserCanVote(privateMessage, chatVoting.restrictions)
+    ) {
+      return;
+    }
 
     // TODO: omit twitch voting badges
     this.chatVoteRepo.save({
       chatVotingId: roomId,
-      content,
+      content: message,
       userId,
       userName: username,
       tags: { badgeInfo, badges, color, displayName, emotes },
@@ -326,5 +345,11 @@ export class ChatVotesService {
 
     // TODO: assert never
     return false;
+  }
+
+  private static validateChatVoting(data: UpdateChatVotingDto) {
+    if (data.commands && data.commands.vote === data.commands.clearVotes) {
+      throw new BadRequestException();
+    }
   }
 }

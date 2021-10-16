@@ -51,6 +51,10 @@ export class ChatVoting {
   @ApiProperty()
   listening: boolean;
 
+  @Column({ type: 'jsonb', default: CHAT_VOTING_COMMANDS_DEFAULT })
+  @ApiProperty()
+  commands: ChatVotingCommands;
+
   @OneToMany(() => ChatVote, (chatVote) => chatVote.chatVoting)
   votes: ChatVote[];
 

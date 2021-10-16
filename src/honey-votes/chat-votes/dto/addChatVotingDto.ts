@@ -5,11 +5,14 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Length,
+  Matches,
   Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TwitchUserType } from '../../honey-votes.interface';
+import { CHAT_VOTING_COMMAND_MAX_LENGTH } from '../chat-votes.constants';
 
 export class ChatVotingRestrictions {
   @IsBoolean()
@@ -42,6 +45,21 @@ export class ChatVotingRestrictions {
   subMonthsRequired: number;
 }
 
+export class ChatVotingCommands {
+  @IsString()
+  @Length(1, CHAT_VOTING_COMMAND_MAX_LENGTH)
+  // https://regex101.com/r/NRejOy/1
+  @Matches(/^[^ ].+[^ ]$/)
+  @ApiProperty()
+  vote: string;
+
+  @IsString()
+  @Length(1, CHAT_VOTING_COMMAND_MAX_LENGTH)
+  @Matches(/^[^ ].+[^ ]$/)
+  @ApiProperty()
+  clearVotes: string;
+}
+
 export class AddChatVotingDtoBase {
   @IsOptional()
   @ValidateNested()
@@ -53,6 +71,12 @@ export class AddChatVotingDtoBase {
   @IsBoolean()
   @ApiPropertyOptional()
   listening?: boolean;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ChatVotingCommands)
+  @ApiPropertyOptional()
+  commands?: ChatVotingCommands;
 }
 
 export class AddChatVotingDto extends AddChatVotingDtoBase {
