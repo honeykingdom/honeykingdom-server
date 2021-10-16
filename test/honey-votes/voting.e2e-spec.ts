@@ -1,15 +1,15 @@
-import {
-  VOTING_TITLE_MAX_LENGTH,
-  VOTING_DESCRIPTION_MAX_LENGTH,
-  VOTING_OPTIONS_LIMIT_MIN,
-  VOTING_OPTIONS_LIMIT_MAX,
-  Voting,
-} from '../../src/honey-votes/votes/entities/Voting.entity';
+import { Voting } from '../../src/honey-votes/votes/entities/Voting.entity';
 import {
   API_BASE,
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
 import { VotingOptionType } from '../../src/honey-votes/honey-votes.interface';
+import {
+  VOTING_DESCRIPTION_MAX_LENGTH,
+  VOTING_OPTIONS_LIMIT_MAX,
+  VOTING_OPTIONS_LIMIT_MIN,
+  VOTING_TITLE_MAX_LENGTH,
+} from '../../src/honey-votes/votes/votes.constants';
 import {
   createTestCreateVoting,
   createTestDeleteVoting,
