@@ -8,10 +8,7 @@ import {
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
 import { ChatVote } from '../../src/honey-votes/chat-votes/entities/ChatVote.entity';
-import {
-  ChatVoting,
-  DEFAULT_CHAT_VOTING_RESTRICTIONS,
-} from '../../src/honey-votes/chat-votes/entities/ChatVoting.entity';
+import { ChatVoting } from '../../src/honey-votes/chat-votes/entities/ChatVoting.entity';
 import {
   AddChatVotingDto,
   ChatVotingRestrictions,
@@ -21,6 +18,11 @@ import {
   getHoneyVotesTestContext,
   twitchChatServiceMock,
 } from './utils/getHoneyVotesTestContext';
+import {
+  CHAT_VOTING_COMMANDS_DEFAULT,
+  CHAT_VOTING_COMMAND_MAX_LENGTH,
+  CHAT_VOTING_RESTRICTIONS_DEFAULT,
+} from '../../src/honey-votes/chat-votes/chat-votes.constants';
 
 describe('HoneyVotes - ChatVotes (e2e)', () => {
   const ctx = getHoneyVotesTestContext();
@@ -36,8 +38,9 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
   };
 
   const defaultChatVotingParams = {
-    restrictions: DEFAULT_CHAT_VOTING_RESTRICTIONS,
+    restrictions: CHAT_VOTING_RESTRICTIONS_DEFAULT,
     listening: false,
+    commands: CHAT_VOTING_COMMANDS_DEFAULT,
   };
 
   const testCreateChatVoting = async (
@@ -333,123 +336,131 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     });
 
     describe('dto validation', () => {
-      it('should create ChatVoting with all required fields', async () => {
+      const testValidation = async (
+        expectedStatusCode: Parameters<typeof testCreateChatVoting>[0],
+        addChatVotingDto: Partial<
+          Parameters<typeof testCreateChatVoting>[1]['addChatVotingDto']
+        >,
+      ) => {
         const [broadcaster] = await ctx.createUsers();
 
-        await testCreateChatVoting(HttpStatus.CREATED, {
+        await testCreateChatVoting(expectedStatusCode, {
           broadcaster: broadcaster,
           initiator: broadcaster,
-          addChatVotingDto: { broadcasterId: broadcaster.id },
+          addChatVotingDto: {
+            broadcasterId: broadcaster.id,
+            ...addChatVotingDto,
+          },
         });
+      };
+
+      it('should create ChatVoting with all required fields', async () => {
+        await testValidation(HttpStatus.CREATED, {});
       });
 
       it('should not create ChatVoting without all required fields', async () => {
-        const [broadcaster] = await ctx.createUsers();
-
-        await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
-          broadcaster: broadcaster,
-          initiator: broadcaster,
-          addChatVotingDto: {} as any,
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          broadcasterId: undefined as any,
         });
       });
 
       test('broadcasterId: wrong type', async () => {
-        const [broadcaster] = await ctx.createUsers();
-
-        await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
-          broadcaster: broadcaster,
-          initiator: broadcaster,
-          addChatVotingDto: { broadcasterId: false } as any,
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          broadcasterId: false as any,
         });
       });
 
       test('broadcasterId: not existing user', async () => {
-        const [broadcaster] = await ctx.createUsers();
-
-        await testCreateChatVoting(HttpStatus.FORBIDDEN, {
-          broadcaster: broadcaster,
-          initiator: broadcaster,
-          addChatVotingDto: { broadcasterId: '1' },
-        });
+        await testValidation(HttpStatus.FORBIDDEN, { broadcasterId: '1' });
       });
 
       test('restrictions: wrong type', async () => {
-        const [broadcaster] = await ctx.createUsers();
-
-        await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
-          broadcaster: broadcaster,
-          initiator: broadcaster,
-          addChatVotingDto: {
-            broadcasterId: broadcaster.id,
-            restrictions: '',
-          } as any,
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          restrictions: '' as any,
         });
       });
 
       test('restrictions: missing fields', async () => {
-        const [broadcaster] = await ctx.createUsers();
-
-        await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
-          broadcaster: broadcaster,
-          initiator: broadcaster,
-          addChatVotingDto: {
-            broadcasterId: broadcaster.id,
-            restrictions: {
-              [TwitchUserType.Viewer]: false,
-              [TwitchUserType.SubTier1]: false,
-              [TwitchUserType.SubTier2]: false,
-              [TwitchUserType.SubTier3]: false,
-              [TwitchUserType.Mod]: false,
-              [TwitchUserType.Vip]: false,
-            } as any,
-          },
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          restrictions: {
+            [TwitchUserType.Viewer]: false,
+            [TwitchUserType.SubTier1]: false,
+            [TwitchUserType.SubTier2]: false,
+            [TwitchUserType.SubTier3]: false,
+            [TwitchUserType.Mod]: false,
+            [TwitchUserType.Vip]: false,
+          } as any,
         });
       });
 
       test('restrictions: valid', async () => {
-        const [broadcaster] = await ctx.createUsers();
-
-        await testCreateChatVoting(HttpStatus.CREATED, {
-          broadcaster: broadcaster,
-          initiator: broadcaster,
-          addChatVotingDto: {
-            broadcasterId: broadcaster.id,
-            restrictions: {
-              [TwitchUserType.Viewer]: true,
-              [TwitchUserType.SubTier1]: true,
-              [TwitchUserType.SubTier2]: true,
-              [TwitchUserType.SubTier3]: true,
-              [TwitchUserType.Mod]: true,
-              [TwitchUserType.Vip]: true,
-              subMonthsRequired: 0,
-            },
+        await testValidation(HttpStatus.CREATED, {
+          restrictions: {
+            [TwitchUserType.Viewer]: true,
+            [TwitchUserType.SubTier1]: true,
+            [TwitchUserType.SubTier2]: true,
+            [TwitchUserType.SubTier3]: true,
+            [TwitchUserType.Mod]: true,
+            [TwitchUserType.Vip]: true,
+            subMonthsRequired: 0,
           },
         });
       });
 
       test('listening: wrong type', async () => {
-        const [broadcaster] = await ctx.createUsers();
-
-        await testCreateChatVoting(HttpStatus.BAD_REQUEST, {
-          broadcaster: broadcaster,
-          initiator: broadcaster,
-          addChatVotingDto: {
-            broadcasterId: broadcaster.id,
-            listening: 1 as any,
-          },
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          listening: 1 as any,
         });
       });
 
       test('listening: valid', async () => {
-        const [broadcaster] = await ctx.createUsers();
+        await testValidation(HttpStatus.CREATED, {
+          listening: false,
+        });
+      });
 
-        await testCreateChatVoting(HttpStatus.CREATED, {
-          broadcaster: broadcaster,
-          initiator: broadcaster,
-          addChatVotingDto: {
-            broadcasterId: broadcaster.id,
-            listening: false,
+      test('commands: wrong type', async () => {
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          commands: false as any,
+        });
+      });
+
+      test('commands: missing fields', async () => {
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          commands: { vote: '%' } as any,
+        });
+      });
+
+      test('commands: empty string', async () => {
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          commands: { vote: '', clearVotes: '!clear' },
+        });
+      });
+
+      test('commands: spaces', async () => {
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          commands: { vote: ' ', clearVotes: ' !clear' },
+        });
+      });
+
+      test('commands: the same value for commands', async () => {
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          commands: { vote: '!vote', clearVotes: '!vote' },
+        });
+      });
+
+      test('commands: too long', async () => {
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          commands: {
+            vote: Array(CHAT_VOTING_COMMAND_MAX_LENGTH + 2).join('0'),
+            clearVotes: Array(CHAT_VOTING_COMMAND_MAX_LENGTH + 2).join('1'),
           },
+        });
+      });
+
+      test('commands: valid', async () => {
+        await testValidation(HttpStatus.CREATED, {
+          commands: { vote: '!vote', clearVotes: '!clear' },
         });
       });
     });
