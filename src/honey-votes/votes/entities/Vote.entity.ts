@@ -10,10 +10,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/User.entity';
+import { VOTE_TABLE_NAME } from '../votes.constants';
 import { Voting } from './Voting.entity';
 import { VotingOption } from './VotingOption.entity';
-
-const VOTE_TABLE_NAME = 'hv_vote';
 
 @Entity(VOTE_TABLE_NAME)
 export class Vote {

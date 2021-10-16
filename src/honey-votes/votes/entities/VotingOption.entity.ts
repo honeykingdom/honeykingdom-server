@@ -14,12 +14,12 @@ import { User } from '../../users/entities/User.entity';
 import { VotingOptionType } from '../../honey-votes.interface';
 import { Vote } from './Vote.entity';
 import { Voting } from './Voting.entity';
-
-const VOTING_OPTION_TABLE_NAME = 'hv_voting_option';
-
-export const VOTING_OPTION_CARD_TITLE_MAX_LENGTH = 50;
-export const VOTING_OPTION_CARD_SUBTITLE_MAX_LENGTH = 255;
-export const VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH = 255;
+import {
+  VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH,
+  VOTING_OPTION_CARD_SUBTITLE_MAX_LENGTH,
+  VOTING_OPTION_CARD_TITLE_MAX_LENGTH,
+  VOTING_OPTION_TABLE_NAME,
+} from '../votes.constants';
 
 @Entity(VOTING_OPTION_TABLE_NAME)
 export class VotingOption {
