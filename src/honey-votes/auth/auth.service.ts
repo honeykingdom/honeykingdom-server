@@ -58,6 +58,7 @@ export class AuthService {
       displayName,
       avatarUrl,
       credentials: { accessToken, refreshToken, scope },
+      areTokensValid: true,
     });
 
     return this.signTokens({ sub: id, login });

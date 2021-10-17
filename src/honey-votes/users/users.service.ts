@@ -35,14 +35,16 @@ type CheckUserTypesInput = {
   minutesToFollowRequired?: number;
 };
 
-type StoreUserInput = Pick<User, 'id' | 'login' | 'displayName' | 'avatarUrl'> &
-  Partial<Pick<User, 'areTokensValid'>> & {
-    credentials: {
-      scope: string[];
-      accessToken: string;
-      refreshToken: string;
-    };
+type StoreUserInput = Pick<
+  User,
+  'id' | 'login' | 'displayName' | 'avatarUrl' | 'areTokensValid'
+> & {
+  credentials: {
+    scope: string[];
+    accessToken: string;
+    refreshToken: string;
   };
+};
 
 @Injectable()
 export class UsersService {
@@ -248,6 +250,8 @@ export class UsersService {
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
     let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
 
+    console.log('isSub');
+
     // TODO: remove loops or add iteration limit
     while (true) {
       try {
@@ -256,8 +260,12 @@ export class UsersService {
           { clientId: this.clientId, accessToken },
         );
 
+        console.log(response.data);
+
         break;
       } catch (e) {
+        console.log(e.response.data);
+
         if (e.response.status === 401) {
           this.logger.log(`isSub: invalid access token. User: ${user.login}`);
 
@@ -302,6 +310,8 @@ export class UsersService {
     let response: AxiosResponse<GetUserFollowsResponse>;
     let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
 
+    console.log('isSub');
+
     while (true) {
       try {
         response = await this.twitchApiService.getUserFollows(
@@ -309,8 +319,12 @@ export class UsersService {
           { clientId: this.clientId, accessToken },
         );
 
+        console.log(response.data);
+
         break;
       } catch (e) {
+        console.log(e.response.data);
+
         if (e.response.status === 401) {
           this.logger.log(
             `isFollower: invalid access token. User: ${user.login}`,
@@ -358,6 +372,8 @@ export class UsersService {
       channel.credentials.encryptedAccessToken,
     );
 
+    console.log('getChannelEditors');
+
     while (true) {
       try {
         response = await this.twitchApiService.getChannelEditors(channel.id, {
@@ -365,8 +381,12 @@ export class UsersService {
           accessToken,
         });
 
+        console.log(response.data);
+
         break;
       } catch (e) {
+        console.log(e.response.data);
+
         if (e.response.status === 401) {
           this.logger.log(
             `getChannelEditors: invalid access token. User: ${channel.login}`,
@@ -407,6 +427,8 @@ export class UsersService {
       channel.credentials.encryptedAccessToken,
     );
 
+    console.log('getChannelMods');
+
     while (true) {
       try {
         response = await this.twitchApiService.getModerators(channel.id, {
@@ -414,8 +436,12 @@ export class UsersService {
           accessToken,
         });
 
+        console.log(response.data);
+
         break;
       } catch (e) {
+        console.log(e.response.data);
+
         if (e.response.status === 401) {
           this.logger.log(
             `getChannelMods: invalid access token. User: ${channel.login}`,
