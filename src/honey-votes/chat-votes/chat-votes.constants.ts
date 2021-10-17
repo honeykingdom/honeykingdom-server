@@ -24,3 +24,6 @@ export const CHAT_VOTING_COMMANDS_DEFAULT: ChatVotingCommands = {
   vote: '%',
   clearVotes: '!clearvotes',
 };
+
+const TWITCH_MESSAGE_MAX_LENGTH = 500;
+export const CHAT_VOTE_CONTENT_MAX_LENGTH = TWITCH_MESSAGE_MAX_LENGTH;

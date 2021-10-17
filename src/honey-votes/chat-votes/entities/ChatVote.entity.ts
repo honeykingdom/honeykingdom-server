@@ -10,7 +10,10 @@ import {
 } from 'typeorm';
 import { UserStateTags } from 'twitch-js';
 import { ChatVoting } from './ChatVoting.entity';
-import { CHAT_VOTE_TABLE_NAME } from '../chat-votes.constants';
+import {
+  CHAT_VOTE_CONTENT_MAX_LENGTH,
+  CHAT_VOTE_TABLE_NAME,
+} from '../chat-votes.constants';
 
 type Tags = Pick<
   UserStateTags,
@@ -44,7 +47,7 @@ export class ChatVote {
   @ApiProperty()
   tags: Tags;
 
-  @Column()
+  @Column({ length: CHAT_VOTE_CONTENT_MAX_LENGTH })
   @ApiProperty()
   content: string;
 
