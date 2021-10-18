@@ -38,6 +38,66 @@ const refreshTokenResponse: RefreshTokenResponse = {
   scope: [],
 };
 
+const makeGetChannelEditorsResponse = (
+  broadcaster: User,
+  initiator: User,
+): GetChannelEditorsResponse => ({
+  data: [
+    {
+      user_id: initiator.id,
+      user_name: initiator.displayName,
+      created_at: new Date().toISOString(),
+    },
+  ],
+});
+
+const makeGetModeratorsResponse = (
+  broadcaster: User,
+  initiator: User,
+): GetModeratorsResponse => ({
+  data: [
+    {
+      user_id: initiator.id,
+      user_login: initiator.login,
+      user_name: initiator.displayName,
+    },
+  ],
+  pagination: {},
+});
+
+const makeCheckUserSubscriptionResponse = (
+  broadcaster: User,
+  initiator: User,
+): CheckUserSubscriptionResponse => ({
+  data: [
+    {
+      broadcaster_id: broadcaster.id,
+      broadcaster_login: broadcaster.login,
+      broadcaster_name: broadcaster.displayName,
+      is_gift: false,
+      tier: '1000',
+    },
+  ],
+});
+
+const makeGetUserFollowsResponse = (
+  broadcaster: User,
+  initiator: User,
+): GetUserFollowsResponse => ({
+  total: 1,
+  data: [
+    {
+      from_id: initiator.id,
+      from_login: initiator.login,
+      from_name: initiator.displayName,
+      to_id: broadcaster.id,
+      to_name: broadcaster.displayName,
+      followed_at: new Date().toISOString(),
+    },
+  ],
+  pagination: {},
+});
+
 describe('HoneyVotes - Users (e2e)', () => {
   const ctx = getHoneyVotesTestContext();
 
@@ -61,14 +121,14 @@ describe('HoneyVotes - Users (e2e)', () => {
   };
 
   const mockRefreshTokenSuccess = (url: string, response200: any) => {
-    let followsRequestCount = 0;
+    let requestsCount = 0;
 
     server.use(
       rest.post('https://id.twitch.tv/oauth2/token', (req, res, ctx) =>
         res(ctx.status(200), ctx.json(refreshTokenResponse)),
       ),
       rest.get(url, (req, res, ctx) =>
-        followsRequestCount++ === 0
+        requestsCount++ === 0
           ? res(ctx.status(401), ctx.json(response401))
           : res(ctx.status(200), ctx.json(response200)),
       ),
@@ -121,61 +181,20 @@ describe('HoneyVotes - Users (e2e)', () => {
 
     let response200: any;
 
-    // TODO: refactor this
     if (type === 'editor') {
-      response200 = {
-        data: [
-          {
-            user_id: initiator.id,
-            user_name: initiator.displayName,
-            created_at: new Date().toISOString(),
-          },
-        ],
-      } as GetChannelEditorsResponse;
+      response200 = makeGetChannelEditorsResponse(broadcaster, initiator);
     }
 
     if (type === 'mod') {
-      response200 = {
-        data: [
-          {
-            user_id: initiator.id,
-            user_login: initiator.login,
-            user_name: initiator.displayName,
-          },
-        ],
-        pagination: {},
-      } as GetModeratorsResponse;
+      response200 = makeGetModeratorsResponse(broadcaster, initiator);
     }
 
     if (type === 'sub') {
-      response200 = {
-        data: [
-          {
-            broadcaster_id: broadcaster.id,
-            broadcaster_login: broadcaster.login,
-            broadcaster_name: broadcaster.displayName,
-            is_gift: false,
-            tier: '1000',
-          },
-        ],
-      } as CheckUserSubscriptionResponse;
+      response200 = makeCheckUserSubscriptionResponse(broadcaster, initiator);
     }
 
     if (type === 'follower') {
-      response200 = {
-        total: 1,
-        data: [
-          {
-            from_id: initiator.id,
-            from_login: initiator.login,
-            from_name: initiator.displayName,
-            to_id: broadcaster.id,
-            to_name: broadcaster.displayName,
-            followed_at: new Date().toISOString(),
-          },
-        ],
-        pagination: {},
-      } as GetUserFollowsResponse;
+      response200 = makeGetUserFollowsResponse(broadcaster, initiator);
     }
 
     if (type !== 'editor') {
@@ -295,6 +314,68 @@ describe('HoneyVotes - Users (e2e)', () => {
         .get(`${API_BASE}/users/me`)
         .set(...ctx.getAuthorizationHeader(user, { expired: true }))
         .expect(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('/users/me/:channelId (GET)', () => {
+    it.todo('should handle if userId and channelId is the same');
+
+    // TODO: i'm not sure is this test correct
+    it('should call twitch refreshToken api method only once if accessToken is expired', async () => {
+      const [broadcaster, initiator] = await ctx.createUsers();
+      let requestsCount = 0;
+      let refreshTokenRequestsCount = 0;
+
+      server.use(
+        rest.post('https://id.twitch.tv/oauth2/token', (req, res, ctx) => {
+          refreshTokenRequestsCount += 1;
+          return res(ctx.status(200), ctx.json(refreshTokenResponse));
+        }),
+        rest.get(urls.editor, (req, res, ctx) =>
+          requestsCount++ === 0
+            ? res(ctx.status(401), ctx.json(response401))
+            : res(
+                ctx.status(200),
+                ctx.json(makeGetChannelEditorsResponse(broadcaster, initiator)),
+              ),
+        ),
+        rest.get(urls.mod, (req, res, ctx) =>
+          requestsCount++ === 0
+            ? res(ctx.status(401), ctx.json(response401))
+            : res(
+                ctx.status(200),
+                ctx.json(makeGetModeratorsResponse(broadcaster, initiator)),
+              ),
+        ),
+        rest.get(urls.sub, (req, res, ctx) =>
+          requestsCount++ === 0
+            ? res(ctx.status(401), ctx.json(response401))
+            : res(
+                ctx.status(200),
+                ctx.json(
+                  makeCheckUserSubscriptionResponse(broadcaster, initiator),
+                ),
+              ),
+        ),
+        rest.get(urls.follower, (req, res, ctx) =>
+          requestsCount++ === 0
+            ? res(ctx.status(401), ctx.json(response401))
+            : res(
+                ctx.status(200),
+                ctx.json(makeGetUserFollowsResponse(broadcaster, initiator)),
+              ),
+        ),
+      );
+
+      await request(ctx.app.getHttpServer())
+        .get(`${API_BASE}/users/me/${broadcaster.id}`)
+        .set(...ctx.getAuthorizationHeader(initiator))
+        .expect(HttpStatus.OK)
+        .expect((response) => {
+          console.log(response.body);
+        });
+
+      expect(refreshTokenRequestsCount).toBe(1);
     });
   });
 
