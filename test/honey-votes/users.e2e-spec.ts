@@ -317,7 +317,7 @@ describe('HoneyVotes - Users (e2e)', () => {
     });
   });
 
-  describe('/users/me/:channelId (GET)', () => {
+  describe('/users/me/roles (GET)', () => {
     it.todo('should handle if userId and channelId is the same');
 
     // TODO: i'm not sure is this test correct
@@ -368,7 +368,7 @@ describe('HoneyVotes - Users (e2e)', () => {
       );
 
       await request(ctx.app.getHttpServer())
-        .get(`${API_BASE}/users/me/${broadcaster.id}`)
+        .get(`${API_BASE}/users/me/roles?id=${broadcaster.id}`)
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(HttpStatus.OK)
         .expect((response) => {
