@@ -250,8 +250,6 @@ export class UsersService {
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
     let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
 
-    console.log('isSub');
-
     // TODO: remove loops or add iteration limit
     while (true) {
       try {
