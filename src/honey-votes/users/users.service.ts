@@ -433,7 +433,7 @@ export class UsersService {
           );
         } else {
           this.logger.error(
-            `getChannelMods: invalid access token. User: ${channel.login}`,
+            `getChannelMods: unknown error. User: ${channel.login}`,
             e.stack,
           );
 
@@ -464,11 +464,14 @@ export class UsersService {
    * @returns the updated user if refresh succeeded
    */
   private async refreshToken(user: User): Promise<User | null> {
+    const refreshToken = this.decryptToken(
+      user.credentials.encryptedRefreshToken,
+    );
     let response: AxiosResponse<RefreshTokenResponse>;
 
     try {
       response = await this.twitchApiService.refreshToken({
-        refresh_token: user.credentials.encryptedRefreshToken,
+        refresh_token: refreshToken,
         client_id: this.clientId,
         client_secret: this.clientSecret,
       });
@@ -480,7 +483,9 @@ export class UsersService {
           areTokensValid: false,
         });
 
-        this.logger.log(`refreshToken: Failed. User: ${user.login}`);
+        this.logger.log(
+          `refreshToken: Failed. User: ${user.login}. ${e.response.data?.message}`,
+        );
 
         return null;
       }
