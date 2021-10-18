@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -7,7 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
 import { POSTGRES_CONNECTION } from '../../app.constants';
 import { Config } from '../../config/config.interface';
@@ -90,10 +91,23 @@ export class UsersService {
     return channel;
   }
 
-  async getUserRoles(userId: string, channelId: string): Promise<UserRoles> {
+  async getUserRoles(
+    userId: string,
+    channelId?: string,
+    channelLogin?: string,
+  ): Promise<UserRoles> {
+    if ((!channelId && !channelLogin) || (channelId && channelLogin)) {
+      throw new BadRequestException();
+    }
+
+    const conditions: FindConditions<User> = {};
+
+    if (channelId) conditions.id = channelId;
+    if (channelLogin) conditions.login = channelLogin;
+
     const [user, channel] = await Promise.all([
       this.findOne(userId, { relations: ['credentials'] }),
-      this.findOne(channelId, { relations: ['credentials'] }),
+      this.userRepo.findOne(conditions, { relations: ['credentials'] }),
     ]);
 
     if (!user || !channel) throw new NotFoundException();

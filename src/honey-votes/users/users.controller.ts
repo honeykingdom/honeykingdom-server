@@ -53,16 +53,20 @@ export class UsersController {
     return this.usersService.findOne(user.id);
   }
 
-  @Get('/users/me/:channelId')
+  @Get('/users/me/roles')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiQuery({ name: 'login', required: false })
+  @ApiQuery({ name: 'id', required: false })
   @ApiOkResponse({ description: 'OK', type: UserRoles })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Not found' })
   getUserRoles(
     @PassportUser() user: JwtStrategyUser,
-    @Param('channelId') channelId: string,
+    @Query('login') login: string,
+    @Query('id') id: string,
   ): Promise<UserRoles> {
-    return this.usersService.getUserRoles(user.id, channelId);
+    return this.usersService.getUserRoles(user.id, id, login);
   }
 }
