@@ -30,7 +30,7 @@ export interface Config {
   POSTGRES_PASSWORD: string;
 
   HONEY_VOTES_BASE_URL: string;
-  HONEY_VOTES_REDIRECT_FRONTEND_URL: string;
+  HONEY_VOTES_FRONTEND_BASE_URL: string;
   HONEY_VOTES_ACCESS_TOKEN_SECRET: string;
   HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: string;
   HONEY_VOTES_REFRESH_TOKEN_SECRET: string;
@@ -77,7 +77,7 @@ export const validationSchema = Joi.object({
   POSTGRES_PASSWORD: Joi.string().required(),
 
   HONEY_VOTES_BASE_URL: Joi.string().required(),
-  HONEY_VOTES_REDIRECT_FRONTEND_URL: Joi.string().required(),
+  HONEY_VOTES_FRONTEND_BASE_URL: Joi.string().required(),
   HONEY_VOTES_ACCESS_TOKEN_SECRET: Joi.string().required(),
   HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: Joi.string().required(),
   HONEY_VOTES_REFRESH_TOKEN_SECRET: Joi.string().required(),

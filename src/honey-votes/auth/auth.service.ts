@@ -21,7 +21,7 @@ type JwtTokenSignOptions = Required<
 export class AuthService {
   private readonly accessTokenSignOptions: JwtTokenSignOptions;
   private readonly refreshTokenSignOptions: JwtTokenSignOptions;
-  private readonly redirectFrontendUrl: string;
+  private readonly frontendBaseUrl: string;
 
   constructor(
     private readonly configService: ConfigService<Config>,
@@ -40,8 +40,8 @@ export class AuthService {
         'HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME',
       ),
     };
-    this.redirectFrontendUrl = configService.get<string>(
-      'HONEY_VOTES_REDIRECT_FRONTEND_URL',
+    this.frontendBaseUrl = configService.get<string>(
+      'HONEY_VOTES_FRONTEND_BASE_URL',
     );
   }
 
@@ -52,7 +52,7 @@ export class AuthService {
 
     const { accessToken, refreshToken } = tokens;
 
-    return `${this.redirectFrontendUrl}/#accessToken=${accessToken}&refreshToken=${refreshToken}`;
+    return `${this.frontendBaseUrl}/#accessToken=${accessToken}&refreshToken=${refreshToken}`;
   }
 
   private async getTokens(
