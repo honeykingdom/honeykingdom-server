@@ -1,27 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserRoles {
-  @ApiProperty()
-  isEditor: boolean;
+  @ApiProperty({ nullable: true })
+  isEditor: boolean | null;
 
-  @ApiProperty()
-  isMod: boolean;
+  @ApiProperty({ nullable: true })
+  isMod: boolean | null;
 
-  @ApiProperty()
-  isVip: boolean;
+  @ApiProperty({ nullable: true })
+  isVip: boolean | null;
 
-  @ApiProperty()
-  isSubTier1: boolean;
+  @ApiProperty({ nullable: true })
+  isSubTier1: boolean | null;
 
-  @ApiProperty()
-  isSubTier2: boolean;
+  @ApiProperty({ nullable: true })
+  isSubTier2: boolean | null;
 
-  @ApiProperty()
-  isSubTier3: boolean;
+  @ApiProperty({ nullable: true })
+  isSubTier3: boolean | null;
 
-  @ApiProperty()
-  isFollower: boolean;
+  @ApiProperty({ nullable: true })
+  isFollower: boolean | null;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   minutesFollowed: number | null;
 }
