@@ -256,7 +256,13 @@ export class UsersService {
   }
 
   async isVip(channel: User, user: User): Promise<boolean> {
-    const vipIds = await this.getChannelVips(channel.id);
+    let vipIds: Set<string>;
+
+    try {
+      vipIds = await this.getChannelVips(channel.id);
+    } catch (e) {
+      return null;
+    }
 
     return vipIds.has(user.id);
   }
@@ -472,7 +478,7 @@ export class UsersService {
   }
 
   private async getChannelVips(channelId: string): Promise<Set<string>> {
-    return new Set();
+    throw new Error('Not implemented');
   }
 
   private async revokeToken(accessToken: string) {
