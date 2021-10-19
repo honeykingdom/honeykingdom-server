@@ -13,10 +13,10 @@ export class TwitchChatService {
   ) {
     this.logger = new Logger(`TwitchChat: ${connectionName}`);
 
-    chat.on(Commands.JOIN, ({ channel }) => this.logger.log(`join ${channel}`));
-    chat.on(Commands.PART, ({ channel }) =>
-      this.logger.log(`part: ${channel}`),
-    );
+    // chat.on(Commands.JOIN, ({ channel }) => this.logger.log(`join ${channel}`));
+    // chat.on(Commands.PART, ({ channel }) =>
+    //   this.logger.log(`part: ${channel}`),
+    // );
   }
 
   joinChannel(channel: string, moduleId: string) {
