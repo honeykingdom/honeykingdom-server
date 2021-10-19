@@ -8,7 +8,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -17,7 +16,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Config } from '../../config/config.interface';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TwitchAuthGuard } from './guards/twitch-auth.guard';
@@ -33,10 +31,7 @@ import { PassportUser } from './decorators/passport-user.decorator';
 @ApiTags('HoneyVotes - Auth')
 @Controller(API_BASE)
 export class AuthController {
-  constructor(
-    private readonly configService: ConfigService<Config>,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Get('/auth/twitch')
   @UseGuards(TwitchAuthGuard)
@@ -51,18 +46,9 @@ export class AuthController {
     @PassportUser() user: TwitchStrategyUser,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const tokens = await this.authService.twitchLogin(user);
+    const url = await this.authService.twitchRedirect(user);
 
-    if (!tokens) return;
-
-    const { accessToken, refreshToken } = tokens;
-
-    res.cookie('accessToken', accessToken, { httpOnly: false });
-    res.cookie('refreshToken', refreshToken, { httpOnly: false });
-
-    return {
-      url: this.configService.get<string>('HONEY_VOTES_REDIRECT_FRONTEND_URL'),
-    };
+    return { url };
   }
 
   @Post('/auth/refresh-token')

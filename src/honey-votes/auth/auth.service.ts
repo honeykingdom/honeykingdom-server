@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { Config } from '../../config/config.interface';
@@ -17,6 +21,7 @@ type JwtTokenSignOptions = Required<
 export class AuthService {
   private readonly accessTokenSignOptions: JwtTokenSignOptions;
   private readonly refreshTokenSignOptions: JwtTokenSignOptions;
+  private readonly redirectFrontendUrl: string;
 
   constructor(
     private readonly configService: ConfigService<Config>,
@@ -35,9 +40,22 @@ export class AuthService {
         'HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME',
       ),
     };
+    this.redirectFrontendUrl = configService.get<string>(
+      'HONEY_VOTES_REDIRECT_FRONTEND_URL',
+    );
   }
 
-  async twitchLogin(
+  async twitchRedirect(user: TwitchStrategyUser): Promise<string> {
+    const tokens = await this.getTokens(user);
+
+    if (!tokens) throw new InternalServerErrorException();
+
+    const { accessToken, refreshToken } = tokens;
+
+    return `${this.redirectFrontendUrl}/#accessToken=${accessToken}&refreshToken=${refreshToken}`;
+  }
+
+  private async getTokens(
     user: TwitchStrategyUser,
   ): Promise<RefreshTokenResponse | null> {
     if (!user) return null;
