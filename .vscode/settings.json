@@ -9,6 +9,7 @@
     "nestjs",
     "postgres",
     "supabase",
+    "timestamptz",
     "typeorm"
   ]
 }
