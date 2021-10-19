@@ -232,13 +232,25 @@ export class UsersService {
   }
 
   async isEditor(channel: User, user: User): Promise<boolean> {
-    const editorIds = await this.getChannelEditors(channel);
+    let editorIds: Set<string>;
+
+    try {
+      editorIds = await this.getChannelEditors(channel);
+    } catch (e) {
+      return null;
+    }
 
     return editorIds.has(user.id);
   }
 
   async isMod(channel: User, user: User): Promise<boolean> {
-    const modIds = await this.getChannelMods(channel);
+    let modIds: Set<string>;
+
+    try {
+      modIds = await this.getChannelMods(channel);
+    } catch (e) {
+      return null;
+    }
 
     return modIds.has(user.id);
   }
@@ -258,7 +270,7 @@ export class UsersService {
         `isSub: areTokensValid === false. User: ${channel.login}`,
       );
 
-      throw new UnauthorizedException();
+      return { isSub: null, tier: null };
     }
 
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
@@ -278,7 +290,7 @@ export class UsersService {
 
           const updatedUser = await this.refreshToken(user);
 
-          if (updatedUser === null) throw new UnauthorizedException();
+          if (updatedUser === null) return { isSub: null, tier: null };
 
           accessToken = this.decryptToken(
             updatedUser.credentials.encryptedAccessToken,
@@ -291,7 +303,7 @@ export class UsersService {
             e.stack,
           );
 
-          return { isSub: false, tier: null };
+          return { isSub: null, tier: null };
         }
       }
     }
@@ -311,7 +323,7 @@ export class UsersService {
         `isFollower: areTokensValid === false. User: ${channel.login}`,
       );
 
-      throw new UnauthorizedException();
+      return { isFollower: null, minutesFollowed: null };
     }
 
     let response: AxiosResponse<GetUserFollowsResponse>;
@@ -333,7 +345,9 @@ export class UsersService {
 
           const updatedUser = await this.refreshToken(user);
 
-          if (updatedUser === null) throw new UnauthorizedException();
+          if (updatedUser === null) {
+            return { isFollower: null, minutesFollowed: null };
+          }
 
           accessToken = this.decryptToken(
             updatedUser.credentials.encryptedAccessToken,
@@ -344,7 +358,7 @@ export class UsersService {
             e.stack,
           );
 
-          return { isFollower: false, minutesFollowed: null };
+          return { isFollower: null, minutesFollowed: null };
         }
       }
     }
