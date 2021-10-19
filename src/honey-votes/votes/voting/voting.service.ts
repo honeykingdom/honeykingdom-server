@@ -37,6 +37,7 @@ export class VotingService {
     return voting;
   }
 
+  // TODO: add voting limit that users can create
   async addVoting(
     userId: string,
     { channelId, ...data }: AddVotingDto,
