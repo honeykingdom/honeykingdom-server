@@ -9,9 +9,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService: ConfigService<Config> = app.get(ConfigService);
   const port = Number.parseInt(configService.get<string>('PORT'));
-  const origin = configService.get<string>('RECENT_MESSAGES_CORS_ORIGIN');
 
-  app.enableCors({ origin: [origin, 'http://localhost:3001'] });
+  app.enableCors({
+    origin: [
+      configService.get<string>('RECENT_MESSAGES_CORS_ORIGIN'),
+      configService.get<string>('HONEY_VOTES_FRONTEND_BASE_URL'),
+      'http://localhost:3001',
+    ],
+  });
 
   app.use(cookieParser());
   // app.enableShutdownHooks();
