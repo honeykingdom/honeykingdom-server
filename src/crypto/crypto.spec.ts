@@ -17,4 +17,6 @@ describe('Crypto', () => {
 
     expect(decrypt(encryptedText, SECRET)).toBe(text);
   });
+
+  it.todo('should throw an error if text is not valid');
 });
