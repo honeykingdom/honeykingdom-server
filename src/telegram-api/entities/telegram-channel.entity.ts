@@ -1,9 +1,11 @@
-import { Column, Entity, ObjectIdColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity()
+const TELEGRAM_CHANNEL_TABLE_NAME = 'ta_telegram_channels';
+
+@Entity(TELEGRAM_CHANNEL_TABLE_NAME)
 export class TelegramChannel {
-  @ObjectIdColumn()
-  _id: string;
+  @PrimaryColumn()
+  channelName: string;
 
   @Column()
   lastPostId: number;
