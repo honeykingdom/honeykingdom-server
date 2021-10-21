@@ -11,7 +11,7 @@ export const typeOrmMongoDbModule = TypeOrmModule.forRootAsync({
   useFactory: (configService: ConfigService<Config>) => ({
     type: 'mongodb',
     url: configService.get('RECENT_MESSAGES_MONGODB_URI', { infer: true }),
-    entities: [Message, TelegramChannel],
+    entities: [Message],
     synchronize:
       configService.get('NODE_ENV', { infer: true }) !== 'production',
   }),
@@ -28,7 +28,7 @@ export const typeOrmPostgresModule = TypeOrmModule.forRootAsync({
     username: configService.get('POSTGRES_USER', { infer: true }),
     password: configService.get('POSTGRES_PASSWORD', { infer: true }),
     database: configService.get('POSTGRES_DATABASE', { infer: true }),
-    entities: honeyVotesEntities,
+    entities: [...honeyVotesEntities, TelegramChannel],
     synchronize:
       configService.get('NODE_ENV', { infer: true }) !== 'production',
     dropSchema: configService.get('NODE_ENV', { infer: true }) === 'test',
