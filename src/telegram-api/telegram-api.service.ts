@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { lastValueFrom } from 'rxjs';
 import { EventEmitter } from 'events';
+import ms from 'ms';
 import { POSTGRES_CONNECTION } from '../app.constants';
 import { Config } from '../config/config.interface';
 import parseTelegramPost from './utils/parseTelegramPost';
@@ -35,9 +36,12 @@ export class TelegramApiService extends EventEmitter {
   ) {
     super();
 
-    this.checkInterval = Number.parseInt(
-      this.configService.get<string>('TELEGRAM_API_CHECK_INTERVAL'),
+    const checkInterval = this.configService.get(
+      'TELEGRAM_API_CHECK_INTERVAL',
+      { infer: true },
     );
+
+    this.checkInterval = ms(checkInterval);
 
     setInterval(() => this.checkChannels(), this.checkInterval);
   }

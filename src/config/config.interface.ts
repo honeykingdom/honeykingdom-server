@@ -59,9 +59,9 @@ export const validationSchema = Joi.object({
   RECENT_MESSAGES_REDIRECT_URL: Joi.string().required(),
 
   HEROKU_AWAKE_BASE_URL: Joi.string().required(),
-  HEROKU_AWAKE_INTERVAL: Joi.number().default(ms('15 min')),
+  HEROKU_AWAKE_INTERVAL: Joi.string().default('15 min'),
 
-  TELEGRAM_API_CHECK_INTERVAL: Joi.number().default(ms('2 min')),
+  TELEGRAM_API_CHECK_INTERVAL: Joi.string().default('2 min'),
 
   HONEY_BOT_USERNAME: Joi.string().required(),
   HONEY_BOT_TOKEN: Joi.string().required(),
