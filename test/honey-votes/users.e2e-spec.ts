@@ -217,7 +217,7 @@ describe('HoneyVotes - Users (e2e)', () => {
       .post(`${API_BASE}/voting-options`)
       .set(...ctx.getAuthorizationHeader(initiator))
       .send(body)
-      .expect(result === 'success' ? 201 : 401);
+      .expect(result === 'success' ? HttpStatus.CREATED : HttpStatus.FORBIDDEN);
 
     // isEditor - uses broadcaster credentials
     // isMod - uses broadcaster credentials
@@ -258,7 +258,7 @@ describe('HoneyVotes - Users (e2e)', () => {
 
       return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users?id=${user.id}`)
-        .expect(200)
+        .expect(HttpStatus.OK)
         .expect(omitUser(user));
     });
 
@@ -267,20 +267,20 @@ describe('HoneyVotes - Users (e2e)', () => {
 
       return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users?login=${user.login}`)
-        .expect(200)
+        .expect(HttpStatus.OK)
         .expect(omitUser(user));
     });
 
     it('should return 400 if id or login is not specified', async () => {
       return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users`)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('should return 404 if user is not exists', async () => {
       return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users?id=1`)
-        .expect(404);
+        .expect(HttpStatus.NOT_FOUND);
     });
   });
 
@@ -291,7 +291,7 @@ describe('HoneyVotes - Users (e2e)', () => {
       return request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users/me`)
         .set(...ctx.getAuthorizationHeader(user))
-        .expect(200)
+        .expect(HttpStatus.OK)
         .expect({
           id: user.id,
           login: user.login,
@@ -370,10 +370,7 @@ describe('HoneyVotes - Users (e2e)', () => {
       await request(ctx.app.getHttpServer())
         .get(`${API_BASE}/users/me/roles?id=${broadcaster.id}`)
         .set(...ctx.getAuthorizationHeader(initiator))
-        .expect(HttpStatus.OK)
-        .expect((response) => {
-          console.log(response.body);
-        });
+        .expect(HttpStatus.OK);
 
       expect(refreshTokenRequestsCount).toBe(1);
     });
