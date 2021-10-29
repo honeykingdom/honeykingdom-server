@@ -5,6 +5,7 @@ import { lastValueFrom } from 'rxjs';
 import ms from 'ms';
 import { Config } from '../config/config.interface';
 
+// https://devcenter.heroku.com/articles/autoidle
 @Injectable()
 export class HerokuAwakeService {
   private readonly interval: number;
