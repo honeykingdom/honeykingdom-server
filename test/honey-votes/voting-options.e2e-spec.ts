@@ -56,7 +56,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           initiator: moderator,
           initiatorTypes: { isMod: true },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Mod]: { canAddOptions: true },
             },
           },
@@ -85,7 +85,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           initiator: subTier1,
           initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Sub]: {
                 canAddOptions: true,
                 subTierRequiredToAddOptions: SubTier.Tier1,
@@ -113,7 +113,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           initiator: subTier2,
           initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Sub]: {
                 canAddOptions: true,
                 subTierRequiredToAddOptions: SubTier.Tier2,
@@ -141,7 +141,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           initiator: subTier3,
           initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Sub]: {
                 canAddOptions: true,
                 subTierRequiredToAddOptions: SubTier.Tier3,
@@ -169,7 +169,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           initiator: follower,
           initiatorTypes: { isFollower: true },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Follower]: { canAddOptions: true },
             },
           },
@@ -194,7 +194,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           initiator: follower,
           initiatorTypes: { isFollower: true, followedMinutes: 120 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Follower]: {
                 canAddOptions: true,
                 minutesToFollowRequiredToAddOptions: 60,
@@ -212,7 +212,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           initiator: follower,
           initiatorTypes: { isFollower: true, followedMinutes: 10 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Follower]: {
                 canAddOptions: true,
                 minutesToFollowRequiredToAddOptions: 60,
@@ -229,7 +229,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           broadcaster: user,
           initiator: viewer,
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Viewer]: { canAddOptions: true },
             },
           },
@@ -642,7 +642,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           broadcaster: user,
           initiator: viewer,
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Viewer]: { canAddOptions: true },
             },
             canManageVotingOptions: false,

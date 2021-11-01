@@ -19,7 +19,7 @@ import {
   UnauthorizedResponse,
 } from '../../src/twitch-api/twitch-api.interface';
 import { AddVotingOptionDto } from '../../src/honey-votes/votes/dto/addVotingOptionDto';
-import { votingUserTypesParamsForbidden } from './utils/common';
+import { votingPermissionsForbidden } from './utils/common';
 import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 
 const response400 = {
@@ -112,7 +112,7 @@ describe('HoneyVotes - Users (e2e)', () => {
 
   const mergeUserTypeParams: Record<
     UserType,
-    DeepPartial<Voting['userTypesParams']>
+    DeepPartial<Voting['permissions']>
   > = {
     editor: {},
     mod: { mod: { canAddOptions: true } },
@@ -166,8 +166,8 @@ describe('HoneyVotes - Users (e2e)', () => {
       { ...rawInitiator, ...initiatorParams },
     ]);
     const voting = await ctx.votingRepo.save({
-      userTypesParams: R.mergeDeepRight(
-        votingUserTypesParamsForbidden,
+      permissions: R.mergeDeepRight(
+        votingPermissionsForbidden,
         mergeUserTypeParams[type],
       ),
       broadcaster,

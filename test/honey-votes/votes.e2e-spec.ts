@@ -48,7 +48,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           initiator: moderator,
           initiatorTypes: { isMod: true },
           votingParams: {
-            userTypesParams: { [TwitchUserType.Mod]: { canVote: true } },
+            permissions: { [TwitchUserType.Mod]: { canVote: true } },
           },
         });
       });
@@ -77,7 +77,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           initiator: subTier1,
           initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Sub]: {
                 canVote: true,
                 subTierRequiredToVote: SubTier.Tier1,
@@ -107,7 +107,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           initiator: subTier2,
           initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Sub]: {
                 canVote: true,
                 subTierRequiredToVote: SubTier.Tier2,
@@ -137,7 +137,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           initiator: subTier3,
           initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Sub]: {
                 canVote: true,
                 subTierRequiredToVote: SubTier.Tier3,
@@ -167,7 +167,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           initiator: follower,
           initiatorTypes: { isFollower: true },
           votingParams: {
-            userTypesParams: { [TwitchUserType.Follower]: { canVote: true } },
+            permissions: { [TwitchUserType.Follower]: { canVote: true } },
           },
         });
       });
@@ -192,7 +192,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           initiator: follower,
           initiatorTypes: { isFollower: true, followedMinutes: 120 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Follower]: {
                 canVote: true,
                 minutesToFollowRequiredToVote: 60,
@@ -211,7 +211,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           initiator: follower,
           initiatorTypes: { isFollower: true, followedMinutes: 10 },
           votingParams: {
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Follower]: {
                 canVote: true,
                 minutesToFollowRequiredToVote: 60,
@@ -229,7 +229,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           votingOptionAuthor: user,
           initiator: viewer,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
         });
       });
@@ -278,7 +278,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           votingOptionAuthor: user,
           initiator: viewer,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
             canManageVotes: false,
           },
         });
@@ -292,7 +292,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           votingOptionAuthor: user,
           initiator: viewer,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
           onBeforeTest:
             async ({ votingOption }) =>
@@ -312,7 +312,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           votingOptionAuthor: user,
           initiator: viewer1,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
           onBeforeTest: async ({ voting, votingOption }) => {
             await ctx.voteRepo.save([
@@ -341,7 +341,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           votingOptionAuthor: user,
           initiator: viewer,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
           skipDbCheck: true,
           onBeforeTest: async ({ voting, votingOption }) => {
@@ -372,7 +372,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           votingOptionAuthor: user,
           initiator: viewer1,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
           onBeforeTest: async ({ voting }) => {
             const votingOption2 = await ctx.votingOptionRepo.save({
@@ -402,7 +402,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           votingOptionAuthor: user,
           initiator: viewer1,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
           onBeforeTest: async ({ voting, votingOption }) => {
             const votingOption2 = await ctx.votingOptionRepo.save({
@@ -443,7 +443,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           voteAuthor: viewer,
           initiator: viewer,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
         });
       });
@@ -457,7 +457,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           voteAuthor: viewer1,
           initiator: viewer2,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
         });
       });
@@ -473,7 +473,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           voteAuthor: user,
           initiator: user,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
           url: `${API_BASE}/votes/${POSTGRES_MAX_INTEGER}`,
         });
@@ -490,7 +490,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           voteAuthor: viewer,
           initiator: viewer,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
             canManageVotes: false,
           },
         });
@@ -505,7 +505,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           voteAuthor: viewer,
           initiator: viewer,
           votingParams: {
-            userTypesParams: { [TwitchUserType.Viewer]: { canVote: true } },
+            permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
           onBeforeTest: async ({ votingOption }) => {
             return async () => {

@@ -223,7 +223,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         });
       });
 
-      test('userTypesParams: valid', async () => {
+      test('permissions: valid', async () => {
         const [user] = await ctx.createUsers();
 
         await testCreateVoting(201, {
@@ -231,7 +231,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
           initiator: user,
           addVotingDto: {
             channelId: user.id,
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Mod]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Vip]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Sub]: {
@@ -252,7 +252,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         });
       });
 
-      test('userTypesParams: invalid', async () => {
+      test('permissions: invalid', async () => {
         const [user] = await ctx.createUsers();
 
         await testCreateVoting(400, {
@@ -260,7 +260,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
           initiator: user,
           addVotingDto: {
             channelId: user.id,
-            userTypesParams: {
+            permissions: {
               [TwitchUserType.Mod]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Vip]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Sub]: { canVote: true, canAddOptions: true },

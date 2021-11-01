@@ -14,7 +14,7 @@ import { Vote } from '../../../src/honey-votes/votes/entities/Vote.entity';
 import { Voting } from '../../../src/honey-votes/votes/entities/Voting.entity';
 import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
 import { AddVotingDto } from '../../../src/honey-votes/votes/dto/addVotingDto';
-import { UserTypesParams } from '../../../src/honey-votes/votes/dto/UserTypesParams';
+import { VotingPermissions } from '../../../src/honey-votes/votes/dto/VotingPermissions';
 import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVotingDto';
 import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
 import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';
@@ -23,7 +23,7 @@ import {
   VOTING_CAN_MANAGE_VOTES_DEFAULT,
   VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT,
   VOTING_OPTIONS_LIMIT_DEFAULT,
-  VOTING_USER_TYPES_PARAMS_DEFAULT,
+  VOTING_PERMISSIONS_DEFAULT,
 } from '../../../src/honey-votes/votes/votes.constants';
 import {
   mockCheckUserSubscription,
@@ -33,14 +33,14 @@ import {
 } from './mock-requests';
 import { HoneyVotesTestContext } from './getHoneyVotesTestContext';
 
-const defaultVotingParams = {
+const defaultVotingParams: Partial<Voting> = {
   id: expect.any(Number),
   broadcasterId: expect.any(String),
   title: null,
   description: null,
   canManageVotes: VOTING_CAN_MANAGE_VOTES_DEFAULT,
   canManageVotingOptions: VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT,
-  userTypesParams: VOTING_USER_TYPES_PARAMS_DEFAULT,
+  permissions: VOTING_PERMISSIONS_DEFAULT,
   allowedVotingOptionTypes: VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   votingOptionsLimit: VOTING_OPTIONS_LIMIT_DEFAULT,
   createdAt: expect.anything(),
@@ -81,7 +81,7 @@ const defaultVoteParams = {
   updatedAt: expect.anything(),
 };
 
-export const votingUserTypesParamsForbidden: UserTypesParams = {
+export const votingPermissionsForbidden: VotingPermissions = {
   [TwitchUserType.Mod]: { canVote: false, canAddOptions: false },
   [TwitchUserType.Vip]: { canVote: false, canAddOptions: false },
   [TwitchUserType.Sub]: {
@@ -339,8 +339,8 @@ export const createTestCreateVotingOption =
       broadcaster: User;
       initiator: User;
       initiatorTypes?: UserTypes;
-      votingParams?: Partial<Omit<Voting, 'userTypesParams'>> & {
-        userTypesParams?: DeepPartial<UserTypesParams>;
+      votingParams?: Partial<Omit<Voting, 'permissions'>> & {
+        permissions?: DeepPartial<VotingPermissions>;
       };
       addVotingOptionDto?: Partial<AddVotingOptionDto>;
       expectedVotingOptionParams?: Partial<VotingOption>;
@@ -350,7 +350,7 @@ export const createTestCreateVotingOption =
   ) => {
     const voting = await ctx.votingRepo.save({
       ...R.mergeDeepRight(
-        { userTypesParams: votingUserTypesParamsForbidden },
+        { permissions: votingPermissionsForbidden },
         votingParams,
       ),
       broadcaster,
@@ -458,7 +458,7 @@ export const createTestDeleteVotingOption =
   ) => {
     const voting = await ctx.votingRepo.save({
       broadcaster,
-      userTypesParams: votingUserTypesParamsForbidden,
+      permissions: votingPermissionsForbidden,
       ...votingParams,
     } as Voting);
     const votingOption = await ctx.votingOptionRepo.save({
@@ -531,8 +531,8 @@ export const createTestCreateVote =
       votingOptionAuthor: User;
       initiator: User;
       initiatorTypes?: UserTypes;
-      votingParams?: Partial<Omit<Voting, 'userTypesParams'>> & {
-        userTypesParams?: DeepPartial<UserTypesParams>;
+      votingParams?: Partial<Omit<Voting, 'permissions'>> & {
+        permissions?: DeepPartial<VotingPermissions>;
       };
       addVoteDto?: AddVoteDto;
       skipDbCheck?: boolean;
@@ -544,7 +544,7 @@ export const createTestCreateVote =
   ) => {
     const voting = await ctx.votingRepo.save({
       ...R.mergeDeepRight(
-        { userTypesParams: votingUserTypesParamsForbidden },
+        { permissions: votingPermissionsForbidden },
         votingParams,
       ),
       broadcaster,
@@ -639,8 +639,8 @@ export const createTestDeleteVote =
       voteAuthor: User;
       initiator: User;
       initiatorTypes?: UserTypes;
-      votingParams?: Partial<Omit<Voting, 'userTypesParams'>> & {
-        userTypesParams?: DeepPartial<UserTypesParams>;
+      votingParams?: Partial<Omit<Voting, 'permissions'>> & {
+        permissions?: DeepPartial<VotingPermissions>;
       };
       url?: string;
       onBeforeTest?: OnBeforeTest<{
@@ -652,7 +652,7 @@ export const createTestDeleteVote =
   ) => {
     const voting = await ctx.votingRepo.save({
       ...R.mergeDeepRight(
-        { userTypesParams: votingUserTypesParamsForbidden },
+        { permissions: votingPermissionsForbidden },
         votingParams,
       ),
       broadcaster,
