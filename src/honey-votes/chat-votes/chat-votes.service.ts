@@ -297,17 +297,16 @@ export class ChatVotesService {
     {
       mod,
       vip,
-      subTier1,
-      subTier2,
-      subTier3,
+      sub,
       viewer,
-      subMonthsRequired: months,
+      subMonthsRequired,
+      subTierRequired,
     }: ChatVotingRestrictions,
   ) {
     if (viewer) return true;
-    if (subTier1 && this.isSub(message, months, SubTier.t1)) return true;
-    if (subTier2 && this.isSub(message, months, SubTier.t2)) return true;
-    if (subTier3 && this.isSub(message, months, SubTier.t3)) return true;
+    if (sub && this.isSub(message, subMonthsRequired, subTierRequired)) {
+      return true;
+    }
     if (vip && 'vip' in message.tags.badges) return true;
     if (mod && 'moderator' in message.tags.badges) return true;
 
@@ -316,32 +315,24 @@ export class ChatVotesService {
 
   private static isSub(
     message: PrivateMessage,
-    monthsRequired = 0,
-    tier: SubTier = SubTier.t1,
+    subMonthsRequired = 0,
+    subTierRequired: SubTier,
   ) {
-    if (monthsRequired > 0) {
+    if (subMonthsRequired > 0) {
       const [, monthsText] = message.tags['badgeInfo'].split('/');
 
       if (!monthsText) return false;
 
       const months = Number.parseInt(monthsText, 10);
 
-      if (months < monthsRequired) return false;
+      if (months < subMonthsRequired) return false;
     }
 
     const subBadgeValue = message.tags.badges.subscriber as number;
 
-    if (subBadgeValue === undefined) return false;
-
-    if (tier === SubTier.t1) return true;
-
-    if (tier === SubTier.t2) {
-      return subBadgeValue >= 2000 && subBadgeValue < 3000;
-    }
-
-    if (tier === SubTier.t3) {
-      return subBadgeValue > 3000;
-    }
+    if (subTierRequired === SubTier.Tier1) return subBadgeValue >= 1000;
+    if (subTierRequired === SubTier.Tier2) return subBadgeValue >= 2000;
+    if (subTierRequired === SubTier.Tier3) return subBadgeValue >= 3000;
 
     // TODO: assert never
     return false;

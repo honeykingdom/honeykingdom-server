@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { SubTier } from '../honey-votes.interface';
 
 export class UserRoles {
   @ApiProperty({ nullable: true })
@@ -11,17 +12,14 @@ export class UserRoles {
   isVip: boolean | null;
 
   @ApiProperty({ nullable: true })
-  isSubTier1: boolean | null;
-
-  @ApiProperty({ nullable: true })
-  isSubTier2: boolean | null;
-
-  @ApiProperty({ nullable: true })
-  isSubTier3: boolean | null;
+  isSub: boolean | null;
 
   @ApiProperty({ nullable: true })
   isFollower: boolean | null;
 
   @ApiProperty({ nullable: true })
   minutesFollowed: number | null;
+
+  @ApiProperty({ nullable: true })
+  subTier: SubTier | null;
 }

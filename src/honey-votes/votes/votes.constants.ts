@@ -1,4 +1,8 @@
-import { TwitchUserType, VotingOptionType } from '../honey-votes.interface';
+import {
+  SubTier,
+  TwitchUserType,
+  VotingOptionType,
+} from '../honey-votes.interface';
 import { UserTypesParams } from './dto/UserTypesParams';
 
 export const VOTE_TABLE_NAME = 'hv_vote';
@@ -17,9 +21,12 @@ export const VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT = true;
 export const VOTING_USER_TYPES_PARAMS_DEFAULT: UserTypesParams = {
   [TwitchUserType.Mod]: { canVote: true, canAddOptions: true },
   [TwitchUserType.Vip]: { canVote: true, canAddOptions: true },
-  [TwitchUserType.SubTier1]: { canVote: true, canAddOptions: true },
-  [TwitchUserType.SubTier2]: { canVote: true, canAddOptions: true },
-  [TwitchUserType.SubTier3]: { canVote: true, canAddOptions: true },
+  [TwitchUserType.Sub]: {
+    canVote: true,
+    canAddOptions: true,
+    subTierRequiredToVote: SubTier.Tier1,
+    subTierRequiredToAddOptions: SubTier.Tier1,
+  },
   [TwitchUserType.Follower]: {
     canVote: false,
     canAddOptions: false,

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsEnum,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -11,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { TwitchUserType } from '../../honey-votes.interface';
+import { SubTier, TwitchUserType } from '../../honey-votes.interface';
 import { CHAT_VOTING_COMMAND_MAX_LENGTH } from '../chat-votes.constants';
 
 export class ChatVotingRestrictions {
@@ -21,15 +22,7 @@ export class ChatVotingRestrictions {
 
   @IsBoolean()
   @ApiProperty()
-  [TwitchUserType.SubTier1]: boolean;
-
-  @IsBoolean()
-  @ApiProperty()
-  [TwitchUserType.SubTier2]: boolean;
-
-  @IsBoolean()
-  @ApiProperty()
-  [TwitchUserType.SubTier3]: boolean;
+  [TwitchUserType.Sub]: boolean;
 
   @IsBoolean()
   @ApiProperty()
@@ -43,6 +36,10 @@ export class ChatVotingRestrictions {
   @Min(0)
   @ApiProperty()
   subMonthsRequired: number;
+
+  @IsEnum(SubTier)
+  @ApiProperty()
+  subTierRequired: SubTier;
 }
 
 export class ChatVotingCommands {

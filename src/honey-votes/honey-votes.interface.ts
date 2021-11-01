@@ -5,18 +5,15 @@ export enum TwitchUserType {
   Editor = 'editor',
   Mod = 'mod',
   Vip = 'vip',
-  // Sub = 'sub',
-  SubTier1 = 'subTier1',
-  SubTier2 = 'subTier2',
-  SubTier3 = 'subTier3',
+  Sub = 'sub',
   Follower = 'follower',
   Viewer = 'viewer',
 }
 
 export enum SubTier {
-  t1 = '1000',
-  t2 = '2000',
-  t3 = '3000',
+  Tier1 = 1,
+  Tier2 = 2,
+  Tier3 = 3,
 }
 
 export enum VotingOptionType {

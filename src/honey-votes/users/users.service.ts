@@ -29,10 +29,9 @@ type CheckUserTypesInput = {
   [TwitchUserType.Editor]?: boolean;
   [TwitchUserType.Mod]?: boolean;
   [TwitchUserType.Vip]?: boolean;
-  [TwitchUserType.SubTier1]?: boolean;
-  [TwitchUserType.SubTier2]?: boolean;
-  [TwitchUserType.SubTier3]?: boolean;
+  [TwitchUserType.Sub]?: boolean;
   [TwitchUserType.Follower]?: boolean;
+  subTierRequired?: SubTier;
   minutesToFollowRequired?: number;
 };
 
@@ -45,6 +44,15 @@ type StoreUserInput = Pick<
     accessToken: string;
     refreshToken: string;
   };
+};
+
+const SUB_TIER: Record<
+  CheckUserSubscriptionResponse['data'][0]['tier'],
+  SubTier
+> = {
+  '1000': SubTier.Tier1,
+  '2000': SubTier.Tier2,
+  '3000': SubTier.Tier3,
 };
 
 @Injectable()
@@ -130,11 +138,10 @@ export class UsersService {
       isEditor,
       isMod,
       isVip,
-      isSubTier1: isSub && tier === SubTier.t1,
-      isSubTier2: isSub && tier === SubTier.t2,
-      isSubTier3: isSub && tier === SubTier.t3,
+      isSub,
       isFollower,
       minutesFollowed,
+      subTier: tier,
     };
   }
 
@@ -198,8 +205,6 @@ export class UsersService {
     user: User,
     types: CheckUserTypesInput = {},
   ): Promise<boolean> {
-    const sub = types.subTier1 || types.subTier2 || types.subTier3;
-
     const [
       isEditor,
       isMod,
@@ -210,7 +215,7 @@ export class UsersService {
       types.editor ? this.isEditor(channel, user) : undefined,
       types.mod ? this.isMod(channel, user) : undefined,
       types.vip ? this.isVip(channel, user) : undefined,
-      sub ? this.isSub(channel, user) : { isSub: false, tier: SubTier.t1 },
+      types.sub ? this.isSub(channel, user) : { isSub: false, tier: null },
       types.follower
         ? this.isFollower(channel, user)
         : { isFollower: false, minutesFollowed: null },
@@ -218,9 +223,7 @@ export class UsersService {
 
     if (
       (isFollower && minutesFollowed >= types.minutesToFollowRequired) ||
-      (isSub && types.subTier1 && tier === SubTier.t1) ||
-      (isSub && types.subTier2 && tier === SubTier.t2) ||
-      (isSub && types.subTier3 && tier === SubTier.t3) ||
+      (isSub && tier >= types.subTierRequired) ||
       isVip ||
       isMod ||
       isEditor
@@ -314,7 +317,7 @@ export class UsersService {
       }
     }
 
-    const tier = response.data.data[0].tier as SubTier;
+    const tier = SUB_TIER[response.data.data[0].tier];
 
     return { isSub: true, tier };
   }

@@ -150,12 +150,11 @@ export class VotesService {
         {
           mod: params.mod.canVote,
           vip: params.vip.canVote,
-          subTier1: params.subTier1.canVote,
-          subTier2: params.subTier2.canVote,
-          subTier3: params.subTier3.canVote,
+          sub: params.sub.canVote,
           follower: params.follower.canVote,
           minutesToFollowRequired:
             params.follower.minutesToFollowRequiredToVote,
+          subTierRequired: params.sub.subTierRequiredToVote,
         },
       )
     ) {

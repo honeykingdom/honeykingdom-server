@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsInt, Min, ValidateNested } from 'class-validator';
-import { TwitchUserType } from '../../honey-votes.interface';
+import { IsBoolean, IsEnum, IsInt, Min, ValidateNested } from 'class-validator';
+import { SubTier, TwitchUserType } from '../../honey-votes.interface';
 
 class UserTypeParams {
   @IsBoolean()
@@ -23,6 +23,15 @@ class UserTypeParamsFollower extends UserTypeParams {
   @ApiProperty()
   minutesToFollowRequiredToAddOptions: number;
 }
+class UserTypeParamsSubscriber extends UserTypeParams {
+  @IsEnum(SubTier)
+  @ApiProperty()
+  subTierRequiredToVote: SubTier;
+
+  @IsEnum(SubTier)
+  @ApiProperty()
+  subTierRequiredToAddOptions: SubTier;
+}
 export class UserTypesParams {
   @ValidateNested()
   @Type(() => UserTypeParams)
@@ -35,19 +44,9 @@ export class UserTypesParams {
   [TwitchUserType.Vip]: UserTypeParams;
 
   @ValidateNested()
-  @Type(() => UserTypeParams)
+  @Type(() => UserTypeParamsSubscriber)
   @ApiProperty()
-  [TwitchUserType.SubTier1]: UserTypeParams;
-
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  @ApiProperty()
-  [TwitchUserType.SubTier2]: UserTypeParams;
-
-  @ValidateNested()
-  @Type(() => UserTypeParams)
-  @ApiProperty()
-  [TwitchUserType.SubTier3]: UserTypeParams;
+  [TwitchUserType.Sub]: UserTypeParamsSubscriber;
 
   @ValidateNested()
   @Type(() => UserTypeParamsFollower)

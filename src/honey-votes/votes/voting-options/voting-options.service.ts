@@ -113,12 +113,11 @@ export class VotingOptionsService {
       await this.usersService.checkUserTypes(voting.broadcaster, user, {
         mod: params.mod.canAddOptions,
         vip: params.vip.canAddOptions,
-        subTier1: params.subTier1.canAddOptions,
-        subTier2: params.subTier2.canAddOptions,
-        subTier3: params.subTier3.canAddOptions,
+        sub: params.sub.canAddOptions,
         follower: params.follower.canAddOptions,
         minutesToFollowRequired:
           params.follower.minutesToFollowRequiredToAddOptions,
+        subTierRequired: params.sub.subTierRequiredToAddOptions,
       })
     ) {
       return true;
