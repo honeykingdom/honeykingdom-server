@@ -68,28 +68,33 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
       // it('should create Vote by vips', async () => {});
       // it('should not create Vote by vips', async () => {});
 
-      it('should create Vote by subTier1', async () => {
+      it('should create Vote by sub Tier1', async () => {
         const [user, subTier1] = await ctx.createUsers();
 
         await testCreateVote(201, {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier1,
-          initiatorTypes: { isSub: true, tier: SubTier.t1 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
           votingParams: {
-            userTypesParams: { [TwitchUserType.SubTier1]: { canVote: true } },
+            userTypesParams: {
+              [TwitchUserType.Sub]: {
+                canVote: true,
+                subTierRequiredToVote: SubTier.Tier1,
+              },
+            },
           },
         });
       });
 
-      it('should not create Vote by subTier1', async () => {
+      it('should not create Vote by sub Tier1', async () => {
         const [user, subTier1] = await ctx.createUsers();
 
         await testCreateVote(403, {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier1,
-          initiatorTypes: { isSub: true, tier: SubTier.t1 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
         });
       });
 
@@ -100,46 +105,56 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier2,
-          initiatorTypes: { isSub: true, tier: SubTier.t2 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
           votingParams: {
-            userTypesParams: { [TwitchUserType.SubTier2]: { canVote: true } },
+            userTypesParams: {
+              [TwitchUserType.Sub]: {
+                canVote: true,
+                subTierRequiredToVote: SubTier.Tier2,
+              },
+            },
           },
         });
       });
 
-      it('should not create Vote by subTier2', async () => {
+      it('should not create Vote by sub Tier2', async () => {
         const [user, subTier2] = await ctx.createUsers();
 
         await testCreateVote(403, {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier2,
-          initiatorTypes: { isSub: true, tier: SubTier.t2 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
         });
       });
 
-      it('should create Vote by subTier3', async () => {
+      it('should create Vote by sub Tier3', async () => {
         const [user, subTier3] = await ctx.createUsers();
 
         await testCreateVote(201, {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier3,
-          initiatorTypes: { isSub: true, tier: SubTier.t3 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
           votingParams: {
-            userTypesParams: { [TwitchUserType.SubTier3]: { canVote: true } },
+            userTypesParams: {
+              [TwitchUserType.Sub]: {
+                canVote: true,
+                subTierRequiredToVote: SubTier.Tier3,
+              },
+            },
           },
         });
       });
 
-      it('should not create Vote by subTier3', async () => {
+      it('should not create Vote by sub Tier3', async () => {
         const [user, subTier3] = await ctx.createUsers();
 
         await testCreateVote(403, {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier3,
-          initiatorTypes: { isSub: true, tier: SubTier.t3 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
         });
       });
 

@@ -1,6 +1,7 @@
 import { Voting } from '../../src/honey-votes/votes/entities/Voting.entity';
 import {
   API_BASE,
+  SubTier,
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
 import { VotingOptionType } from '../../src/honey-votes/honey-votes.interface';
@@ -233,9 +234,12 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
             userTypesParams: {
               [TwitchUserType.Mod]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Vip]: { canVote: true, canAddOptions: true },
-              [TwitchUserType.SubTier1]: { canVote: true, canAddOptions: true },
-              [TwitchUserType.SubTier2]: { canVote: true, canAddOptions: true },
-              [TwitchUserType.SubTier3]: { canVote: true, canAddOptions: true },
+              [TwitchUserType.Sub]: {
+                canVote: true,
+                canAddOptions: true,
+                subTierRequiredToVote: SubTier.Tier1,
+                subTierRequiredToAddOptions: SubTier.Tier1,
+              },
               [TwitchUserType.Follower]: {
                 canVote: true,
                 canAddOptions: false,
@@ -259,9 +263,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
             userTypesParams: {
               [TwitchUserType.Mod]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Vip]: { canVote: true, canAddOptions: true },
-              [TwitchUserType.SubTier1]: { canVote: true, canAddOptions: true },
-              [TwitchUserType.SubTier2]: { canVote: true, canAddOptions: true },
-              [TwitchUserType.SubTier3]: { canVote: true, canAddOptions: true },
+              [TwitchUserType.Sub]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Follower]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Viewer]: { canVote: true },
             },

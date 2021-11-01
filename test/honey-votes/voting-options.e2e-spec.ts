@@ -77,78 +77,87 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       // it('should create VotingOption by vips', async () => {});
       // it('should not create VotingOption by vips', async () => {});
 
-      it('should create VotingOption by subTier1', async () => {
+      it('should create VotingOption by sub Tier1', async () => {
         const [user, subTier1] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: subTier1,
-          initiatorTypes: { isSub: true, tier: SubTier.t1 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
           votingParams: {
             userTypesParams: {
-              [TwitchUserType.SubTier1]: { canAddOptions: true },
+              [TwitchUserType.Sub]: {
+                canAddOptions: true,
+                subTierRequiredToAddOptions: SubTier.Tier1,
+              },
             },
           },
         });
       });
 
-      it('should not create VotingOption by subTier1', async () => {
+      it('should not create VotingOption by sub Tier1', async () => {
         const [user, subTier1] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: subTier1,
-          initiatorTypes: { isSub: true, tier: SubTier.t1 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
         });
       });
 
-      it('should create VotingOption by subTier2', async () => {
+      it('should create VotingOption by sub Tier2', async () => {
         const [user, subTier2] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: subTier2,
-          initiatorTypes: { isSub: true, tier: SubTier.t2 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
           votingParams: {
             userTypesParams: {
-              [TwitchUserType.SubTier2]: { canAddOptions: true },
+              [TwitchUserType.Sub]: {
+                canAddOptions: true,
+                subTierRequiredToAddOptions: SubTier.Tier2,
+              },
             },
           },
         });
       });
 
-      it('should not create VotingOption by subTier2', async () => {
+      it('should not create VotingOption by sub Tier2', async () => {
         const [user, subTier2] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: subTier2,
-          initiatorTypes: { isSub: true, tier: SubTier.t2 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
         });
       });
 
-      it('should create VotingOption by subTier3', async () => {
+      it('should create VotingOption by sub Tier3', async () => {
         const [user, subTier3] = await ctx.createUsers();
 
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: subTier3,
-          initiatorTypes: { isSub: true, tier: SubTier.t3 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
           votingParams: {
             userTypesParams: {
-              [TwitchUserType.SubTier3]: { canAddOptions: true },
+              [TwitchUserType.Sub]: {
+                canAddOptions: true,
+                subTierRequiredToAddOptions: SubTier.Tier3,
+              },
             },
           },
         });
       });
 
-      it('should not create VotingOption by subTier3', async () => {
+      it('should not create VotingOption by sub Tier3', async () => {
         const [user, subTier3] = await ctx.createUsers();
 
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: subTier3,
-          initiatorTypes: { isSub: true, tier: SubTier.t3 },
+          initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
         });
       });
 

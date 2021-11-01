@@ -116,7 +116,7 @@ describe('HoneyVotes - Users (e2e)', () => {
   > = {
     editor: {},
     mod: { mod: { canAddOptions: true } },
-    sub: { subTier1: { canAddOptions: true } },
+    sub: { sub: { canAddOptions: true } },
     follower: { follower: { canAddOptions: true } },
   };
 

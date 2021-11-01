@@ -81,12 +81,15 @@ const defaultVoteParams = {
   updatedAt: expect.anything(),
 };
 
-export const votingUserTypesParamsForbidden = {
+export const votingUserTypesParamsForbidden: UserTypesParams = {
   [TwitchUserType.Mod]: { canVote: false, canAddOptions: false },
   [TwitchUserType.Vip]: { canVote: false, canAddOptions: false },
-  [TwitchUserType.SubTier1]: { canVote: false, canAddOptions: false },
-  [TwitchUserType.SubTier2]: { canVote: false, canAddOptions: false },
-  [TwitchUserType.SubTier3]: { canVote: false, canAddOptions: false },
+  [TwitchUserType.Sub]: {
+    canVote: false,
+    canAddOptions: false,
+    subTierRequiredToVote: SubTier.Tier1,
+    subTierRequiredToAddOptions: SubTier.Tier1,
+  },
   [TwitchUserType.Follower]: {
     canVote: false,
     canAddOptions: false,

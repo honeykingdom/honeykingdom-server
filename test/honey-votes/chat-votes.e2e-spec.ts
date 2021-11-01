@@ -5,6 +5,7 @@ import { OnBeforeTest } from './utils/common';
 import { User } from '../../src/honey-votes/users/entities/User.entity';
 import {
   API_BASE,
+  SubTier,
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
 import { ChatVote } from '../../src/honey-votes/chat-votes/entities/ChatVote.entity';
@@ -29,12 +30,11 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
   const chatVotingRestrictionsForbidden: ChatVotingRestrictions = {
     [TwitchUserType.Viewer]: false,
-    [TwitchUserType.SubTier1]: false,
-    [TwitchUserType.SubTier2]: false,
-    [TwitchUserType.SubTier3]: false,
+    [TwitchUserType.Sub]: false,
     [TwitchUserType.Mod]: false,
     [TwitchUserType.Vip]: false,
     subMonthsRequired: 0,
+    subTierRequired: SubTier.Tier1,
   };
 
   const defaultChatVotingParams = {
@@ -384,9 +384,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await testValidation(HttpStatus.BAD_REQUEST, {
           restrictions: {
             [TwitchUserType.Viewer]: false,
-            [TwitchUserType.SubTier1]: false,
-            [TwitchUserType.SubTier2]: false,
-            [TwitchUserType.SubTier3]: false,
+            [TwitchUserType.Sub]: false,
             [TwitchUserType.Mod]: false,
             [TwitchUserType.Vip]: false,
           } as any,
@@ -397,12 +395,11 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await testValidation(HttpStatus.CREATED, {
           restrictions: {
             [TwitchUserType.Viewer]: true,
-            [TwitchUserType.SubTier1]: true,
-            [TwitchUserType.SubTier2]: true,
-            [TwitchUserType.SubTier3]: true,
+            [TwitchUserType.Sub]: true,
             [TwitchUserType.Mod]: true,
             [TwitchUserType.Vip]: true,
             subMonthsRequired: 0,
+            subTierRequired: SubTier.Tier1,
           },
         });
       });

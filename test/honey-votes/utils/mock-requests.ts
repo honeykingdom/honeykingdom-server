@@ -10,6 +10,15 @@ import { MockUser } from './users';
 
 type User = Pick<MockUser, 'id' | 'displayName' | 'login'>;
 
+const SUB_TIER: Record<
+  SubTier,
+  CheckUserSubscriptionResponse['data'][0]['tier']
+> = {
+  [SubTier.Tier1]: '1000',
+  [SubTier.Tier2]: '2000',
+  [SubTier.Tier3]: '3000',
+};
+
 // TODO: refactor get response functions
 export const mockGetChannelEditors = (editors: User[] = []) => {
   const response: GetChannelEditorsResponse = {
@@ -56,7 +65,7 @@ export const mockCheckUserSubscription = (
         broadcaster_login: broadcaster.login,
         broadcaster_name: broadcaster.displayName,
         is_gift: !!gifter,
-        tier,
+        tier: SUB_TIER[tier],
         ...(gifter
           ? {
               gifter_id: gifter.id,
