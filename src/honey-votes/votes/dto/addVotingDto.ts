@@ -22,7 +22,7 @@ import {
   VOTING_OPTIONS_LIMIT_MIN,
   VOTING_TITLE_MAX_LENGTH,
 } from '../votes.constants';
-import { UserTypesParams } from './UserTypesParams';
+import { VotingPermissions } from './VotingPermissions';
 
 export class AddVotingDtoBase {
   @IsString()
@@ -51,9 +51,9 @@ export class AddVotingDtoBase {
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => UserTypesParams)
+  @Type(() => VotingPermissions)
   @ApiPropertyOptional()
-  userTypesParams?: UserTypesParams;
+  permissions?: VotingPermissions;
 
   @IsArray()
   @ArrayMinSize(1)

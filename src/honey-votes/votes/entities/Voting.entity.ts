@@ -14,7 +14,7 @@ import { User } from '../../users/entities/User.entity';
 import { Vote } from './Vote.entity';
 import { VotingOption } from './VotingOption.entity';
 import { VotingOptionType } from '../../honey-votes.interface';
-import { UserTypesParams } from '../dto/UserTypesParams';
+import { VotingPermissions } from '../dto/VotingPermissions';
 import {
   VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   VOTING_CAN_MANAGE_VOTES_DEFAULT,
@@ -23,7 +23,7 @@ import {
   VOTING_OPTIONS_LIMIT_DEFAULT,
   VOTING_TABLE_NAME,
   VOTING_TITLE_MAX_LENGTH,
-  VOTING_USER_TYPES_PARAMS_DEFAULT,
+  VOTING_PERMISSIONS_DEFAULT,
 } from '../votes.constants';
 
 @Entity(VOTING_TABLE_NAME)
@@ -58,9 +58,9 @@ export class Voting {
   @ApiProperty()
   canManageVotingOptions: boolean;
 
-  @Column({ type: 'jsonb', default: VOTING_USER_TYPES_PARAMS_DEFAULT })
+  @Column({ type: 'jsonb', default: VOTING_PERMISSIONS_DEFAULT })
   @ApiProperty()
-  userTypesParams: UserTypesParams;
+  permissions: VotingPermissions;
 
   @Column({
     type: 'enum',

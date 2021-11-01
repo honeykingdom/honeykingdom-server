@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsBoolean, IsEnum, IsInt, Min, ValidateNested } from 'class-validator';
 import { SubTier, TwitchUserType } from '../../honey-votes.interface';
 
-class UserTypeParams {
+class VotingPermissionsDefault {
   @IsBoolean()
   @ApiProperty()
   canVote: boolean;
@@ -12,7 +12,7 @@ class UserTypeParams {
   @ApiProperty()
   canAddOptions: boolean;
 }
-class UserTypeParamsFollower extends UserTypeParams {
+class VotingPermissionsFollower extends VotingPermissionsDefault {
   @IsInt()
   @Min(0)
   @ApiProperty()
@@ -23,7 +23,7 @@ class UserTypeParamsFollower extends UserTypeParams {
   @ApiProperty()
   minutesToFollowRequiredToAddOptions: number;
 }
-class UserTypeParamsSubscriber extends UserTypeParams {
+class VotingPermissionsSubscriber extends VotingPermissionsDefault {
   @IsEnum(SubTier)
   @ApiProperty()
   subTierRequiredToVote: SubTier;
@@ -32,29 +32,29 @@ class UserTypeParamsSubscriber extends UserTypeParams {
   @ApiProperty()
   subTierRequiredToAddOptions: SubTier;
 }
-export class UserTypesParams {
+export class VotingPermissions {
   @ValidateNested()
-  @Type(() => UserTypeParams)
+  @Type(() => VotingPermissionsDefault)
   @ApiProperty()
-  [TwitchUserType.Mod]: UserTypeParams;
+  [TwitchUserType.Mod]: VotingPermissionsDefault;
 
   @ValidateNested()
-  @Type(() => UserTypeParams)
+  @Type(() => VotingPermissionsDefault)
   @ApiProperty()
-  [TwitchUserType.Vip]: UserTypeParams;
+  [TwitchUserType.Vip]: VotingPermissionsDefault;
 
   @ValidateNested()
-  @Type(() => UserTypeParamsSubscriber)
+  @Type(() => VotingPermissionsSubscriber)
   @ApiProperty()
-  [TwitchUserType.Sub]: UserTypeParamsSubscriber;
+  [TwitchUserType.Sub]: VotingPermissionsSubscriber;
 
   @ValidateNested()
-  @Type(() => UserTypeParamsFollower)
+  @Type(() => VotingPermissionsFollower)
   @ApiProperty()
-  [TwitchUserType.Follower]: UserTypeParamsFollower;
+  [TwitchUserType.Follower]: VotingPermissionsFollower;
 
   @ValidateNested()
-  @Type(() => UserTypeParams)
+  @Type(() => VotingPermissionsDefault)
   @ApiProperty()
-  [TwitchUserType.Viewer]: UserTypeParams;
+  [TwitchUserType.Viewer]: VotingPermissionsDefault;
 }

@@ -139,22 +139,21 @@ export class VotesService {
     if (!votingOption || !user) return false;
     if (!votingOption.voting.canManageVotes) return false;
 
-    const params = votingOption.voting.userTypesParams;
+    const { mod, vip, sub, follower, viewer } = votingOption.voting.permissions;
 
-    if (params.viewer.canVote) return true;
+    if (viewer.canVote) return true;
 
     if (
       await this.usersService.checkUserTypes(
         votingOption.voting.broadcaster,
         user,
         {
-          mod: params.mod.canVote,
-          vip: params.vip.canVote,
-          sub: params.sub.canVote,
-          follower: params.follower.canVote,
-          minutesToFollowRequired:
-            params.follower.minutesToFollowRequiredToVote,
-          subTierRequired: params.sub.subTierRequiredToVote,
+          mod: mod.canVote,
+          vip: vip.canVote,
+          sub: sub.canVote,
+          follower: follower.canVote,
+          minutesToFollowRequired: follower.minutesToFollowRequiredToVote,
+          subTierRequired: sub.subTierRequiredToVote,
         },
       )
     ) {

@@ -3,7 +3,7 @@ import {
   TwitchUserType,
   VotingOptionType,
 } from '../honey-votes.interface';
-import { UserTypesParams } from './dto/UserTypesParams';
+import { VotingPermissions } from './dto/VotingPermissions';
 
 export const VOTE_TABLE_NAME = 'hv_vote';
 export const VOTING_TABLE_NAME = 'hv_voting';
@@ -18,7 +18,7 @@ export const VOTING_OPTIONS_LIMIT_MAX = 200;
 
 export const VOTING_CAN_MANAGE_VOTES_DEFAULT = true;
 export const VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT = true;
-export const VOTING_USER_TYPES_PARAMS_DEFAULT: UserTypesParams = {
+export const VOTING_PERMISSIONS_DEFAULT: VotingPermissions = {
   [TwitchUserType.Mod]: { canVote: true, canAddOptions: true },
   [TwitchUserType.Vip]: { canVote: true, canAddOptions: true },
   [TwitchUserType.Sub]: {

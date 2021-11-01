@@ -105,7 +105,7 @@ export class VotingOptionsService {
     if (!voting.allowedVotingOptionTypes.includes(votingOptionType))
       return false;
 
-    const params = voting.userTypesParams;
+    const params = voting.permissions;
 
     if (params.viewer.canAddOptions) return true;
 
