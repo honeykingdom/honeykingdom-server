@@ -60,7 +60,7 @@ export class VotingOption {
   // card
   @Column({ nullable: true })
   @ApiPropertyOptional()
-  cardId?: number;
+  cardId?: string;
 
   @Column({ length: VOTING_OPTION_CARD_TITLE_MAX_LENGTH })
   @ApiProperty()

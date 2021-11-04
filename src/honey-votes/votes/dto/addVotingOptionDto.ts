@@ -23,10 +23,10 @@ class VotingOptionKinopoiskMovie {
   id: number;
 }
 class VotingOptionIgdbGame {
-  @IsInt()
-  @IsPositive()
+  @IsString()
+  @IsNotEmpty()
   @ApiProperty()
-  id: number;
+  slug: string;
 }
 class VotingOptionCustom {
   @IsString()
@@ -36,7 +36,6 @@ class VotingOptionCustom {
   title: string;
 
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
   @MaxLength(VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH)
   @ApiPropertyOptional()

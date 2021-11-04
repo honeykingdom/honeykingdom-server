@@ -161,14 +161,21 @@ export class VotingOptionsService {
   private async getVotingOptionCard(data: AddVotingOptionDto) {
     const payload = data[data.type];
 
-    type Custom = AddVotingOptionDto[VotingOptionType.Custom];
-    type WithId = AddVotingOptionDto[VotingOptionType.KinopoiskMovie];
+    type PayloadCustom = AddVotingOptionDto[VotingOptionType.Custom];
+    type PayloadKp = AddVotingOptionDto[VotingOptionType.KinopoiskMovie];
+    type PayloadIgdb = AddVotingOptionDto[VotingOptionType.IgdbGame];
 
-    const where =
-      data.type === VotingOptionType.KinopoiskMovie ||
-      data.type === VotingOptionType.IgdbGame
-        ? { cardId: (payload as WithId).id }
-        : { cardTitle: (payload as Custom).title };
+    let where = {};
+
+    if (data.type === VotingOptionType.Custom) {
+      where = { cardTitle: (payload as PayloadCustom).title };
+    }
+    if (data.type === VotingOptionType.KinopoiskMovie) {
+      where = { cardTitle: (payload as PayloadKp).id };
+    }
+    if (data.type === VotingOptionType.IgdbGame) {
+      where = { cardTitle: (payload as PayloadIgdb).slug };
+    }
 
     const sameVotingOption = await this.votingOptionRepo.findOne({
       where: { voting: { id: data.votingId }, ...where },
@@ -177,11 +184,11 @@ export class VotingOptionsService {
     if (sameVotingOption) throw new BadRequestException();
 
     if (data.type === VotingOptionType.KinopoiskMovie) {
-      return await this.getKinopoiskMovieCard((payload as WithId).id);
+      return await this.getKinopoiskMovieCard((payload as PayloadKp).id);
     }
 
     if (data.type === VotingOptionType.IgdbGame) {
-      return await this.getIgdbGameCard((payload as WithId).id);
+      return await this.getIgdbGameCard((payload as PayloadIgdb).slug);
     }
 
     return this.getCustomCard(payload);
@@ -206,7 +213,7 @@ export class VotingOptionsService {
       .join(' - ')}`;
 
     return {
-      cardId: kinopoiskId,
+      cardId: `${kinopoiskId}`,
       cardTitle: nameRu,
       cardSubtitle: nameEn,
       cardDescription,
@@ -215,8 +222,8 @@ export class VotingOptionsService {
     };
   }
 
-  private async getIgdbGameCard(gameId: number): Promise<VotingOptionCard> {
-    const body = `fields cover.image_id,first_release_date,genres.name,name,release_dates,slug; where id=${gameId};`;
+  private async getIgdbGameCard(gameSlug: string): Promise<VotingOptionCard> {
+    const body = `fields cover.image_id,first_release_date,genres.name,name,release_dates,slug; where slug=${gameSlug};`;
     let response;
 
     try {

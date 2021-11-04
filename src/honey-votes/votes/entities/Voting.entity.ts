@@ -9,7 +9,11 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiProperty,
+  ApiPropertyOptional,
+} from '@nestjs/swagger';
 import { User } from '../../users/entities/User.entity';
 import { Vote } from './Vote.entity';
 import { VotingOption } from './VotingOption.entity';
@@ -26,6 +30,7 @@ import {
   VOTING_PERMISSIONS_DEFAULT,
 } from '../votes.constants';
 
+@ApiExtraModels(Vote)
 @Entity(VOTING_TABLE_NAME)
 export class Voting {
   static readonly tableName = VOTING_TABLE_NAME;
