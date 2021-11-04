@@ -27,14 +27,12 @@ import { VotingPermissions } from './VotingPermissions';
 export class AddVotingDtoBase {
   @IsString()
   @IsOptional()
-  @IsNotEmpty()
   @MaxLength(VOTING_TITLE_MAX_LENGTH)
   @ApiPropertyOptional()
   title?: string;
 
   @IsString()
   @IsOptional()
-  @IsNotEmpty()
   @MaxLength(VOTING_DESCRIPTION_MAX_LENGTH)
   @ApiPropertyOptional()
   description?: string;
