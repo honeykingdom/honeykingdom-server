@@ -19,8 +19,8 @@ import { JwtStrategyUser } from '../../auth/auth.interface';
 import { PassportUser } from '../../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../../honey-votes.interface';
-import { AddVoteDto } from '../dto/addVoteDto';
-import { RemoveVoteDto } from '../dto/deleteVoteDto';
+import { CreateVoteDto } from '../dto/create-vote.dto';
+import { DeleteVoteDto } from '../dto/delete-vote.dto';
 import { VotesService } from './votes.service';
 import { validationPipe } from '../../honey-votes.validation';
 
@@ -39,9 +39,9 @@ export class VotesController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   addVote(
     @PassportUser() user: JwtStrategyUser,
-    @Body() addVoteDto: AddVoteDto,
+    @Body() data: CreateVoteDto,
   ): Promise<void> {
-    return this.votesService.addVote(user.id, addVoteDto);
+    return this.votesService.addVote(user.id, data);
   }
 
   @Delete('/votes')
@@ -50,8 +50,8 @@ export class VotesController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   removeVote(
     @PassportUser() user: JwtStrategyUser,
-    @Body() removeVoteDto: RemoveVoteDto,
+    @Body() data: DeleteVoteDto,
   ): Promise<void> {
-    return this.votesService.removeVote(user.id, removeVoteDto);
+    return this.votesService.removeVote(user.id, data);
   }
 }

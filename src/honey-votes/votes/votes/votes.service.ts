@@ -8,8 +8,8 @@ import { Connection, Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
 import { User } from '../../users/entities/User.entity';
 import { UsersService } from '../../users/users.service';
-import { AddVoteDto } from '../dto/addVoteDto';
-import { RemoveVoteDto } from '../dto/deleteVoteDto';
+import { CreateVoteDto } from '../dto/create-vote.dto';
+import { DeleteVoteDto } from '../dto/delete-vote.dto';
 import { Vote } from '../entities/Vote.entity';
 import { Voting } from '../entities/Voting.entity';
 import { VotingOption } from '../entities/VotingOption.entity';
@@ -26,7 +26,10 @@ export class VotesService {
     private readonly connection: Connection,
   ) {}
 
-  async addVote(userId: string, { votingOptionId }: AddVoteDto): Promise<void> {
+  async addVote(
+    userId: string,
+    { votingOptionId }: CreateVoteDto,
+  ): Promise<void> {
     const hasAccess = await this.canCreateVote(userId, votingOptionId);
 
     if (!hasAccess) throw new ForbiddenException();
@@ -96,7 +99,7 @@ export class VotesService {
 
   async removeVote(
     userId: string,
-    { votingOptionId }: RemoveVoteDto,
+    { votingOptionId }: DeleteVoteDto,
   ): Promise<void> {
     const queryRunner = this.connection.createQueryRunner();
 

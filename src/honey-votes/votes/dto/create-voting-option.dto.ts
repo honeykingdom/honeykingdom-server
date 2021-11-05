@@ -42,7 +42,7 @@ class VotingOptionCustom {
   description?: string;
 }
 
-export class AddVotingOptionDto {
+export class CreateVotingOptionDto {
   @IsInt()
   @IsPositive()
   @ApiProperty()

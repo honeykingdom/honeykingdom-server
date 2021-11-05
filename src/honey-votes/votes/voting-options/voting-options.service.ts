@@ -11,7 +11,7 @@ import { UsersService } from '../../users/users.service';
 import { KinopoiskApiService } from '../../../kinopoisk-api/kinopoisk-api.service';
 import { GetFilmData } from '../../../kinopoisk-api/kinopoisk-api.interface';
 import { IgdbApiService } from '../../../igdb-api/igdb-api.service';
-import { AddVotingOptionDto } from '../dto/addVotingOptionDto';
+import { CreateVotingOptionDto } from '../dto/create-voting-option.dto';
 import { VotingOptionType } from '../../honey-votes.interface';
 import {
   VotingOption,
@@ -37,7 +37,7 @@ export class VotingOptionsService {
 
   async addVotingOption(
     userId: string,
-    data: AddVotingOptionDto,
+    data: CreateVotingOptionDto,
   ): Promise<VotingOption> {
     const { votingId, type } = data;
 
@@ -158,12 +158,12 @@ export class VotingOptionsService {
     return true;
   }
 
-  private async getVotingOptionCard(data: AddVotingOptionDto) {
+  private async getVotingOptionCard(data: CreateVotingOptionDto) {
     const payload = data[data.type];
 
-    type PayloadCustom = AddVotingOptionDto[VotingOptionType.Custom];
-    type PayloadKp = AddVotingOptionDto[VotingOptionType.KinopoiskMovie];
-    type PayloadIgdb = AddVotingOptionDto[VotingOptionType.IgdbGame];
+    type PayloadCustom = CreateVotingOptionDto[VotingOptionType.Custom];
+    type PayloadKp = CreateVotingOptionDto[VotingOptionType.KinopoiskMovie];
+    type PayloadIgdb = CreateVotingOptionDto[VotingOptionType.IgdbGame];
 
     let where = {};
 

@@ -24,7 +24,7 @@ import {
 } from '../votes.constants';
 import { VotingPermissions } from './VotingPermissions';
 
-export class AddVotingDtoBase {
+export class CreateVotingDtoBase {
   @IsString()
   @IsOptional()
   @MaxLength(VOTING_TITLE_MAX_LENGTH)
@@ -69,7 +69,7 @@ export class AddVotingDtoBase {
   votingOptionsLimit?: number;
 }
 
-export class AddVotingDto extends AddVotingDtoBase {
+export class CreateVotingDto extends CreateVotingDtoBase {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()

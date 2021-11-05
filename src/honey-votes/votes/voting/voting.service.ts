@@ -8,8 +8,8 @@ import { Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
 import { User } from '../../users/entities/User.entity';
 import { UsersService } from '../../users/users.service';
-import { AddVotingDto } from '../dto/addVotingDto';
-import { UpdateVotingDto } from '../dto/updateVotingDto';
+import { CreateVotingDto } from '../dto/create-voting.dto';
+import { UpdateVotingDto } from '../dto/update-voting.dto';
 import { Voting } from '../entities/Voting.entity';
 
 @Injectable()
@@ -40,7 +40,7 @@ export class VotingService {
   // TODO: add voting limit that users can create
   async addVoting(
     userId: string,
-    { channelId, ...data }: AddVotingDto,
+    { channelId, ...data }: CreateVotingDto,
   ): Promise<Voting> {
     const hasAccess = await this.canCreateVoting(userId, channelId);
 

@@ -21,7 +21,7 @@ import { JwtStrategyUser } from '../../auth/auth.interface';
 import { PassportUser } from '../../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../../honey-votes.interface';
-import { AddVotingOptionDto } from '../dto/addVotingOptionDto';
+import { CreateVotingOptionDto } from '../dto/create-voting-option.dto';
 import { validationPipe } from '../../honey-votes.validation';
 import { VotingOptionsService } from './voting-options.service';
 import { VotingOption } from '../entities/VotingOption.entity';
@@ -41,7 +41,7 @@ export class VotingOptionsController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   addVotingOption(
     @PassportUser() user: JwtStrategyUser,
-    @Body() data: AddVotingOptionDto,
+    @Body() data: CreateVotingOptionDto,
   ): Promise<VotingOption> {
     return this.votingOptionsService.addVotingOption(user.id, data);
   }
