@@ -37,6 +37,10 @@ export class VotingOption {
   @ApiProperty()
   authorId: string;
 
+  @Column({ default: '' })
+  @ApiProperty()
+  authorLogin: string;
+
   @ManyToOne(() => Voting, (voting) => voting.votingOptions, {
     onDelete: 'CASCADE',
   })
