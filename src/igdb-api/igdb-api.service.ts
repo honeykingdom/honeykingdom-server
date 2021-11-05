@@ -24,11 +24,12 @@ export class IgdbApiService {
     this.accessToken = configService.get<string>('IGDB_ACCESS_TOKEN');
   }
 
-  game(body: string) {
+  game(data: string) {
     const url = 'https://api.igdb.com/v4/games';
-    const config = { body, headers: this.getHeaders() };
 
-    return lastValueFrom(this.httpService.post(url, config));
+    return lastValueFrom(
+      this.httpService.post(url, data, { headers: this.getHeaders() }),
+    );
   }
 
   private getHeaders() {
