@@ -25,8 +25,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../honey-votes.interface';
 import { validationPipe } from '../honey-votes.validation';
 import { ChatVotesService } from './chat-votes.service';
-import { AddChatVotingDto } from './dto/addChatVotingDto';
-import { UpdateChatVotingDto } from './dto/updateChatVotingDto';
+import { CreateChatVotingDto } from './dto/create-chat-voting.dto';
+import { UpdateChatVotingDto } from './dto/update-chat-voting.dto';
 import { ChatVoting } from './entities/ChatVoting.entity';
 
 @ApiTags('HoneyVotes - Chat Votes')
@@ -44,7 +44,7 @@ export class ChatVotesController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   async addChatVoting(
     @PassportUser() user: JwtStrategyUser,
-    @Body() data: AddChatVotingDto,
+    @Body() data: CreateChatVotingDto,
   ): Promise<ChatVoting> {
     return this.chatVotesService.addChatVoting(user.id, data);
   }

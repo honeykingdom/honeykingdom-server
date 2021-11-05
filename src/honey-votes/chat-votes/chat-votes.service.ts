@@ -14,17 +14,17 @@ import {
 } from '../../app.constants';
 import { ChatVote } from './entities/ChatVote.entity';
 import { ChatVoting } from './entities/ChatVoting.entity';
-import { UpdateChatVotingDto } from './dto/updateChatVotingDto';
+import { UpdateChatVotingDto } from './dto/update-chat-voting.dto';
 import {
-  AddChatVotingDto,
-  ChatVotingRestrictions,
-} from './dto/addChatVotingDto';
+  CreateChatVotingDto,
+  ChatVotingPermissions,
+} from './dto/create-chat-voting.dto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/User.entity';
 import { SubTier } from '../honey-votes.interface';
 import {
   CHAT_VOTING_COMMANDS_DEFAULT,
-  CHAT_VOTING_RESTRICTIONS_DEFAULT,
+  CHAT_VOTING_PERMISSIONS_DEFAULT,
 } from './chat-votes.constants';
 
 @Injectable()
@@ -68,7 +68,7 @@ export class ChatVotesService {
   // TODO: refactor this
   async addChatVoting(
     initiatorId: string,
-    { broadcasterId, ...data }: AddChatVotingDto,
+    { broadcasterId, ...data }: CreateChatVotingDto,
   ): Promise<ChatVoting> {
     let broadcaster: User;
 
@@ -92,7 +92,7 @@ export class ChatVotesService {
 
     this.onChatVotingChange(broadcaster, {
       listening: data.listening,
-      restrictions: data.restrictions || CHAT_VOTING_RESTRICTIONS_DEFAULT,
+      permissions: data.permissions || CHAT_VOTING_PERMISSIONS_DEFAULT,
       commands: data.commands || CHAT_VOTING_COMMANDS_DEFAULT,
     });
 
@@ -172,7 +172,7 @@ export class ChatVotesService {
 
   private onChatVotingChange(
     broadcaster: User,
-    { listening, restrictions, commands }: UpdateChatVotingDto,
+    { listening, permissions, commands }: UpdateChatVotingDto,
   ) {
     if (listening === true) {
       this.twitchChatService.joinChannel(
@@ -188,10 +188,13 @@ export class ChatVotesService {
       );
     }
 
-    if (restrictions) {
+    if (permissions) {
       const chatVoting = this.chatVotingList.get(broadcaster.id);
 
-      this.chatVotingList.set(broadcaster.id, { ...chatVoting, restrictions });
+      this.chatVotingList.set(broadcaster.id, {
+        ...chatVoting,
+        permissions,
+      });
     }
 
     if (commands) {
@@ -277,7 +280,7 @@ export class ChatVotesService {
     if (!vote) return;
 
     if (
-      !ChatVotesService.isUserCanVote(privateMessage, chatVoting.restrictions)
+      !ChatVotesService.isUserCanVote(privateMessage, chatVoting.permissions)
     ) {
       return;
     }
@@ -301,7 +304,7 @@ export class ChatVotesService {
       viewer,
       subMonthsRequired,
       subTierRequired,
-    }: ChatVotingRestrictions,
+    }: ChatVotingPermissions,
   ) {
     if (viewer) return true;
     if (sub && this.isSub(message, subMonthsRequired, subTierRequired)) {

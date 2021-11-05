@@ -15,7 +15,7 @@ import { Type } from 'class-transformer';
 import { SubTier, TwitchUserType } from '../../honey-votes.interface';
 import { CHAT_VOTING_COMMAND_MAX_LENGTH } from '../chat-votes.constants';
 
-export class ChatVotingRestrictions {
+export class ChatVotingPermissions {
   @IsBoolean()
   @ApiProperty()
   [TwitchUserType.Viewer]: boolean;
@@ -57,12 +57,12 @@ export class ChatVotingCommands {
   clearVotes: string;
 }
 
-export class AddChatVotingDtoBase {
+export class CreateChatVotingDtoBase {
   @IsOptional()
   @ValidateNested()
-  @Type(() => ChatVotingRestrictions)
+  @Type(() => ChatVotingPermissions)
   @ApiPropertyOptional()
-  restrictions?: ChatVotingRestrictions;
+  permissions?: ChatVotingPermissions;
 
   @IsOptional()
   @IsBoolean()
@@ -76,7 +76,7 @@ export class AddChatVotingDtoBase {
   commands?: ChatVotingCommands;
 }
 
-export class AddChatVotingDto extends AddChatVotingDtoBase {
+export class CreateChatVotingDto extends CreateChatVotingDtoBase {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()

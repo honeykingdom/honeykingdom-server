@@ -14,11 +14,11 @@ import { ChatVote } from './ChatVote.entity';
 import { User } from '../../users/entities/User.entity';
 import {
   ChatVotingCommands,
-  ChatVotingRestrictions,
-} from '../dto/addChatVotingDto';
+  ChatVotingPermissions,
+} from '../dto/create-chat-voting.dto';
 import {
   CHAT_VOTING_COMMANDS_DEFAULT,
-  CHAT_VOTING_RESTRICTIONS_DEFAULT,
+  CHAT_VOTING_PERMISSIONS_DEFAULT,
   CHAT_VOTING_TABLE_NAME,
 } from '../chat-votes.constants';
 
@@ -38,9 +38,9 @@ export class ChatVoting {
   @ApiProperty()
   broadcasterId: string;
 
-  @Column({ type: 'jsonb', default: CHAT_VOTING_RESTRICTIONS_DEFAULT })
+  @Column({ type: 'jsonb', default: CHAT_VOTING_PERMISSIONS_DEFAULT })
   @ApiProperty()
-  restrictions: ChatVotingRestrictions;
+  permissions: ChatVotingPermissions;
 
   @Column({ default: false })
   @ApiProperty()

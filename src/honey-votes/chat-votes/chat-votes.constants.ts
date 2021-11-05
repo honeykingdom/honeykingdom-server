@@ -1,15 +1,15 @@
 import { SubTier, TwitchUserType } from '../honey-votes.interface';
 import {
   ChatVotingCommands,
-  ChatVotingRestrictions,
-} from './dto/addChatVotingDto';
+  ChatVotingPermissions,
+} from './dto/create-chat-voting.dto';
 
 // TODO: export all the constants to the frontend
 
 export const CHAT_VOTING_TABLE_NAME = 'hv_chat_voting';
 export const CHAT_VOTE_TABLE_NAME = 'hv_chat_vote';
 
-export const CHAT_VOTING_RESTRICTIONS_DEFAULT: ChatVotingRestrictions = {
+export const CHAT_VOTING_PERMISSIONS_DEFAULT: ChatVotingPermissions = {
   [TwitchUserType.Viewer]: false,
   [TwitchUserType.Sub]: true,
   [TwitchUserType.Mod]: true,
