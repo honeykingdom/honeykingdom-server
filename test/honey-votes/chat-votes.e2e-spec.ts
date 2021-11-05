@@ -28,7 +28,7 @@ import {
 describe('HoneyVotes - ChatVotes (e2e)', () => {
   const ctx = getHoneyVotesTestContext();
 
-  const chatVotingRestrictionsForbidden: ChatVotingPermissions = {
+  const chatVotingPermissionsForbidden: ChatVotingPermissions = {
     [TwitchUserType.Viewer]: false,
     [TwitchUserType.Sub]: false,
     [TwitchUserType.Mod]: false,
@@ -37,8 +37,8 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     subTierRequired: SubTier.Tier1,
   };
 
-  const defaultChatVotingParams = {
-    restrictions: CHAT_VOTING_PERMISSIONS_DEFAULT,
+  const defaultChatVotingParams: Partial<ChatVoting> = {
+    permissions: CHAT_VOTING_PERMISSIONS_DEFAULT,
     listening: false,
     commands: CHAT_VOTING_COMMANDS_DEFAULT,
   };
@@ -374,13 +374,13 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await testValidation(HttpStatus.FORBIDDEN, { broadcasterId: '1' });
       });
 
-      test('restrictions: wrong type', async () => {
+      test('permissions: wrong type', async () => {
         await testValidation(HttpStatus.BAD_REQUEST, {
           permissions: '' as any,
         });
       });
 
-      test('restrictions: missing fields', async () => {
+      test('permissions: missing fields', async () => {
         await testValidation(HttpStatus.BAD_REQUEST, {
           permissions: {
             [TwitchUserType.Viewer]: false,
@@ -391,7 +391,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         });
       });
 
-      test('restrictions: valid', async () => {
+      test('permissions: valid', async () => {
         await testValidation(HttpStatus.CREATED, {
           permissions: {
             [TwitchUserType.Viewer]: true,
@@ -725,7 +725,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       it.todo('should skip empty messages');
     });
 
-    describe('restrictions', () => {
+    describe('permissions', () => {
       it.todo('should vote by mods');
 
       it.todo('should not vote by mods');

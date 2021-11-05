@@ -32,6 +32,7 @@ import {
   mockGetUserFollows,
 } from './mock-requests';
 import { HoneyVotesTestContext } from './getHoneyVotesTestContext';
+import { DeleteVoteDto } from '../../../src/honey-votes/votes/dto/delete-vote.dto';
 
 const defaultVotingParams: Partial<Voting> = {
   id: expect.any(Number),
@@ -634,7 +635,7 @@ export const createTestDeleteVote =
       initiator,
       initiatorTypes,
       votingParams = {},
-      url,
+      votingOptionId,
       onBeforeTest = () => {},
     }: {
       broadcaster: User;
@@ -645,7 +646,7 @@ export const createTestDeleteVote =
       votingParams?: Partial<Omit<Voting, 'permissions'>> & {
         permissions?: DeepPartial<VotingPermissions>;
       };
-      url?: string;
+      votingOptionId?: number;
       onBeforeTest?: OnBeforeTest<{
         voting: Voting;
         votingOption: VotingOption;
@@ -672,6 +673,9 @@ export const createTestDeleteVote =
       voting,
       votingOption,
     } as Vote);
+    const body: DeleteVoteDto = {
+      votingOptionId: votingOptionId || votingOption.id,
+    };
     const expectedVote = {
       ...defaultVoteParams,
       authorId: voteAuthor.id,
@@ -683,11 +687,12 @@ export const createTestDeleteVote =
 
     const onAfterTest = await onBeforeTest({ voting, votingOption, vote });
 
-    const finalUrl = url || `${API_BASE}/votes/${vote.id}`;
+    const url = `${API_BASE}/votes`;
 
     if (expectedStatusCode === HttpStatus.OK) {
       await request(ctx.app.getHttpServer())
-        .delete(finalUrl)
+        .delete(url)
+        .send(body)
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
@@ -696,7 +701,8 @@ export const createTestDeleteVote =
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
       await request(ctx.app.getHttpServer())
-        .delete(finalUrl)
+        .delete(url)
+        .send(body)
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 

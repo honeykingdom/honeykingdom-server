@@ -432,7 +432,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
     });
   });
 
-  describe('/votes/:voteId (DELETE)', () => {
+  describe('/votes (DELETE)', () => {
     describe('permissions', () => {
       it('should delete Vote by author', async () => {
         const [user, viewer] = await ctx.createUsers();
@@ -475,7 +475,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           votingParams: {
             permissions: { [TwitchUserType.Viewer]: { canVote: true } },
           },
-          url: `${API_BASE}/votes/${POSTGRES_MAX_INTEGER}`,
+          votingOptionId: POSTGRES_MAX_INTEGER,
         });
       });
     });
