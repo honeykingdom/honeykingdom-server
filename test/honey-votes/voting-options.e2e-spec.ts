@@ -379,7 +379,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
                 author: user,
                 voting,
                 type: VotingOptionType.KinopoiskMovie,
-                cardId: movieId,
+                cardId: `${movieId}`,
                 cardTitle: '',
                 cardSubtitle: '',
                 cardDescription: '',
@@ -396,7 +396,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       describe('dto validation', () => {
         it('with required fields', async () => {
           const [user] = await ctx.createUsers();
-          const gameId = 379;
+          const gameSlug = 'metal-gear-solid-3-snake-eater';
 
           mockIgdbGames([game379]);
 
@@ -405,11 +405,11 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             initiator: user,
             createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
-              [VotingOptionType.IgdbGame]: { id: gameId },
+              [VotingOptionType.IgdbGame]: { slug: gameSlug },
             },
             expectedVotingOptionParams: {
               type: VotingOptionType.IgdbGame,
-              cardId: gameId,
+              cardId: gameSlug,
               cardTitle: expect.any(String),
               cardDescription: expect.any(String),
               cardImageUrl: expect.any(String),
@@ -440,7 +440,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             initiator: user,
             createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
-              [VotingOptionType.IgdbGame]: { id: false as any },
+              [VotingOptionType.IgdbGame]: { slug: false as any },
             },
           });
         });
@@ -455,14 +455,14 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             initiator: user,
             createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
-              [VotingOptionType.IgdbGame]: { id: 379.5 },
+              [VotingOptionType.IgdbGame]: { slug: '' },
             },
           });
         });
 
         it('id: non existing', async () => {
           const [user] = await ctx.createUsers();
-          const gameId = 1;
+          const gameSlug = 'non-existing-game';
 
           mockIgdbGames([]);
 
@@ -471,7 +471,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             initiator: user,
             createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
-              [VotingOptionType.IgdbGame]: { id: gameId },
+              [VotingOptionType.IgdbGame]: { slug: gameSlug },
             },
           });
         });
@@ -480,7 +480,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
       describe('logic', () => {
         it('should not create VotingOption if its already exists with same id', async () => {
           const [user] = await ctx.createUsers();
-          const gameId = 379;
+          const gameSlug = 'metal-gear-solid-3-snake-eater';
 
           mockIgdbGames([game379]);
 
@@ -489,7 +489,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
             initiator: user,
             createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
-              [VotingOptionType.IgdbGame]: { id: gameId },
+              [VotingOptionType.IgdbGame]: { slug: gameSlug },
             },
             skipDbCheck: true,
             onBeforeTest: async ({ voting }) => {
@@ -497,7 +497,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
                 author: user,
                 voting,
                 type: VotingOptionType.IgdbGame,
-                cardId: gameId,
+                cardId: gameSlug,
                 cardTitle: '',
                 cardSubtitle: '',
                 cardDescription: '',
