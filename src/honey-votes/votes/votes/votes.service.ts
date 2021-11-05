@@ -6,6 +6,7 @@ import {
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
+import { User } from '../../users/entities/User.entity';
 import { UsersService } from '../../users/users.service';
 import { AddVoteDto } from '../dto/addVoteDto';
 import { RemoveVoteDto } from '../dto/deleteVoteDto';
@@ -97,23 +98,26 @@ export class VotesService {
     userId: string,
     { votingOptionId }: RemoveVoteDto,
   ): Promise<void> {
-    const hasAccess = await this.canDeleteVote(userId, votingOptionId);
-
-    if (!hasAccess) throw new ForbiddenException();
-
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const vote = await queryRunner.manager.findOne(Vote, {
-        where: {
-          author: { id: userId },
-          votingOption: { id: votingOptionId },
-        },
-        relations: ['votingOption'],
-      });
+      const [user, vote] = await Promise.all([
+        queryRunner.manager.findOne(User, userId),
+        queryRunner.manager.findOne(Vote, {
+          where: {
+            author: { id: userId },
+            votingOption: { id: votingOptionId },
+          },
+          relations: ['author', 'voting', 'votingOption'],
+        }),
+      ]);
+
+      const hasAccess = await this.canDeleteVote(user, vote);
+
+      if (!hasAccess) throw new ForbiddenException();
 
       vote.votingOption.fullVotesValue -= vote.value;
 
@@ -170,18 +174,7 @@ export class VotesService {
     return false;
   }
 
-  private async canDeleteVote(userId: string, votingOptionId: number) {
-    const [user, vote] = await Promise.all([
-      this.usersService.findOne(userId),
-      this.voteRepo.findOne({
-        where: {
-          author: { id: userId },
-          votingOption: { id: votingOptionId },
-        },
-        relations: ['author', 'voting'],
-      }),
-    ]);
-
+  private async canDeleteVote(user: User, vote: Vote) {
     if (!vote || !user) return false;
     if (vote.author.id !== user.id) return false;
     if (!vote.voting.canManageVotes) return false;
