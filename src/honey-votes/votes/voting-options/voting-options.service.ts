@@ -171,10 +171,10 @@ export class VotingOptionsService {
       where = { cardTitle: (payload as PayloadCustom).title };
     }
     if (data.type === VotingOptionType.KinopoiskMovie) {
-      where = { cardTitle: (payload as PayloadKp).id };
+      where = { cardId: (payload as PayloadKp).id };
     }
     if (data.type === VotingOptionType.IgdbGame) {
-      where = { cardTitle: (payload as PayloadIgdb).slug };
+      where = { cardId: (payload as PayloadIgdb).slug };
     }
 
     const sameVotingOption = await this.votingOptionRepo.findOne({
@@ -235,7 +235,6 @@ export class VotingOptionsService {
     if (response.data.length === 0) throw new BadRequestException();
 
     const {
-      id,
       cover: { image_id },
       first_release_date,
       genres,
@@ -250,7 +249,7 @@ export class VotingOptionsService {
       .join(' - ')}`;
 
     return {
-      cardId: id,
+      cardId: slug,
       cardTitle: name,
       cardDescription,
       cardImageUrl: `https://images.igdb.com/igdb/image/upload/t_cover_big/${image_id}.jpg`,
