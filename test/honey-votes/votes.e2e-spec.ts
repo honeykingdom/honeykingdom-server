@@ -253,7 +253,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: user,
-          addVoteDto: { votingOptionId: POSTGRES_MAX_INTEGER },
+          createVoteDto: { votingOptionId: POSTGRES_MAX_INTEGER },
         });
       });
 
@@ -264,7 +264,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: user,
-          addVoteDto: { votingOptionId: undefined },
+          createVoteDto: { votingOptionId: undefined },
         });
       });
     });

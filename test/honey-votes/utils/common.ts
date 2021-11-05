@@ -13,11 +13,11 @@ import { User } from '../../../src/honey-votes/users/entities/User.entity';
 import { Vote } from '../../../src/honey-votes/votes/entities/Vote.entity';
 import { Voting } from '../../../src/honey-votes/votes/entities/Voting.entity';
 import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
-import { AddVotingDto } from '../../../src/honey-votes/votes/dto/addVotingDto';
+import { CreateVotingDto } from '../../../src/honey-votes/votes/dto/create-voting.dto';
 import { VotingPermissions } from '../../../src/honey-votes/votes/dto/VotingPermissions';
-import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/updateVotingDto';
-import { AddVotingOptionDto } from '../../../src/honey-votes/votes/dto/addVotingOptionDto';
-import { AddVoteDto } from '../../../src/honey-votes/votes/dto/addVoteDto';
+import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/update-voting.dto';
+import { CreateVotingOptionDto } from '../../../src/honey-votes/votes/dto/create-voting-option.dto';
+import { CreateVoteDto } from '../../../src/honey-votes/votes/dto/create-vote.dto';
 import {
   VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   VOTING_CAN_MANAGE_VOTES_DEFAULT,
@@ -154,21 +154,24 @@ export const createTestCreateVoting =
       broadcaster,
       initiator,
       initiatorTypes,
-      addVotingDto,
+      createVotingDto,
     }: {
       broadcaster: User;
       initiator: User;
       initiatorTypes?: UserTypes;
-      addVotingDto?: AddVotingDto;
+      createVotingDto?: CreateVotingDto;
     },
   ) => {
     const expectedVoting = {
       ...defaultVotingParams,
-      ...R.omit(['channelId'], addVotingDto),
+      ...R.omit(['channelId'], createVotingDto),
       broadcasterId: broadcaster.id,
     };
 
-    const body: AddVotingDto = { channelId: broadcaster.id, ...addVotingDto };
+    const body: CreateVotingDto = {
+      channelId: broadcaster.id,
+      ...createVotingDto,
+    };
 
     mockUserTypes(broadcaster, initiator, initiatorTypes);
 
@@ -331,7 +334,7 @@ export const createTestCreateVotingOption =
       initiator,
       initiatorTypes,
       votingParams = {},
-      addVotingOptionDto = {},
+      createVotingOptionDto = {},
       expectedVotingOptionParams = {},
       skipDbCheck = false,
       onBeforeTest = () => {},
@@ -342,7 +345,7 @@ export const createTestCreateVotingOption =
       votingParams?: Partial<Omit<Voting, 'permissions'>> & {
         permissions?: DeepPartial<VotingPermissions>;
       };
-      addVotingOptionDto?: Partial<AddVotingOptionDto>;
+      createVotingOptionDto?: Partial<CreateVotingOptionDto>;
       expectedVotingOptionParams?: Partial<VotingOption>;
       skipDbCheck?: boolean;
       onBeforeTest?: OnBeforeTest<{ voting: Voting }>;
@@ -355,11 +358,11 @@ export const createTestCreateVotingOption =
       ),
       broadcaster,
     } as Voting);
-    const body: AddVotingOptionDto = {
+    const body: CreateVotingOptionDto = {
       type: VotingOptionType.Custom,
       [VotingOptionType.Custom]: { title: 'Test VotingOption' },
       votingId: voting.id,
-      ...addVotingOptionDto,
+      ...createVotingOptionDto,
     };
     const expectedVotingOption = {
       ...defaultVotingOptionParams,
@@ -523,7 +526,7 @@ export const createTestCreateVote =
       initiator,
       initiatorTypes,
       votingParams = {},
-      addVoteDto,
+      createVoteDto,
       skipDbCheck,
       onBeforeTest = () => {},
     }: {
@@ -534,7 +537,7 @@ export const createTestCreateVote =
       votingParams?: Partial<Omit<Voting, 'permissions'>> & {
         permissions?: DeepPartial<VotingPermissions>;
       };
-      addVoteDto?: AddVoteDto;
+      createVoteDto?: CreateVoteDto;
       skipDbCheck?: boolean;
       onBeforeTest?: OnBeforeTest<{
         voting: Voting;
@@ -556,7 +559,7 @@ export const createTestCreateVote =
       cardTitle: 'Test VotingOption',
     } as VotingOption);
     const body = {
-      ...addVoteDto,
+      ...createVoteDto,
       votingOptionId: votingOption.id,
     };
     const expectedVote = {

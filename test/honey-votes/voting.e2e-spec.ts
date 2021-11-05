@@ -80,7 +80,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id },
+          createVotingDto: { channelId: user.id },
         });
       });
 
@@ -90,7 +90,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: undefined },
+          createVotingDto: { channelId: undefined },
         });
       });
 
@@ -100,7 +100,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             wrongField: 'test',
             anotherField: false,
@@ -114,7 +114,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id, title: 'Test Voting' },
+          createVotingDto: { channelId: user.id, title: 'Test Voting' },
         });
       });
 
@@ -124,7 +124,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id, title: false } as any,
+          createVotingDto: { channelId: user.id, title: false } as any,
         });
       });
 
@@ -134,7 +134,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             title: Array(VOTING_TITLE_MAX_LENGTH + 2).join('0'),
           },
@@ -147,7 +147,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             description: 'This is test voting',
           },
@@ -160,7 +160,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id, description: 123 } as any,
+          createVotingDto: { channelId: user.id, description: 123 } as any,
         });
       });
 
@@ -170,7 +170,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             description: Array(VOTING_DESCRIPTION_MAX_LENGTH + 2).join('0'),
           },
@@ -183,7 +183,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id, canManageVotes: false },
+          createVotingDto: { channelId: user.id, canManageVotes: false },
         });
       });
 
@@ -193,7 +193,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             canManageVotes: 'hello world',
           } as any,
@@ -206,7 +206,10 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id, canManageVotingOptions: false },
+          createVotingDto: {
+            channelId: user.id,
+            canManageVotingOptions: false,
+          },
         });
       });
 
@@ -216,7 +219,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             canManageVotingOptions: 1,
           } as any,
@@ -229,7 +232,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             permissions: {
               [TwitchUserType.Mod]: { canVote: true, canAddOptions: true },
@@ -258,7 +261,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             permissions: {
               [TwitchUserType.Mod]: { canVote: true, canAddOptions: true },
@@ -277,7 +280,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             allowedVotingOptionTypes: [
               VotingOptionType.IgdbGame,
@@ -293,7 +296,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             allowedVotingOptionTypes: false,
           } as any,
@@ -306,7 +309,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id, allowedVotingOptionTypes: [] },
+          createVotingDto: { channelId: user.id, allowedVotingOptionTypes: [] },
         });
       });
 
@@ -316,7 +319,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             allowedVotingOptionTypes: [
               VotingOptionType.IgdbGame,
@@ -332,7 +335,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             allowedVotingOptionTypes: ['hello world', 1, false],
           } as any,
@@ -345,7 +348,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id, votingOptionsLimit: 50 },
+          createVotingDto: { channelId: user.id, votingOptionsLimit: 50 },
         });
       });
 
@@ -355,7 +358,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             votingOptionsLimit: 'wrong type',
           } as any,
@@ -368,7 +371,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: { channelId: user.id, votingOptionsLimit: 10.5 },
+          createVotingDto: { channelId: user.id, votingOptionsLimit: 10.5 },
         });
       });
 
@@ -378,7 +381,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             votingOptionsLimit: VOTING_OPTIONS_LIMIT_MIN - 1,
           },
@@ -391,7 +394,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(400, {
           broadcaster: user,
           initiator: user,
-          addVotingDto: {
+          createVotingDto: {
             channelId: user.id,
             votingOptionsLimit: VOTING_OPTIONS_LIMIT_MAX + 1,
           },

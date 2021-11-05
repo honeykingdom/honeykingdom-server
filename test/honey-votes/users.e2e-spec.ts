@@ -18,7 +18,7 @@ import {
   RefreshTokenResponse,
   UnauthorizedResponse,
 } from '../../src/twitch-api/twitch-api.interface';
-import { AddVotingOptionDto } from '../../src/honey-votes/votes/dto/addVotingOptionDto';
+import { CreateVotingOptionDto } from '../../src/honey-votes/votes/dto/create-voting-option.dto';
 import { votingPermissionsForbidden } from './utils/common';
 import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 
@@ -173,7 +173,7 @@ describe('HoneyVotes - Users (e2e)', () => {
       broadcaster,
     } as Voting);
 
-    const body: AddVotingOptionDto = {
+    const body: CreateVotingOptionDto = {
       votingId: voting.id,
       type: VotingOptionType.Custom,
       [VotingOptionType.Custom]: { title: 'Test Voting' },

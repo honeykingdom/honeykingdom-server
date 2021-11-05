@@ -11,10 +11,10 @@ import {
 import { ChatVote } from '../../src/honey-votes/chat-votes/entities/ChatVote.entity';
 import { ChatVoting } from '../../src/honey-votes/chat-votes/entities/ChatVoting.entity';
 import {
-  AddChatVotingDto,
-  ChatVotingRestrictions,
-} from '../../src/honey-votes/chat-votes/dto/addChatVotingDto';
-import { UpdateChatVotingDto } from '../../src/honey-votes/chat-votes/dto/updateChatVotingDto';
+  CreateChatVotingDto,
+  ChatVotingPermissions,
+} from '../../src/honey-votes/chat-votes/dto/create-chat-voting.dto';
+import { UpdateChatVotingDto } from '../../src/honey-votes/chat-votes/dto/update-chat-voting.dto';
 import {
   getHoneyVotesTestContext,
   twitchChatServiceMock,
@@ -22,13 +22,13 @@ import {
 import {
   CHAT_VOTING_COMMANDS_DEFAULT,
   CHAT_VOTING_COMMAND_MAX_LENGTH,
-  CHAT_VOTING_RESTRICTIONS_DEFAULT,
+  CHAT_VOTING_PERMISSIONS_DEFAULT,
 } from '../../src/honey-votes/chat-votes/chat-votes.constants';
 
 describe('HoneyVotes - ChatVotes (e2e)', () => {
   const ctx = getHoneyVotesTestContext();
 
-  const chatVotingRestrictionsForbidden: ChatVotingRestrictions = {
+  const chatVotingRestrictionsForbidden: ChatVotingPermissions = {
     [TwitchUserType.Viewer]: false,
     [TwitchUserType.Sub]: false,
     [TwitchUserType.Mod]: false,
@@ -38,7 +38,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
   };
 
   const defaultChatVotingParams = {
-    restrictions: CHAT_VOTING_RESTRICTIONS_DEFAULT,
+    restrictions: CHAT_VOTING_PERMISSIONS_DEFAULT,
     listening: false,
     commands: CHAT_VOTING_COMMANDS_DEFAULT,
   };
@@ -52,19 +52,19 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       broadcaster,
       initiator,
       isEditor = false,
-      addChatVotingDto,
+      createChatVotingDto,
     }: {
       broadcaster: User;
       initiator: User;
       isEditor?: boolean;
-      addChatVotingDto?: AddChatVotingDto;
+      createChatVotingDto?: CreateChatVotingDto;
     },
   ) => {
     const expectedChatVoting = {
       createdAt: expect.anything(),
       updatedAt: expect.anything(),
       ...defaultChatVotingParams,
-      ...addChatVotingDto,
+      ...createChatVotingDto,
     };
 
     mockGetChannelEditors(isEditor ? [initiator] : []);
@@ -72,7 +72,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/chat-votes`)
       .set(...ctx.getAuthorizationHeader(initiator))
-      .send(addChatVotingDto)
+      .send(createChatVotingDto)
       .expect(expectedStatusCode)
       .expect((response) => {
         if (expectedStatusCode === HttpStatus.CREATED) {
@@ -309,7 +309,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
           initiator: broadcaster,
-          addChatVotingDto: { broadcasterId: broadcaster.id },
+          createChatVotingDto: { broadcasterId: broadcaster.id },
         });
       });
 
@@ -320,7 +320,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
           broadcaster: broadcaster,
           initiator: editor,
           isEditor: true,
-          addChatVotingDto: { broadcasterId: broadcaster.id },
+          createChatVotingDto: { broadcasterId: broadcaster.id },
         });
       });
 
@@ -330,7 +330,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await testCreateChatVoting(HttpStatus.FORBIDDEN, {
           broadcaster: broadcaster,
           initiator: viewer,
-          addChatVotingDto: { broadcasterId: broadcaster.id },
+          createChatVotingDto: { broadcasterId: broadcaster.id },
         });
       });
     });
@@ -338,8 +338,8 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
     describe('dto validation', () => {
       const testValidation = async (
         expectedStatusCode: Parameters<typeof testCreateChatVoting>[0],
-        addChatVotingDto: Partial<
-          Parameters<typeof testCreateChatVoting>[1]['addChatVotingDto']
+        createChatVotingDto: Partial<
+          Parameters<typeof testCreateChatVoting>[1]['createChatVotingDto']
         >,
       ) => {
         const [broadcaster] = await ctx.createUsers();
@@ -347,9 +347,9 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await testCreateChatVoting(expectedStatusCode, {
           broadcaster: broadcaster,
           initiator: broadcaster,
-          addChatVotingDto: {
+          createChatVotingDto: {
             broadcasterId: broadcaster.id,
-            ...addChatVotingDto,
+            ...createChatVotingDto,
           },
         });
       };
@@ -376,13 +376,13 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
       test('restrictions: wrong type', async () => {
         await testValidation(HttpStatus.BAD_REQUEST, {
-          restrictions: '' as any,
+          permissions: '' as any,
         });
       });
 
       test('restrictions: missing fields', async () => {
         await testValidation(HttpStatus.BAD_REQUEST, {
-          restrictions: {
+          permissions: {
             [TwitchUserType.Viewer]: false,
             [TwitchUserType.Sub]: false,
             [TwitchUserType.Mod]: false,
@@ -393,7 +393,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
       test('restrictions: valid', async () => {
         await testValidation(HttpStatus.CREATED, {
-          restrictions: {
+          permissions: {
             [TwitchUserType.Viewer]: true,
             [TwitchUserType.Sub]: true,
             [TwitchUserType.Mod]: true,
@@ -469,7 +469,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
           initiator: broadcaster,
-          addChatVotingDto: {
+          createChatVotingDto: {
             broadcasterId: broadcaster.id,
             listening: true,
           },
@@ -488,7 +488,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await testCreateChatVoting(HttpStatus.CREATED, {
           broadcaster: broadcaster,
           initiator: broadcaster,
-          addChatVotingDto: {
+          createChatVotingDto: {
             broadcasterId: broadcaster.id,
             listening: false,
           },

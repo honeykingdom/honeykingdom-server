@@ -253,7 +253,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: user,
-          addVotingOptionDto: { votingId: POSTGRES_MAX_INTEGER },
+          createVotingOptionDto: { votingId: POSTGRES_MAX_INTEGER },
         });
       });
 
@@ -266,7 +266,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(403, {
           broadcaster: user1,
           initiator: user1,
-          addVotingOptionDto: { votingId: voting.id },
+          createVotingOptionDto: { votingId: voting.id },
         });
       });
     });
@@ -282,13 +282,13 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(201, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.KinopoiskMovie,
               [VotingOptionType.KinopoiskMovie]: { id: movieId },
             },
             expectedVotingOptionParams: {
               type: VotingOptionType.KinopoiskMovie,
-              cardId: movieId,
+              cardId: `${movieId}`,
               cardTitle: expect.any(String),
               cardDescription: expect.any(String),
               cardImageUrl: expect.any(String),
@@ -306,7 +306,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: { type: VotingOptionType.KinopoiskMovie },
+            createVotingOptionDto: { type: VotingOptionType.KinopoiskMovie },
           });
         });
 
@@ -319,7 +319,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.KinopoiskMovie,
               [VotingOptionType.KinopoiskMovie]: { id: false as any },
             },
@@ -335,7 +335,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.KinopoiskMovie,
               [VotingOptionType.KinopoiskMovie]: { id: 371.5 },
             },
@@ -351,7 +351,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.KinopoiskMovie,
               [VotingOptionType.KinopoiskMovie]: { id: movieId },
             },
@@ -369,7 +369,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.KinopoiskMovie,
               [VotingOptionType.KinopoiskMovie]: { id: movieId },
             },
@@ -403,7 +403,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(201, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
               [VotingOptionType.IgdbGame]: { id: gameId },
             },
@@ -426,7 +426,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: { type: VotingOptionType.IgdbGame },
+            createVotingOptionDto: { type: VotingOptionType.IgdbGame },
           });
         });
 
@@ -438,14 +438,14 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
               [VotingOptionType.IgdbGame]: { id: false as any },
             },
           });
         });
 
-        it('id: not integer', async () => {
+        it('id: empty', async () => {
           const [user] = await ctx.createUsers();
 
           mockIgdbGames([game379]);
@@ -453,7 +453,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
               [VotingOptionType.IgdbGame]: { id: 379.5 },
             },
@@ -469,7 +469,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
               [VotingOptionType.IgdbGame]: { id: gameId },
             },
@@ -487,7 +487,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.IgdbGame,
               [VotingOptionType.IgdbGame]: { id: gameId },
             },
@@ -518,7 +518,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(201, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.Custom,
               [VotingOptionType.Custom]: {
                 title: 'Test VotingOption',
@@ -538,7 +538,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: { type: VotingOptionType.Custom },
+            createVotingOptionDto: { type: VotingOptionType.Custom },
           });
         });
 
@@ -548,7 +548,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               payload: { type: VotingOptionType.Custom, title: 123 },
             } as any,
           });
@@ -560,7 +560,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.Custom,
               [VotingOptionType.Custom]: {
                 title: Array(VOTING_OPTION_CARD_TITLE_MAX_LENGTH + 2).join('0'),
@@ -575,7 +575,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.Custom,
               [VotingOptionType.Custom]: {
                 title: 'Test VotingOption',
@@ -591,7 +591,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.Custom,
               [VotingOptionType.Custom]: {
                 title: 'Test VotingOption',
@@ -611,7 +611,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           await testCreateVotingOption(400, {
             broadcaster: user,
             initiator: user,
-            addVotingOptionDto: {
+            createVotingOptionDto: {
               type: VotingOptionType.Custom,
               [VotingOptionType.Custom]: { title: 'Test VotingOption' },
             },
