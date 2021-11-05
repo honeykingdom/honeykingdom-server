@@ -8,7 +8,7 @@ import { Config } from '../config/config.interface';
 import { InjectChat } from '../twitch-chat/twitch-chat.decorators';
 import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
 import { Message } from '../recent-messages/entities/message.entity';
-import { RecentMessagesResponse } from '../recent-messages/recent.messages.interface';
+import { RecentMessagesResponse } from './recent-messages.interface';
 
 @Injectable()
 export class RecentMessagesService {

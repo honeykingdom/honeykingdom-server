@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { lastValueFrom } from 'rxjs';
 import { Config } from '../config/config.interface';
 import { RecentMessagesService } from '../recent-messages/recent-messages.service';
-import { RecentMessagesResponse } from '../recent-messages/recent.messages.interface';
+import { RecentMessagesResponse } from './recent-messages.interface';
 
 @Controller('api/v1/recent-messages')
 export class RecentMessagesController {
