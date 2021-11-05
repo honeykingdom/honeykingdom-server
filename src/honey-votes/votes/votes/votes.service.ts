@@ -8,6 +8,7 @@ import { Connection, Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
 import { UsersService } from '../../users/users.service';
 import { AddVoteDto } from '../dto/addVoteDto';
+import { RemoveVoteDto } from '../dto/deleteVoteDto';
 import { Vote } from '../entities/Vote.entity';
 import { Voting } from '../entities/Voting.entity';
 import { VotingOption } from '../entities/VotingOption.entity';
@@ -92,8 +93,11 @@ export class VotesService {
     }
   }
 
-  async removeVote(userId: string, voteId: number): Promise<void> {
-    const hasAccess = await this.canDeleteVote(userId, voteId);
+  async removeVote(
+    userId: string,
+    { votingOptionId }: RemoveVoteDto,
+  ): Promise<void> {
+    const hasAccess = await this.canDeleteVote(userId, votingOptionId);
 
     if (!hasAccess) throw new ForbiddenException();
 
@@ -104,14 +108,17 @@ export class VotesService {
 
     try {
       const vote = await queryRunner.manager.findOne(Vote, {
-        where: { id: voteId },
+        where: {
+          author: { id: userId },
+          votingOption: { id: votingOptionId },
+        },
         relations: ['votingOption'],
       });
 
       vote.votingOption.fullVotesValue -= vote.value;
 
       await Promise.all([
-        queryRunner.manager.delete(Vote, voteId),
+        queryRunner.manager.delete(Vote, vote.id),
         queryRunner.manager.save(VotingOption, vote.votingOption),
       ]);
 
@@ -163,10 +170,16 @@ export class VotesService {
     return false;
   }
 
-  private async canDeleteVote(userId: string, voteId: number) {
+  private async canDeleteVote(userId: string, votingOptionId: number) {
     const [user, vote] = await Promise.all([
-      this.usersService.findOne(userId, { relations: ['credentials'] }),
-      this.voteRepo.findOne(voteId, { relations: ['author', 'voting'] }),
+      this.usersService.findOne(userId),
+      this.voteRepo.findOne({
+        where: {
+          author: { id: userId },
+          votingOption: { id: votingOptionId },
+        },
+        relations: ['author', 'voting'],
+      }),
     ]);
 
     if (!vote || !user) return false;

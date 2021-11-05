@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Param,
-  ParseIntPipe,
   Post,
   UseGuards,
   UsePipes,
@@ -22,6 +20,7 @@ import { PassportUser } from '../../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../../honey-votes.interface';
 import { AddVoteDto } from '../dto/addVoteDto';
+import { RemoveVoteDto } from '../dto/deleteVoteDto';
 import { VotesService } from './votes.service';
 import { validationPipe } from '../../honey-votes.validation';
 
@@ -45,14 +44,14 @@ export class VotesController {
     return this.votesService.addVote(user.id, addVoteDto);
   }
 
-  @Delete('/votes/:voteId')
+  @Delete('/votes')
   @ApiOkResponse({ description: 'OK' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   removeVote(
     @PassportUser() user: JwtStrategyUser,
-    @Param('voteId', ParseIntPipe) voteId: number,
+    @Body() removeVoteDto: RemoveVoteDto,
   ): Promise<void> {
-    return this.votesService.removeVote(user.id, voteId);
+    return this.votesService.removeVote(user.id, removeVoteDto);
   }
 }
