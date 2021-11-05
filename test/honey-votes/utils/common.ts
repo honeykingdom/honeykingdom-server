@@ -365,9 +365,10 @@ export const createTestCreateVotingOption =
       votingId: voting.id,
       ...createVotingOptionDto,
     };
-    const expectedVotingOption = {
+    const expectedVotingOption: Partial<VotingOption> = {
       ...defaultVotingOptionParams,
       authorId: initiator.id,
+      authorLogin: '',
       votingId: voting.id,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
