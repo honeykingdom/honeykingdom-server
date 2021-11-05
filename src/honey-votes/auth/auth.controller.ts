@@ -19,7 +19,7 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TwitchAuthGuard } from './guards/twitch-auth.guard';
-import { RefreshTokenDto } from './dto/refreshTokenDto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import {
   JwtStrategyUser,
   RefreshTokenResponse,
