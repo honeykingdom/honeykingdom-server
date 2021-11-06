@@ -40,6 +40,7 @@
     "class-validator": "^0.13.1",
     "cookie-parser": "^1.4.5",
     "date-fns": "^2.23.0",
+    "igdb-api-types": "^0.1.0",
     "joi": "^17.4.2",
     "mongodb": "^3.7.0",
     "ms": "^2.1.3",
