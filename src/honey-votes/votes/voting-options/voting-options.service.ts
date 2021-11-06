@@ -215,8 +215,15 @@ export class VotingOptionsService {
       throw new BadRequestException();
     }
 
-    const { kinopoiskId, nameRu, nameEn, year, genres, posterUrl } =
-      response.data;
+    const {
+      kinopoiskId,
+      nameRu,
+      nameEn,
+      year,
+      genres,
+      posterUrl,
+      posterUrlPreview,
+    } = response.data;
 
     const cardDescription = `${[year, genres.map((g) => g.genre).join(', ')]
       .filter(Boolean)
@@ -227,7 +234,7 @@ export class VotingOptionsService {
       cardTitle: nameRu,
       cardSubtitle: nameEn,
       cardDescription,
-      cardImageUrl: posterUrl,
+      cardImageUrl: posterUrlPreview || posterUrl,
       cardUrl: `https://www.kinopoisk.ru/film/${kinopoiskId}/`,
     };
   }
