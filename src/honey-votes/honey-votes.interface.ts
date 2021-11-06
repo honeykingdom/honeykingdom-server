@@ -1,7 +1,7 @@
 export const API_BASE = '/api/honey-votes';
 
 export enum TwitchUserType {
-  Admin = 'admin',
+  Broadcaster = 'broadcaster',
   Editor = 'editor',
   Mod = 'mod',
   Vip = 'vip',

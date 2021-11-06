@@ -120,26 +120,22 @@ export class UsersService {
 
     if (!user || !channel) throw new NotFoundException();
 
-    const [
-      isEditor,
-      isMod,
-      isVip,
-      { isSub, tier },
-      { isFollower, minutesFollowed },
-    ] = await Promise.all([
-      this.isEditor(channel, user),
-      this.isMod(channel, user),
-      this.isVip(channel, user),
-      this.isSub(channel, user),
-      this.isFollower(channel, user),
-    ]);
+    const [editor, mod, vip, { sub, tier }, { follower, minutesFollowed }] =
+      await Promise.all([
+        this.isEditor(channel, user),
+        this.isMod(channel, user),
+        this.isVip(channel, user),
+        this.isSub(channel, user),
+        this.isFollower(channel, user),
+      ]);
 
     return {
-      isEditor,
-      isMod,
-      isVip,
-      isSub,
-      isFollower,
+      broadcaster: user.id === channel.id,
+      editor,
+      mod,
+      vip,
+      sub,
+      follower,
       minutesFollowed,
       subTier: tier,
     };
@@ -205,28 +201,23 @@ export class UsersService {
     user: User,
     types: CheckUserTypesInput = {},
   ): Promise<boolean> {
-    const [
-      isEditor,
-      isMod,
-      isVip,
-      { isSub, tier },
-      { isFollower, minutesFollowed },
-    ] = await Promise.all([
-      types.editor ? this.isEditor(channel, user) : undefined,
-      types.mod ? this.isMod(channel, user) : undefined,
-      types.vip ? this.isVip(channel, user) : undefined,
-      types.sub ? this.isSub(channel, user) : { isSub: false, tier: null },
-      types.follower
-        ? this.isFollower(channel, user)
-        : { isFollower: false, minutesFollowed: null },
-    ]);
+    const [editor, mod, vip, { sub, tier }, { follower, minutesFollowed }] =
+      await Promise.all([
+        types.editor ? this.isEditor(channel, user) : undefined,
+        types.mod ? this.isMod(channel, user) : undefined,
+        types.vip ? this.isVip(channel, user) : undefined,
+        types.sub ? this.isSub(channel, user) : { sub: false, tier: null },
+        types.follower
+          ? this.isFollower(channel, user)
+          : { follower: false, minutesFollowed: null },
+      ]);
 
     if (
-      (isFollower && minutesFollowed >= types.minutesToFollowRequired) ||
-      (isSub && tier >= types.subTierRequired) ||
-      isVip ||
-      isMod ||
-      isEditor
+      (follower && minutesFollowed >= types.minutesToFollowRequired) ||
+      (sub && tier >= types.subTierRequired) ||
+      vip ||
+      mod ||
+      editor
     ) {
       return true;
     }
@@ -273,13 +264,13 @@ export class UsersService {
   async isSub(
     channel: User,
     user: User,
-  ): Promise<{ isSub: boolean; tier: SubTier | null }> {
+  ): Promise<{ sub: boolean; tier: SubTier | null }> {
     if (!user.areTokensValid) {
       this.logger.log(
         `isSub: areTokensValid === false. User: ${channel.login}`,
       );
 
-      return { isSub: null, tier: null };
+      return { sub: null, tier: null };
     }
 
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
@@ -299,40 +290,40 @@ export class UsersService {
 
           const updatedUser = await this.refreshToken(user);
 
-          if (updatedUser === null) return { isSub: null, tier: null };
+          if (updatedUser === null) return { sub: null, tier: null };
 
           accessToken = this.decryptToken(
             updatedUser.credentials.encryptedAccessToken,
           );
         } else if (e.response.status === 404) {
-          return { isSub: false, tier: null };
+          return { sub: false, tier: null };
         } else {
           this.logger.error(
             `isSub: unknown error. User: ${user.login}`,
             e.stack,
           );
 
-          return { isSub: null, tier: null };
+          return { sub: null, tier: null };
         }
       }
     }
 
     const tier = SUB_TIER[response.data.data[0].tier];
 
-    return { isSub: true, tier };
+    return { sub: true, tier };
   }
 
   // TODO: if user token not valid take channel token
   async isFollower(
     channel: User,
     user: User,
-  ): Promise<{ isFollower: boolean; minutesFollowed: number | null }> {
+  ): Promise<{ follower: boolean; minutesFollowed: number | null }> {
     if (!user.areTokensValid) {
       this.logger.log(
         `isFollower: areTokensValid === false. User: ${channel.login}`,
       );
 
-      return { isFollower: null, minutesFollowed: null };
+      return { follower: null, minutesFollowed: null };
     }
 
     let response: AxiosResponse<GetUserFollowsResponse>;
@@ -355,7 +346,7 @@ export class UsersService {
           const updatedUser = await this.refreshToken(user);
 
           if (updatedUser === null) {
-            return { isFollower: null, minutesFollowed: null };
+            return { follower: null, minutesFollowed: null };
           }
 
           accessToken = this.decryptToken(
@@ -367,19 +358,19 @@ export class UsersService {
             e.stack,
           );
 
-          return { isFollower: null, minutesFollowed: null };
+          return { follower: null, minutesFollowed: null };
         }
       }
     }
 
     if (response.data.total === 0) {
-      return { isFollower: false, minutesFollowed: null };
+      return { follower: false, minutesFollowed: null };
     }
 
     const followedAt = new Date(response.data.data[0].followed_at);
     const minutesFollowed = differenceInMinutes(new Date(), followedAt);
 
-    return { isFollower: true, minutesFollowed };
+    return { follower: true, minutesFollowed };
   }
 
   async getChannelEditors(channel: User): Promise<Set<string>> {

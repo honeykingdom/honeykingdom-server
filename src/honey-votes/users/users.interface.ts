@@ -1,21 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SubTier } from '../honey-votes.interface';
+import { SubTier, TwitchUserType } from '../honey-votes.interface';
 
 export class UserRoles {
   @ApiProperty({ nullable: true })
-  isEditor: boolean | null;
+  [TwitchUserType.Broadcaster]: boolean | null;
 
   @ApiProperty({ nullable: true })
-  isMod: boolean | null;
+  [TwitchUserType.Editor]: boolean | null;
 
   @ApiProperty({ nullable: true })
-  isVip: boolean | null;
+  [TwitchUserType.Mod]: boolean | null;
 
   @ApiProperty({ nullable: true })
-  isSub: boolean | null;
+  [TwitchUserType.Vip]: boolean | null;
 
   @ApiProperty({ nullable: true })
-  isFollower: boolean | null;
+  [TwitchUserType.Sub]: boolean | null;
+
+  @ApiProperty({ nullable: true })
+  [TwitchUserType.Follower]: boolean | null;
 
   @ApiProperty({ nullable: true })
   minutesFollowed: number | null;
