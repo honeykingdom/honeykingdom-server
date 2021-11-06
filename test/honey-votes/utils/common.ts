@@ -368,7 +368,7 @@ export const createTestCreateVotingOption =
     const expectedVotingOption: Partial<VotingOption> = {
       ...defaultVotingOptionParams,
       authorId: initiator.id,
-      authorLogin: '',
+      authorLogin: expect.any(String),
       votingId: voting.id,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
@@ -447,6 +447,7 @@ export const createTestDeleteVotingOption =
       initiatorTypes,
       votingParams = {},
       url,
+      skipDbCheck,
       onBeforeTest = () => {},
     }: {
       broadcaster: User;
@@ -455,6 +456,7 @@ export const createTestDeleteVotingOption =
       initiatorTypes?: UserTypes;
       votingParams?: Partial<Voting>;
       url?: string;
+      skipDbCheck?: boolean;
       onBeforeTest?: OnBeforeTest<{
         voting: Voting;
         votingOption: VotingOption;
@@ -472,10 +474,11 @@ export const createTestDeleteVotingOption =
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
     } as VotingOption);
-    const expectedVotingOption = {
+    const expectedVotingOption: Partial<VotingOption> = {
       ...defaultVotingOptionParams,
       id: votingOption.id,
       authorId: author.id,
+      authorLogin: expect.any(String),
       votingId: voting.id,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
@@ -493,9 +496,11 @@ export const createTestDeleteVotingOption =
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
-      expect(
-        await ctx.votingOptionRepo.findOne(votingOption.id),
-      ).toBeUndefined();
+      if (!skipDbCheck) {
+        expect(
+          await ctx.votingOptionRepo.findOne(votingOption.id),
+        ).toBeUndefined();
+      }
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
@@ -504,9 +509,11 @@ export const createTestDeleteVotingOption =
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
-      expect(await ctx.votingOptionRepo.findOne(votingOption.id)).toEqual(
-        expectedVotingOption,
-      );
+      if (!skipDbCheck) {
+        expect(await ctx.votingOptionRepo.findOne(votingOption.id)).toEqual(
+          expectedVotingOption,
+        );
+      }
     }
 
     // @ts-expect-error

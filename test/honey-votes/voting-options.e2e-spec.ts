@@ -650,6 +650,29 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         });
       });
 
+      it('should not create VotingOption twice for users', async () => {
+        const [user, viewer] = await ctx.createUsers();
+
+        await testCreateVotingOption(403, {
+          broadcaster: user,
+          initiator: viewer,
+          votingParams: {
+            permissions: {
+              [TwitchUserType.Viewer]: { canAddOptions: true },
+            },
+          },
+          skipDbCheck: true,
+          onBeforeTest: async ({ voting }) => {
+            await ctx.votingOptionRepo.save({
+              author: viewer,
+              voting,
+              type: VotingOptionType.Custom,
+              cardTitle: 'My VotingOption',
+            });
+          },
+        });
+      });
+
       it.todo(
         'should not create VotingOption by broadcaster if limit is reached',
       );
