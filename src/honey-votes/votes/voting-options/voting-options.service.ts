@@ -224,7 +224,7 @@ export class VotingOptionsService {
   }
 
   private async getIgdbGameCard(gameSlug: string): Promise<VotingOptionCard> {
-    const body = `fields cover.image_id,first_release_date,genres.name,name,release_dates,slug; where slug=${gameSlug};`;
+    const body = `fields cover.image_id,first_release_date,genres.name,name,release_dates,slug; where slug="${gameSlug}";`;
     let response;
 
     try {
@@ -243,7 +243,9 @@ export class VotingOptionsService {
       slug,
     } = response.data[0];
 
-    const year = first_release_date ? getYear(first_release_date) : undefined;
+    const year = first_release_date
+      ? getYear(first_release_date * 1000)
+      : undefined;
 
     const cardDescription = `${[year, genres.map((g) => g.name).join(', ')]
       .filter(Boolean)
