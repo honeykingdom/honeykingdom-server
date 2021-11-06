@@ -20,6 +20,8 @@ import {
 import { Voting } from '../entities/Voting.entity';
 import { Vote } from '../entities/Vote.entity';
 import { User } from '../../users/entities/User.entity';
+import { AxiosResponse } from 'axios';
+import { Cover, Game } from 'igdb-api-types';
 
 @Injectable()
 export class VotingOptionsService {
@@ -225,7 +227,7 @@ export class VotingOptionsService {
 
   private async getIgdbGameCard(gameSlug: string): Promise<VotingOptionCard> {
     const body = `fields cover.image_id,first_release_date,genres.name,name,release_dates,slug; where slug="${gameSlug}";`;
-    let response;
+    let response: AxiosResponse<Game[]>;
 
     try {
       response = await this.igdbApiService.game(body);
@@ -235,13 +237,8 @@ export class VotingOptionsService {
 
     if (response.data.length === 0) throw new BadRequestException();
 
-    const {
-      cover: { image_id },
-      first_release_date,
-      genres,
-      name,
-      slug,
-    } = response.data[0];
+    const { cover, first_release_date, genres, name, slug } = response.data[0];
+    const coverImageId = (cover as Cover).image_id;
 
     const year = first_release_date
       ? getYear(first_release_date * 1000)
@@ -255,7 +252,7 @@ export class VotingOptionsService {
       cardId: slug,
       cardTitle: name,
       cardDescription,
-      cardImageUrl: `https://images.igdb.com/igdb/image/upload/t_cover_big/${image_id}.jpg`,
+      cardImageUrl: `https://images.igdb.com/igdb/image/upload/t_cover_big/${coverImageId}.jpg`,
       cardUrl: `https://www.igdb.com/games/${slug}`,
     };
   }
