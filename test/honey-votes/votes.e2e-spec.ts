@@ -1,7 +1,6 @@
 import { VotingOption } from '../../src/honey-votes/votes/entities/VotingOption.entity';
 import { Vote } from '../../src/honey-votes/votes/entities/Vote.entity';
 import {
-  API_BASE,
   SubTier,
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
