@@ -1,11 +1,13 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { lastValueFrom } from 'rxjs';
 import { Config } from '../config/config.interface';
 import { RecentMessagesService } from '../recent-messages/recent-messages.service';
 import { RecentMessagesResponse } from './recent-messages.interface';
 
+@ApiTags('Recent Messages')
 @Controller('api/v1/recent-messages')
 export class RecentMessagesController {
   private readonly defaultRecentMessagesUrl: string;
@@ -21,6 +23,7 @@ export class RecentMessagesController {
   }
 
   @Get(':channel')
+  @ApiOkResponse({ type: RecentMessagesResponse })
   async getRecentMessages(
     @Param('channel') channel: string,
   ): Promise<RecentMessagesResponse> {
