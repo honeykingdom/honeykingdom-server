@@ -88,7 +88,7 @@ export class VotingOptionsService {
     user: User,
     voting: Voting,
     votingOptionType: VotingOptionType,
-  ) {
+  ): Promise<boolean> {
     if (!voting || !user) return false;
     if (!voting.canManageVotingOptions) return false;
 
@@ -100,11 +100,15 @@ export class VotingOptionsService {
 
     if (isEditor) return true;
 
-    const votingOptionsCount = await this.votingOptionRepo.count({
-      where: { id: voting.id },
-    });
+    const [votingOptionsCount, votingOptionsByUserCount] = await Promise.all([
+      this.votingOptionRepo.count({ where: { voting: voting } }),
+      this.votingOptionRepo.count({
+        where: { voting: voting, author: user },
+      }),
+    ]);
 
     if (votingOptionsCount >= voting.votingOptionsLimit) return false;
+    if (votingOptionsByUserCount >= 1) return false;
     if (!voting.allowedVotingOptionTypes.includes(votingOptionType))
       return false;
 
@@ -129,7 +133,10 @@ export class VotingOptionsService {
     return false;
   }
 
-  private async canDeleteVotingOption(userId: string, votingOptionId: number) {
+  private async canDeleteVotingOption(
+    userId: string,
+    votingOptionId: number,
+  ): Promise<boolean> {
     const [user, votingOption] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingOptionRepo.findOne(votingOptionId, {
