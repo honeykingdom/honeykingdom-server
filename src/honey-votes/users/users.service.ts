@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
+import NodeCache from 'node-cache';
 import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
 import { POSTGRES_CONNECTION } from '../../app.constants';
@@ -46,6 +47,9 @@ type StoreUserInput = Pick<
   };
 };
 
+type IsSub = [sub: boolean | null, tier: SubTier | null];
+type IsFollower = [follower: boolean | null, minutesFollowed: number | null];
+
 const SUB_TIER: Record<
   CheckUserSubscriptionResponse['data'][0]['tier'],
   SubTier
@@ -55,6 +59,8 @@ const SUB_TIER: Record<
   '3000': SubTier.Tier3,
 };
 
+const CACHE_TTL = 60 * 10; // 10 minutes
+
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -63,10 +69,10 @@ export class UsersService {
   private readonly clientSecret: string;
   private readonly cryptoSecret: string;
 
-  // TODO: cache requests
-  // private readonly editorIds = new Map<string, Set<string>>();
-  // private readonly modIds = new Map<string, Set<string>>();
-  // private readonly vipIds = new Map<string, Set<string>>();
+  private readonly editorsCache = new NodeCache({ stdTTL: CACHE_TTL });
+  private readonly modsCache = new NodeCache({ stdTTL: CACHE_TTL });
+  private readonly subsCache = new NodeCache({ stdTTL: CACHE_TTL });
+  private readonly followersCache = new NodeCache({ stdTTL: CACHE_TTL });
 
   constructor(
     private readonly configService: ConfigService<Config>,
@@ -120,7 +126,7 @@ export class UsersService {
 
     if (!user || !channel) throw new NotFoundException();
 
-    const [editor, mod, vip, { sub, tier }, { follower, minutesFollowed }] =
+    const [editor, mod, vip, [sub, tier], [follower, minutesFollowed]] =
       await Promise.all([
         this.isEditor(channel, user),
         this.isMod(channel, user),
@@ -201,15 +207,15 @@ export class UsersService {
     user: User,
     types: CheckUserTypesInput = {},
   ): Promise<boolean> {
-    const [editor, mod, vip, { sub, tier }, { follower, minutesFollowed }] =
+    const [editor, mod, vip, [sub, tier], [follower, minutesFollowed]] =
       await Promise.all([
         types.editor ? this.isEditor(channel, user) : undefined,
         types.mod ? this.isMod(channel, user) : undefined,
         types.vip ? this.isVip(channel, user) : undefined,
-        types.sub ? this.isSub(channel, user) : { sub: false, tier: null },
+        types.sub ? this.isSub(channel, user) : ([null, null] as IsSub),
         types.follower
           ? this.isFollower(channel, user)
-          : { follower: false, minutesFollowed: null },
+          : ([null, null] as IsFollower),
       ]);
 
     if (
@@ -226,51 +232,86 @@ export class UsersService {
   }
 
   async isEditor(channel: User, user: User): Promise<boolean> {
-    let editorIds: Set<string>;
+    const key = channel.id;
+    let editorIds = this.editorsCache.get<Set<string>>(key);
 
-    try {
-      editorIds = await this.getChannelEditors(channel);
-    } catch (e) {
-      return null;
+    if (!editorIds) {
+      try {
+        editorIds = await this.getChannelEditors(channel);
+
+        this.editorsCache.set<Set<string>>(key, editorIds);
+      } catch (e) {
+        return null;
+      }
     }
 
     return editorIds.has(user.id);
   }
 
   async isMod(channel: User, user: User): Promise<boolean> {
-    let modIds: Set<string>;
+    const key = channel.id;
+    let modIds = this.modsCache.get<Set<string>>(key);
 
-    try {
-      modIds = await this.getChannelMods(channel);
-    } catch (e) {
-      return null;
+    if (!modIds) {
+      try {
+        modIds = await this.getChannelMods(channel);
+
+        this.modsCache.set<Set<string>>(channel.id, modIds);
+      } catch (e) {
+        return null;
+      }
     }
 
     return modIds.has(user.id);
   }
 
   async isVip(channel: User, user: User): Promise<boolean> {
-    let vipIds: Set<string>;
-
-    try {
-      vipIds = await this.getChannelVips(channel.id);
-    } catch (e) {
-      return null;
-    }
-
-    return vipIds.has(user.id);
+    return null;
   }
 
-  async isSub(
-    channel: User,
-    user: User,
-  ): Promise<{ sub: boolean; tier: SubTier | null }> {
+  async isSub(channel: User, user: User): Promise<IsSub> {
+    const key = `${channel.id}.${user.id}`;
+
+    let subData = this.subsCache.get<IsSub>(key);
+
+    if (!subData) {
+      try {
+        subData = await this.getIsSub(channel, user);
+
+        this.subsCache.set<IsSub>(key, subData);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return subData;
+  }
+
+  async isFollower(channel: User, user: User): Promise<IsFollower> {
+    const key = `${channel.id}.${user.id}`;
+
+    let followerData = this.followersCache.get<IsFollower>(key);
+
+    if (!followerData) {
+      try {
+        followerData = await this.getIsFollower(channel, user);
+
+        this.followersCache.set<IsFollower>(key, followerData);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return followerData;
+  }
+
+  async getIsSub(channel: User, user: User): Promise<IsSub> {
     if (!user.areTokensValid) {
       this.logger.log(
         `isSub: areTokensValid === false. User: ${channel.login}`,
       );
 
-      return { sub: null, tier: null };
+      return [null, null];
     }
 
     let response: AxiosResponse<CheckUserSubscriptionResponse>;
@@ -290,40 +331,37 @@ export class UsersService {
 
           const updatedUser = await this.refreshToken(user);
 
-          if (updatedUser === null) return { sub: null, tier: null };
+          if (updatedUser === null) return [null, null];
 
           accessToken = this.decryptToken(
             updatedUser.credentials.encryptedAccessToken,
           );
         } else if (e.response.status === 404) {
-          return { sub: false, tier: null };
+          return [false, null];
         } else {
           this.logger.error(
             `isSub: unknown error. User: ${user.login}`,
             e.stack,
           );
 
-          return { sub: null, tier: null };
+          return [null, null];
         }
       }
     }
 
     const tier = SUB_TIER[response.data.data[0].tier];
 
-    return { sub: true, tier };
+    return [true, tier];
   }
 
   // TODO: if user token not valid take channel token
-  async isFollower(
-    channel: User,
-    user: User,
-  ): Promise<{ follower: boolean; minutesFollowed: number | null }> {
+  async getIsFollower(channel: User, user: User): Promise<IsFollower> {
     if (!user.areTokensValid) {
       this.logger.log(
         `isFollower: areTokensValid === false. User: ${channel.login}`,
       );
 
-      return { follower: null, minutesFollowed: null };
+      return [null, null];
     }
 
     let response: AxiosResponse<GetUserFollowsResponse>;
@@ -346,7 +384,7 @@ export class UsersService {
           const updatedUser = await this.refreshToken(user);
 
           if (updatedUser === null) {
-            return { follower: null, minutesFollowed: null };
+            return [null, null];
           }
 
           accessToken = this.decryptToken(
@@ -358,19 +396,19 @@ export class UsersService {
             e.stack,
           );
 
-          return { follower: null, minutesFollowed: null };
+          return [null, null];
         }
       }
     }
 
     if (response.data.total === 0) {
-      return { follower: false, minutesFollowed: null };
+      return [false, null];
     }
 
     const followedAt = new Date(response.data.data[0].followed_at);
     const minutesFollowed = differenceInMinutes(new Date(), followedAt);
 
-    return { follower: true, minutesFollowed };
+    return [true, minutesFollowed];
   }
 
   async getChannelEditors(channel: User): Promise<Set<string>> {
