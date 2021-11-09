@@ -333,7 +333,7 @@ export class ChatVotesService {
 
     const subBadgeValue = message.tags.badges.subscriber as number;
 
-    if (subTierRequired === SubTier.Tier1) return true;
+    if (subTierRequired === SubTier.Tier1) return subBadgeValue >= 0;
     if (subTierRequired === SubTier.Tier2) return subBadgeValue >= 2000;
     if (subTierRequired === SubTier.Tier3) return subBadgeValue >= 3000;
 
