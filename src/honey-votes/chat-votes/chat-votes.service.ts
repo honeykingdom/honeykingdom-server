@@ -307,7 +307,10 @@ export class ChatVotesService {
     }: ChatVotingPermissions,
   ) {
     if (viewer) return true;
-    if (sub && this.isSub(message, subMonthsRequired, subTierRequired)) {
+    if (
+      sub &&
+      ChatVotesService.isSub(message, subMonthsRequired, subTierRequired)
+    ) {
       return true;
     }
     if (vip && 'vip' in message.tags.badges) return true;
