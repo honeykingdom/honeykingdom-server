@@ -6,6 +6,9 @@ export enum TwitchUserType {
   Mod = 'mod',
   Vip = 'vip',
   Sub = 'sub',
+  SubTier1 = 'subTier1',
+  SubTier2 = 'subTier2',
+  SubTier3 = 'subTier3',
   Follower = 'follower',
   Viewer = 'viewer',
 }
