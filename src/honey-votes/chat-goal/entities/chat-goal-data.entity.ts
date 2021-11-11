@@ -17,8 +17,7 @@ export class ChatGoalData {
   @ApiProperty()
   chatGoalId: string;
 
-  /** How many votes users already spent */
   @Column({ type: 'jsonb', default: {} })
-  @ApiProperty()
+  @ApiProperty({ description: 'How many votes users already spent' })
   votesCountByUser: Record<string, number>;
 }
