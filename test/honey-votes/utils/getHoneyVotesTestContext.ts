@@ -6,6 +6,9 @@ import { Connection, Repository } from 'typeorm';
 import { Config } from '../../../src/config/config.interface';
 import { DatabaseModule } from '../../../src/database/database.module';
 import { DatabaseService } from '../../../src/database/database.service';
+import { ChatGoalData } from '../../../src/honey-votes/chat-goal/entities/chat-goal-data.entity';
+import { ChatGoalEvent } from '../../../src/honey-votes/chat-goal/entities/chat-goal-event.entity';
+import { ChatGoal } from '../../../src/honey-votes/chat-goal/entities/chat-goal.entity';
 import { ChatVote } from '../../../src/honey-votes/chat-votes/entities/ChatVote.entity';
 import { ChatVoting } from '../../../src/honey-votes/chat-votes/entities/ChatVoting.entity';
 import { HoneyVotesModule } from '../../../src/honey-votes/honey-votes.module';
@@ -36,6 +39,9 @@ export type HoneyVotesTestContext = {
   voteRepo: Repository<Vote>;
   chatVotingRepo: Repository<ChatVoting>;
   chatVoteRepo: Repository<ChatVote>;
+  chatGoalRepo: Repository<ChatGoal>;
+  chatGoalEventRepo: Repository<ChatGoalEvent>;
+  chatGoalDataRepo: Repository<ChatGoalData>;
   jwtService: JwtService;
   configService: ConfigService<Config>;
   getAuthorizationHeader: (
@@ -77,6 +83,9 @@ export const getHoneyVotesTestContext = () => {
     ctx.voteRepo = ctx.connection.getRepository(Vote);
     ctx.chatVotingRepo = ctx.connection.getRepository(ChatVoting);
     ctx.chatVoteRepo = ctx.connection.getRepository(ChatVote);
+    ctx.chatGoalRepo = ctx.connection.getRepository(ChatGoal);
+    ctx.chatGoalEventRepo = ctx.connection.getRepository(ChatGoalEvent);
+    ctx.chatGoalDataRepo = ctx.connection.getRepository(ChatGoalData);
 
     // TODO: make this work
     // ctx.connection = ctx.app.get(getConnectionToken(POSTGRES_CONNECTION));
@@ -96,6 +105,9 @@ export const getHoneyVotesTestContext = () => {
       Voting.tableName,
       VotingOption.tableName,
       Vote.tableName,
+      ChatGoal.tableName,
+      ChatGoalEvent.tableName,
+      ChatGoalData.tableName,
     ];
 
     await ctx.connection.query(`TRUNCATE ${tableNames.join(',')} CASCADE;`);
