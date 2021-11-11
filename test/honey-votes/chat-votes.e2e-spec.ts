@@ -380,6 +380,12 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         });
       });
 
+      test('permissions: empty object', async () => {
+        await testValidation(HttpStatus.BAD_REQUEST, {
+          permissions: {} as any,
+        });
+      });
+
       test('permissions: missing fields', async () => {
         await testValidation(HttpStatus.BAD_REQUEST, {
           permissions: {

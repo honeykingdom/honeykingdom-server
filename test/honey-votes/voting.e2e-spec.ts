@@ -255,6 +255,20 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         });
       });
 
+      // TODO:
+      test.skip('permissions: empty', async () => {
+        const [user] = await ctx.createUsers();
+
+        await testCreateVoting(400, {
+          broadcaster: user,
+          initiator: user,
+          createVotingDto: {
+            channelId: user.id,
+            permissions: {} as any,
+          },
+        });
+      });
+
       test('permissions: invalid', async () => {
         const [user] = await ctx.createUsers();
 
@@ -269,8 +283,8 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
               [TwitchUserType.Sub]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Follower]: { canVote: true, canAddOptions: true },
               [TwitchUserType.Viewer]: { canVote: true },
-            },
-          } as any,
+            } as any,
+          },
         });
       });
 
