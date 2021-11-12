@@ -43,6 +43,9 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
       updatedAt: expect.anything(),
       ...CHAT_GOAL_DEFAULT,
       ...dto,
+      status: expect.any(Number),
+      // TODO:
+      endTimerTimestamp: expect.any(String),
     };
 
     const body: CreateChatGoalDto = {
@@ -87,6 +90,9 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
       createdAt: expect.anything(),
       updatedAt: expect.anything(),
       ...dto,
+      status: expect.any(Number),
+      // TODO:
+      endTimerTimestamp: expect.any(String),
     };
 
     let initiator: User;
