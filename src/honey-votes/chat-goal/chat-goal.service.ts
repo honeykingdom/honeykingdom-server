@@ -365,7 +365,8 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
   ) {
     const goal = this.goals.get(goalId);
 
-    Object.assign(goal, { state: stateChanges, options: optionsChanges });
+    if (stateChanges) Object.assign(goal.state, stateChanges);
+    if (optionsChanges) Object.assign(goal.options, optionsChanges);
 
     await this.goalRepo.update(goalId, { ...stateChanges, ...optionsChanges });
   }
@@ -383,8 +384,8 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     let type: ChatEventType | null = null;
 
-    if (message !== goal.options.upvoteCommand) type = ChatEventType.Upvote;
-    if (message !== goal.options.downvoteCommand) type = ChatEventType.Downvote;
+    if (message === goal.options.upvoteCommand) type = ChatEventType.Upvote;
+    if (message === goal.options.downvoteCommand) type = ChatEventType.Downvote;
 
     if (!type) return;
 
