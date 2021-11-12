@@ -110,7 +110,7 @@ export class ChatGoalController {
     @PassportUser() user: JwtStrategyUser,
     @Param('goalId') goalId: string,
   ): Promise<void> {
-    return this.chatGoalService.pauseGoal(user.id, goalId);
+    return this.chatGoalService.resetGoal(user.id, goalId);
   }
 
   @Post('/chat-goal/:goalId/reset-votes')
