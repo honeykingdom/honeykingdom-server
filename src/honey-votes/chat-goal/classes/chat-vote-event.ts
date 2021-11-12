@@ -10,6 +10,9 @@ class ChatVoteEventPayload {
 
   @ApiProperty()
   userDisplayName: string;
+
+  @ApiProperty()
+  votesCount: number;
 }
 
 export class ChatVoteEvent {

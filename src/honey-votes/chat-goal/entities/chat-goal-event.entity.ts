@@ -11,14 +11,14 @@ export class ChatGoalEvent {
   @OneToOne(() => ChatGoal, (chatGoal) => chatGoal.event, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'chatGoalId' })
   chatGoal: ChatGoal;
 
   @PrimaryColumn()
   @ApiProperty()
   chatGoalId: string;
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @ApiProperty()
   seed: number;
 

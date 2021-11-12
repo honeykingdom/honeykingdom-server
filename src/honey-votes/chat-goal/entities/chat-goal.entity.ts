@@ -82,11 +82,11 @@ export class ChatGoal {
   })
   downvoteCommand: string;
 
-  @Column({ default: 0 })
+  @Column({ type: 'integer', default: 0 })
   @ApiProperty({ description: 'Original timer duration', default: 0 })
   timerDuration: number;
 
-  @Column({ default: CHAT_VOTES_MAX_VOTES_VALUE_DEFAULT })
+  @Column({ type: 'integer', default: CHAT_VOTES_MAX_VOTES_VALUE_DEFAULT })
   @ApiProperty({
     description: 'How many votes needs to complete the goal',
     default: CHAT_VOTES_MAX_VOTES_VALUE_DEFAULT,
@@ -97,21 +97,21 @@ export class ChatGoal {
   @ApiProperty({ default: ChatGoalStatus.Uninitialized })
   status: ChatGoalStatus;
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @ApiProperty({
-    description: 'Timestamp when timer should finish',
+    description: 'Timestamp when timer should finish (ms)',
     default: 0,
   })
   endTimerTimestamp: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'integer', default: 0 })
   @ApiProperty({
-    description: 'Remaining timer duration after pause',
+    description: 'Remaining timer duration after pause (ms)',
     default: 0,
   })
   remainingTimerDuration: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'integer', default: 0 })
   @ApiProperty({ description: 'Current full votes value', default: 0 })
   votesValue: number;
 
