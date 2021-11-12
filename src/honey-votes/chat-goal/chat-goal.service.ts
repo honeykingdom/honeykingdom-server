@@ -185,9 +185,23 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     if (!canManage || !chatGoal) throw new ForbiddenException();
 
+    const additionalData: DeepPartial<ChatGoal> = {};
+
     // TODO:
     if (!data.listening) {
       // this.twitchChatService.partChannel()
+    }
+
+    if (data.timerDuration !== undefined) {
+      const hasTimer = data.timerDuration > 0;
+
+      if (hasTimer && chatGoal.status === ChatGoalStatus.VotingIdle) {
+        additionalData.status = ChatGoalStatus.TimerIdle;
+      }
+
+      if (!hasTimer && chatGoal.status === ChatGoalStatus.TimerIdle) {
+        additionalData.status = ChatGoalStatus.VotingIdle;
+      }
     }
 
     // TODO: if maxVotesCount was changed check if it needs to set status to completed
@@ -199,6 +213,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     const updatedGoal = await this.goalRepo.save({
       ...chatGoal,
       ...data,
+      ...additionalData,
     });
 
     return updatedGoal;
