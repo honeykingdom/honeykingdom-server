@@ -188,7 +188,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     const goal = this.goals.get(goalId);
 
-    const additionalData: DeepPartial<ChatGoal> = {};
+    const additionalData: Partial<ChatGoalState> = {};
 
     if (data.listening !== undefined) {
       if (data.listening) {
@@ -207,23 +207,23 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     if (data.timerDuration !== undefined) {
       const hasTimer = data.timerDuration > 0;
 
-      if (hasTimer && chatGoal.status === ChatGoalStatus.VotingIdle) {
-        additionalData.status = ChatGoalStatus.TimerIdle;
-      }
-
-      if (!hasTimer && chatGoal.status === ChatGoalStatus.TimerIdle) {
-        additionalData.status = ChatGoalStatus.VotingIdle;
+      if (
+        chatGoal.status === ChatGoalStatus.VotingIdle ||
+        chatGoal.status === ChatGoalStatus.TimerIdle
+      ) {
+        additionalData.status = hasTimer
+          ? ChatGoalStatus.TimerIdle
+          : ChatGoalStatus.VotingIdle;
       }
     }
 
     if (data.maxVotesValue !== undefined) {
       if (data.maxVotesValue <= goal.state.votesValue) {
         additionalData.status = ChatGoalStatus.VotingFinished;
-
-        Object.assign(goal.state, { status: ChatGoalStatus.VotingFinished });
       }
     }
 
+    Object.assign(goal.state, additionalData);
     Object.assign(goal.options, data);
 
     const updatedGoal = await this.goalRepo.save({
