@@ -38,7 +38,7 @@ export class VotingOption {
   authorId: string;
 
   @Column({ default: '' })
-  @ApiProperty()
+  @ApiProperty({ default: '' })
   authorLogin: string;
 
   @ManyToOne(() => Voting, (voting) => voting.votingOptions, {
@@ -67,15 +67,15 @@ export class VotingOption {
   cardId?: string;
 
   @Column({ length: VOTING_OPTION_CARD_TITLE_MAX_LENGTH })
-  @ApiProperty()
+  @ApiProperty({ maxLength: VOTING_OPTION_CARD_TITLE_MAX_LENGTH })
   cardTitle: string;
 
   @Column({ nullable: true, length: VOTING_OPTION_CARD_SUBTITLE_MAX_LENGTH })
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: VOTING_OPTION_CARD_SUBTITLE_MAX_LENGTH })
   cardSubtitle?: string;
 
   @Column({ nullable: true, length: VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH })
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH })
   cardDescription?: string;
 
   @Column({ nullable: true })

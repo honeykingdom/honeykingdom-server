@@ -48,23 +48,23 @@ export class Voting {
   broadcasterId: string;
 
   @Column({ nullable: true, length: VOTING_TITLE_MAX_LENGTH })
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: VOTING_TITLE_MAX_LENGTH })
   title?: string;
 
   @Column({ nullable: true, length: VOTING_DESCRIPTION_MAX_LENGTH })
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: VOTING_DESCRIPTION_MAX_LENGTH })
   description?: string;
 
   @Column({ default: VOTING_CAN_MANAGE_VOTES_DEFAULT })
-  @ApiProperty()
+  @ApiProperty({ default: VOTING_CAN_MANAGE_VOTES_DEFAULT })
   canManageVotes: boolean;
 
   @Column({ default: VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT })
-  @ApiProperty()
+  @ApiProperty({ default: VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT })
   canManageVotingOptions: boolean;
 
   @Column({ type: 'jsonb', default: VOTING_PERMISSIONS_DEFAULT })
-  @ApiProperty()
+  @ApiProperty({ default: VOTING_PERMISSIONS_DEFAULT })
   permissions: VotingPermissions;
 
   @Column({
@@ -73,14 +73,18 @@ export class Voting {
     array: true,
     default: VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   })
-  @ApiProperty({ enum: VotingOptionType, isArray: true })
+  @ApiProperty({
+    enum: VotingOptionType,
+    isArray: true,
+    default: VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
+  })
   allowedVotingOptionTypes: VotingOptionType[];
 
   @OneToMany(() => VotingOption, (votingOption) => votingOption.voting)
   votingOptions: VotingOption[];
 
   @Column({ type: 'integer', default: VOTING_OPTIONS_LIMIT_DEFAULT })
-  @ApiProperty()
+  @ApiProperty({ default: VOTING_OPTIONS_LIMIT_DEFAULT })
   votingOptionsLimit: number;
 
   @OneToMany(() => Vote, (vote) => vote.voting)

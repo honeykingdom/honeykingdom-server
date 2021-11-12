@@ -49,7 +49,7 @@ export class Vote {
   votingOptionId: number;
 
   @Column({ type: 'integer', default: 1 })
-  @ApiProperty()
+  @ApiProperty({ default: 1 })
   value: number;
 
   @CreateDateColumn({ type: 'timestamptz' })

@@ -48,7 +48,7 @@ export class ChatVote {
   tags: Tags;
 
   @Column({ length: CHAT_VOTE_CONTENT_MAX_LENGTH })
-  @ApiProperty()
+  @ApiProperty({ maxLength: CHAT_VOTE_CONTENT_MAX_LENGTH })
   content: string;
 
   @CreateDateColumn({ type: 'timestamptz' })

@@ -39,7 +39,7 @@ export class ChatVoting {
   broadcasterId: string;
 
   @Column({ type: 'jsonb', default: CHAT_VOTING_PERMISSIONS_DEFAULT })
-  @ApiProperty()
+  @ApiProperty({ default: CHAT_VOTING_PERMISSIONS_DEFAULT })
   permissions: ChatVotingPermissions;
 
   @Column({ default: false })
@@ -47,7 +47,7 @@ export class ChatVoting {
   listening: boolean;
 
   @Column({ type: 'jsonb', default: CHAT_VOTING_COMMANDS_DEFAULT })
-  @ApiProperty()
+  @ApiProperty({ default: CHAT_VOTING_COMMANDS_DEFAULT })
   commands: ChatVotingCommands;
 
   @OneToMany(() => ChatVote, (chatVote) => chatVote.chatVoting)
