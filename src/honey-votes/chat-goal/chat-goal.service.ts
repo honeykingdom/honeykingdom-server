@@ -166,6 +166,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     const createdGoal = await this.goalRepo.save({
       broadcaster: { id: broadcasterId },
       ...data,
+      status,
     });
 
     delete createdGoal.broadcaster;
@@ -180,16 +181,27 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
   ): Promise<ChatGoal> {
     const [canManage, chatGoal] = await Promise.all([
       this.canManage(goalId, initiatorId),
-      this.goalRepo.findOne(goalId),
+      this.goalRepo.findOne(goalId, { relations: ['broadcaster'] }),
     ]);
 
     if (!canManage || !chatGoal) throw new ForbiddenException();
 
+    const goal = this.goals.get(goalId);
+
     const additionalData: DeepPartial<ChatGoal> = {};
 
-    // TODO:
-    if (!data.listening) {
-      // this.twitchChatService.partChannel()
+    if (data.listening !== undefined) {
+      if (data.listening) {
+        this.twitchChatService.joinChannel(
+          chatGoal.broadcaster.login,
+          ChatGoalService.name,
+        );
+      } else {
+        this.twitchChatService.partChannel(
+          chatGoal.broadcaster.login,
+          ChatGoalService.name,
+        );
+      }
     }
 
     if (data.timerDuration !== undefined) {
@@ -204,17 +216,23 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    // TODO: if maxVotesCount was changed check if it needs to set status to completed
+    if (data.maxVotesValue !== undefined) {
+      if (data.maxVotesValue <= goal.state.votesValue) {
+        additionalData.status = ChatGoalStatus.VotingFinished;
 
-    const goal = this.goals.get(goalId);
+        Object.assign(goal.state, { status: ChatGoalStatus.VotingFinished });
+      }
+    }
 
-    Object.assign(goal, { options: data });
+    Object.assign(goal.options, data);
 
     const updatedGoal = await this.goalRepo.save({
       ...chatGoal,
       ...data,
       ...additionalData,
     });
+
+    delete updatedGoal.broadcaster;
 
     return updatedGoal;
   }
@@ -353,7 +371,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     goal.votesCountByUser = {};
 
     await this.goalVotesCountRepo.save({
-      chatGoal: { broadcaster: { id: goalId } },
+      chatGoalId: goalId,
       byUser: {},
     });
   }
@@ -414,6 +432,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
           userId,
           userLogin: username,
           userDisplayName: displayName,
+          votesCount: goal.votesCountByUser[userId],
         },
       }),
     ]);
@@ -469,7 +488,8 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
   private sendVoteEvent(goalId: string, action: ChatVoteEvent) {
     return this.goalEventRepo.save({
-      chatGoal: { broadcasterId: goalId },
+      chatGoalId: goalId,
+      seed: Date.now(),
       action,
     });
   }
