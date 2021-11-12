@@ -29,7 +29,7 @@ export class User {
   login: string;
 
   @Column({ default: '' })
-  @ApiProperty()
+  @ApiProperty({ default: '' })
   displayName: string;
 
   @Column()
@@ -38,7 +38,7 @@ export class User {
 
   /** If `false` the user needs to re-login */
   @Column({ default: true })
-  @ApiProperty()
+  @ApiProperty({ default: true })
   areTokensValid: boolean;
 
   @OneToOne(() => UserCredentials, (userCredentials) => userCredentials.user, {
