@@ -15,8 +15,8 @@ export const CHAT_GOAL_DATA_TABLE_NAME = 'hv_chat_goal_data';
 
 export const CHAT_GOAL_TITLE_MAX_LENGTH = 50;
 
-export const CHAT_GOAL_UPVOTE_COMMAND_DEFAULT = '!upvote';
-export const CHAT_GOAL_DOWNVOTE_COMMAND_DEFAULT = '!downvote';
+export const CHAT_GOAL_UPVOTE_COMMAND_DEFAULT = 'VoteYea';
+export const CHAT_GOAL_DOWNVOTE_COMMAND_DEFAULT = 'VoteNay';
 export const CHAT_GOAL_VOTE_COMMAND_MAX_LENGTH = TWITCH_MESSAGE_MAX_LENGTH;
 
 export const CHAT_VOTES_MAX_VOTES_VALUE_DEFAULT = 100;
