@@ -325,6 +325,8 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     if (!goal) throw new BadRequestException();
 
+    clearTimeout(goal.timeout);
+
     const hasTimer = goal.options.timerDuration > 0;
 
     const status = hasTimer
