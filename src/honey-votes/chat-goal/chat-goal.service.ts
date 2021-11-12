@@ -148,9 +148,15 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     if (!canManage) throw new ForbiddenException();
 
+    const hasTimer = data.timerDuration > 0;
+
+    const status: ChatGoalStatus = hasTimer
+      ? ChatGoalStatus.TimerIdle
+      : ChatGoalStatus.VotingIdle;
+
     const goal: GoalState = {
       options: { ...CHAT_GOAL_OPTIONS_DEFAULT, ...data },
-      state: CHAT_GOAL_STATE_DEFAULT,
+      state: { ...CHAT_GOAL_STATE_DEFAULT, status },
       votesCountByUser: {},
       timeout: null,
     };
