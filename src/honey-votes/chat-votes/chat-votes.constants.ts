@@ -1,4 +1,4 @@
-import { SubTier, TwitchUserType } from '../honey-votes.interface';
+import { SubTier, TwitchUserType } from '../honey-votes.constants';
 import {
   ChatVotingCommands,
   ChatVotingPermissions,

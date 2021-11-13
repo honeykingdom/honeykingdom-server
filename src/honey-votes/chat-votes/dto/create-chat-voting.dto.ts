@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { SubTier, TwitchUserType } from '../../honey-votes.interface';
+import { SubTier, TwitchUserType } from '../../honey-votes.constants';
 import { CHAT_VOTING_COMMAND_MAX_LENGTH } from '../chat-votes.constants';
 
 export class ChatVotingPermissions {

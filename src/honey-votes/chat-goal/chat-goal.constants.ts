@@ -1,4 +1,4 @@
-import { TwitchUserType } from '../honey-votes.interface';
+import { TwitchUserType } from '../honey-votes.constants';
 import {
   ChatGoalOptions,
   ChatGoalState,

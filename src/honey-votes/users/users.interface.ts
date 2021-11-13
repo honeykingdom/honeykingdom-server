@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SubTier, TwitchUserType } from '../honey-votes.interface';
+import { SubTier, TwitchUserType } from '../honey-votes.constants';
 
 export class UserRoles {
   @ApiProperty({ nullable: true })

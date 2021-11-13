@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsEnum, IsInt, Min, ValidateNested } from 'class-validator';
-import { SubTier, TwitchUserType } from '../../honey-votes.interface';
+import { SubTier, TwitchUserType } from '../../honey-votes.constants';
 
 class VotingPermissionsDefault {
   @IsBoolean()

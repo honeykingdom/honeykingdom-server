@@ -2,7 +2,7 @@ import {
   SubTier,
   TwitchUserType,
   VotingOptionType,
-} from '../honey-votes.interface';
+} from '../honey-votes.constants';
 import { VotingPermissions } from './dto/VotingPermissions';
 
 export const VOTE_TABLE_NAME = 'hv_vote';

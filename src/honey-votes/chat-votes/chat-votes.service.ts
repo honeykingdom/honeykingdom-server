@@ -21,7 +21,7 @@ import {
 } from './dto/create-chat-voting.dto';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
-import { SubTier } from '../honey-votes.interface';
+import { SubTier } from '../honey-votes.constants';
 import {
   CHAT_VOTING_COMMANDS_DEFAULT,
   CHAT_VOTING_PERMISSIONS_DEFAULT,

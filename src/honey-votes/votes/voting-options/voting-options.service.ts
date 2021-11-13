@@ -12,7 +12,7 @@ import { KinopoiskApiService } from '../../../kinopoisk-api/kinopoisk-api.servic
 import { GetFilmData } from '../../../kinopoisk-api/kinopoisk-api.interface';
 import { IgdbApiService } from '../../../igdb-api/igdb-api.service';
 import { CreateVotingOptionDto } from '../dto/create-voting-option.dto';
-import { VotingOptionType } from '../../honey-votes.interface';
+import { VotingOptionType } from '../../honey-votes.constants';
 import {
   VotingOption,
   VotingOptionCard,

@@ -15,7 +15,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { VotingOptionType } from '../../honey-votes.interface';
+import { VotingOptionType } from '../../honey-votes.constants';
 import {
   VOTING_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTIONS_LIMIT_MAX,

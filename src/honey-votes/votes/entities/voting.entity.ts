@@ -17,7 +17,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { Vote } from './vote.entity';
 import { VotingOption } from './voting-option.entity';
-import { VotingOptionType } from '../../honey-votes.interface';
+import { VotingOptionType } from '../../honey-votes.constants';
 import { VotingPermissions } from '../dto/VotingPermissions';
 import {
   VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,

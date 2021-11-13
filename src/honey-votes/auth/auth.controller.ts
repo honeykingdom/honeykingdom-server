@@ -25,7 +25,7 @@ import {
   RefreshTokenResponse,
   TwitchStrategyUser,
 } from './auth.interface';
-import { API_BASE } from '../honey-votes.interface';
+import { API_BASE } from '../honey-votes.constants';
 import { PassportUser } from './decorators/passport-user.decorator';
 
 @ApiTags('HoneyVotes - Auth')

@@ -10,7 +10,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { VotingOptionType } from '../../honey-votes.interface';
+import { VotingOptionType } from '../../honey-votes.constants';
 import {
   VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTION_CARD_TITLE_MAX_LENGTH,
