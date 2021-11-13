@@ -4,8 +4,8 @@ import { DeepPartial } from 'typeorm';
 import R from 'ramda';
 import { server, rest } from './utils/test-server';
 import { users } from './utils/users';
-import { Voting } from '../../src/honey-votes/votes/entities/Voting.entity';
-import { User } from '../../src/honey-votes/users/entities/User.entity';
+import { Voting } from '../../src/honey-votes/votes/entities/voting.entity';
+import { User } from '../../src/honey-votes/users/entities/user.entity';
 import {
   API_BASE,
   VotingOptionType,

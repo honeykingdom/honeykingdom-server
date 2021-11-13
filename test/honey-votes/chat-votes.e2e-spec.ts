@@ -2,14 +2,14 @@ import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { mockGetChannelEditors } from './utils/mock-requests';
 import { OnBeforeTest } from './utils/common';
-import { User } from '../../src/honey-votes/users/entities/User.entity';
+import { User } from '../../src/honey-votes/users/entities/user.entity';
 import {
   API_BASE,
   SubTier,
   TwitchUserType,
 } from '../../src/honey-votes/honey-votes.interface';
-import { ChatVote } from '../../src/honey-votes/chat-votes/entities/ChatVote.entity';
-import { ChatVoting } from '../../src/honey-votes/chat-votes/entities/ChatVoting.entity';
+import { ChatVote } from '../../src/honey-votes/chat-votes/entities/chat-vote.entity';
+import { ChatVoting } from '../../src/honey-votes/chat-votes/entities/chat-voting.entity';
 import {
   CreateChatVotingDto,
   ChatVotingPermissions,

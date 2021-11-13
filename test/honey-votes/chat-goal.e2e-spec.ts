@@ -5,7 +5,7 @@ import {
   getHoneyVotesTestContext,
   twitchChatServiceMock,
 } from './utils/getHoneyVotesTestContext';
-import { User } from '../../src/honey-votes/users/entities/User.entity';
+import { User } from '../../src/honey-votes/users/entities/user.entity';
 import { ChatGoal } from '../../src/honey-votes/chat-goal/entities/chat-goal.entity';
 import { CreateChatGoalDto } from '../../src/honey-votes/chat-goal/dto/create-chat-goal.dto';
 import {

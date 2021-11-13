@@ -9,10 +9,10 @@ import {
   TwitchUserType,
   VotingOptionType,
 } from '../../../src/honey-votes/honey-votes.interface';
-import { User } from '../../../src/honey-votes/users/entities/User.entity';
-import { Vote } from '../../../src/honey-votes/votes/entities/Vote.entity';
-import { Voting } from '../../../src/honey-votes/votes/entities/Voting.entity';
-import { VotingOption } from '../../../src/honey-votes/votes/entities/VotingOption.entity';
+import { User } from '../../../src/honey-votes/users/entities/user.entity';
+import { Vote } from '../../../src/honey-votes/votes/entities/vote.entity';
+import { Voting } from '../../../src/honey-votes/votes/entities/voting.entity';
+import { VotingOption } from '../../../src/honey-votes/votes/entities/voting-option.entity';
 import { CreateVotingDto } from '../../../src/honey-votes/votes/dto/create-voting.dto';
 import { VotingPermissions } from '../../../src/honey-votes/votes/dto/VotingPermissions';
 import { UpdateVotingDto } from '../../../src/honey-votes/votes/dto/update-voting.dto';

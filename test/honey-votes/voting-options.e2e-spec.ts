@@ -1,6 +1,6 @@
-import { Voting } from '../../src/honey-votes/votes/entities/Voting.entity';
-import { Vote } from '../../src/honey-votes/votes/entities/Vote.entity';
-import { VotingOption } from '../../src/honey-votes/votes/entities/VotingOption.entity';
+import { Voting } from '../../src/honey-votes/votes/entities/voting.entity';
+import { Vote } from '../../src/honey-votes/votes/entities/vote.entity';
+import { VotingOption } from '../../src/honey-votes/votes/entities/voting-option.entity';
 import {
   API_BASE,
   SubTier,
