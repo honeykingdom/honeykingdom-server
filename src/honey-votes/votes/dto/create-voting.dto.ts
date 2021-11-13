@@ -58,7 +58,11 @@ export class CreateVotingDtoBase {
   @ArrayUnique()
   @IsEnum(VotingOptionType, { each: true })
   @IsOptional()
-  @ApiPropertyOptional({ enum: VotingOptionType, isArray: true })
+  @ApiPropertyOptional({
+    enum: VotingOptionType,
+    enumName: 'VotingOptionType',
+    isArray: true,
+  })
   allowedVotingOptionTypes?: VotingOptionType[];
 
   @IsInt()

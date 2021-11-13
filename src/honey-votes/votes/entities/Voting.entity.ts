@@ -28,6 +28,8 @@ import {
   VOTING_TABLE_NAME,
   VOTING_TITLE_MAX_LENGTH,
   VOTING_PERMISSIONS_DEFAULT,
+  VOTING_OPTIONS_LIMIT_MIN,
+  VOTING_OPTIONS_LIMIT_MAX,
 } from '../votes.constants';
 
 @ApiExtraModels(Vote)
@@ -75,6 +77,7 @@ export class Voting {
   })
   @ApiProperty({
     enum: VotingOptionType,
+    enumName: 'VotingOptionType',
     isArray: true,
     default: VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   })
@@ -84,7 +87,11 @@ export class Voting {
   votingOptions: VotingOption[];
 
   @Column({ type: 'integer', default: VOTING_OPTIONS_LIMIT_DEFAULT })
-  @ApiProperty({ default: VOTING_OPTIONS_LIMIT_DEFAULT })
+  @ApiProperty({
+    default: VOTING_OPTIONS_LIMIT_DEFAULT,
+    minimum: VOTING_OPTIONS_LIMIT_MIN,
+    maximum: VOTING_OPTIONS_LIMIT_MAX,
+  })
   votingOptionsLimit: number;
 
   @OneToMany(() => Vote, (vote) => vote.voting)

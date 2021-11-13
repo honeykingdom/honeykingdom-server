@@ -59,6 +59,7 @@ export class VotingOption {
   fullVotesValue: number;
 
   @Column({ type: 'enum', enum: VotingOptionType })
+  @ApiProperty({ enum: VotingOptionType, enumName: 'VotingOptionType' })
   type: VotingOptionType;
 
   // card
