@@ -236,7 +236,11 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
         test.skip('missing fields', async () => {
           await testCreateChatGoal(HttpStatus.BAD_REQUEST, {
             permissions: {
-              [TwitchUserType.Mod]: { canVote: true, votesAmount: 1 },
+              [TwitchUserType.Mod]: {
+                canUpvote: true,
+                canDownvote: true,
+                votesAmount: 1,
+              },
             } as any,
           });
         });
@@ -250,11 +254,15 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
           });
         });
 
-        test('canVote - invalid type', async () => {
+        test('canUpvote - invalid type', async () => {
           await testCreateChatGoal(HttpStatus.BAD_REQUEST, {
             permissions: {
               ...CHAT_GOAL_PERMISSIONS_DEFAULT,
-              [TwitchUserType.Mod]: { canVote: 'no', votesAmount: 1 } as any,
+              [TwitchUserType.Mod]: {
+                canUpvote: 'no',
+                canDownvote: true,
+                votesAmount: 1,
+              } as any,
             },
           });
         });
@@ -263,7 +271,11 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
           await testCreateChatGoal(HttpStatus.BAD_REQUEST, {
             permissions: {
               ...CHAT_GOAL_PERMISSIONS_DEFAULT,
-              [TwitchUserType.Mod]: { canVote: true, votesAmount: -5 },
+              [TwitchUserType.Mod]: {
+                canUpvote: true,
+                canDownvote: true,
+                votesAmount: -5,
+              },
             },
           });
         });
