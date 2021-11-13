@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ChatEventType } from '../chat-goal.interface';
+import { ChatGoalEventType } from '../chat-goal.interface';
 
 class ChatVoteEventPayload {
   @ApiProperty()
@@ -16,8 +16,8 @@ class ChatVoteEventPayload {
 }
 
 export class ChatVoteEvent {
-  @ApiProperty()
-  type: ChatEventType;
+  @ApiProperty({ enum: ChatGoalEventType, enumName: 'ChatGoalEventType' })
+  type: ChatGoalEventType;
 
   @ApiProperty()
   payload: ChatVoteEventPayload;

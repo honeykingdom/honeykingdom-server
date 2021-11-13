@@ -21,7 +21,7 @@ import { UpdateChatGoalDto } from './dto/update-chat-goal.dto';
 import {
   ChatGoalOptions,
   ChatGoalState,
-  ChatEventType,
+  ChatGoalEventType,
   ChatGoalStatus,
 } from './chat-goal.interface';
 import { PrivateMessage } from 'twitch-js';
@@ -400,10 +400,11 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     if (!goal || goal.state.status !== ChatGoalStatus.VotingRunning) return;
 
-    let type: ChatEventType | null = null;
+    let type: ChatGoalEventType | null = null;
 
-    if (message === goal.options.upvoteCommand) type = ChatEventType.Upvote;
-    if (message === goal.options.downvoteCommand) type = ChatEventType.Downvote;
+    if (message === goal.options.upvoteCommand) type = ChatGoalEventType.Upvote;
+    if (message === goal.options.downvoteCommand)
+      type = ChatGoalEventType.Downvote;
 
     if (!type) return;
 
@@ -413,8 +414,8 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     let votesValue = goal.state.votesValue;
 
-    if (type === ChatEventType.Upvote) votesValue += 1;
-    if (type === ChatEventType.Downvote) votesValue -= 1;
+    if (type === ChatGoalEventType.Upvote) votesValue += 1;
+    if (type === ChatGoalEventType.Downvote) votesValue -= 1;
 
     const isVotingFinished = votesValue >= goal.options.maxVotesValue;
 
@@ -463,7 +464,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
       votesCountByUser,
     }: GoalState,
     { tags }: PrivateMessage,
-    type: ChatEventType,
+    type: ChatGoalEventType,
   ): boolean {
     const subscriberBadge = tags.badges.subscriber as number;
 
@@ -474,7 +475,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     const isMod = 'moderator' in tags.badges;
 
     if (
-      type === ChatEventType.Upvote &&
+      type === ChatGoalEventType.Upvote &&
       !viewer.canUpvote &&
       !(subTier1.canUpvote && isSubTier1) &&
       !(subTier2.canUpvote && isSubTier2) &&
@@ -486,7 +487,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     }
 
     if (
-      type === ChatEventType.Downvote &&
+      type === ChatGoalEventType.Downvote &&
       !viewer.canDownvote &&
       !(subTier1.canDownvote && isSubTier1) &&
       !(subTier2.canDownvote && isSubTier2) &&
