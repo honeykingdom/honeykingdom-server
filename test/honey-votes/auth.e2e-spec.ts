@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { User } from '../../src/honey-votes/users/entities/user.entity';
-import { API_BASE } from '../../src/honey-votes/honey-votes.interface';
+import { API_BASE } from '../../src/honey-votes/honey-votes.constants';
 import { RefreshTokenDto } from '../../src/honey-votes/auth/dto/refresh-token.dto';
 import { JwtPayload } from '../../src/honey-votes/auth/auth.interface';
 import { signRefreshToken } from './utils/auth';

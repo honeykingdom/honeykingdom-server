@@ -3,8 +3,8 @@ import { Vote } from '../../src/honey-votes/votes/entities/vote.entity';
 import {
   SubTier,
   TwitchUserType,
-} from '../../src/honey-votes/honey-votes.interface';
-import { VotingOptionType } from '../../src/honey-votes/honey-votes.interface';
+} from '../../src/honey-votes/honey-votes.constants';
+import { VotingOptionType } from '../../src/honey-votes/honey-votes.constants';
 import { createTestCreateVote, createTestDeleteVote } from './utils/common';
 import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 import { POSTGRES_MAX_INTEGER } from '../constants';

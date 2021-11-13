@@ -1,4 +1,4 @@
-import { SubTier } from '../../../src/honey-votes/honey-votes.interface';
+import { SubTier } from '../../../src/honey-votes/honey-votes.constants';
 import {
   CheckUserSubscriptionResponse,
   GetChannelEditorsResponse,

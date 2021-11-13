@@ -9,7 +9,7 @@ import { User } from '../../src/honey-votes/users/entities/user.entity';
 import {
   API_BASE,
   VotingOptionType,
-} from '../../src/honey-votes/honey-votes.interface';
+} from '../../src/honey-votes/honey-votes.constants';
 import {
   CheckUserSubscriptionResponse,
   GetChannelEditorsResponse,

@@ -8,7 +8,7 @@ import {
   SubTier,
   TwitchUserType,
   VotingOptionType,
-} from '../../../src/honey-votes/honey-votes.interface';
+} from '../../../src/honey-votes/honey-votes.constants';
 import { User } from '../../../src/honey-votes/users/entities/user.entity';
 import { Vote } from '../../../src/honey-votes/votes/entities/vote.entity';
 import { Voting } from '../../../src/honey-votes/votes/entities/voting.entity';

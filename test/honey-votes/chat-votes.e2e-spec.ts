@@ -7,7 +7,7 @@ import {
   API_BASE,
   SubTier,
   TwitchUserType,
-} from '../../src/honey-votes/honey-votes.interface';
+} from '../../src/honey-votes/honey-votes.constants';
 import { ChatVote } from '../../src/honey-votes/chat-votes/entities/chat-vote.entity';
 import { ChatVoting } from '../../src/honey-votes/chat-votes/entities/chat-voting.entity';
 import {

@@ -3,8 +3,8 @@ import {
   API_BASE,
   SubTier,
   TwitchUserType,
-} from '../../src/honey-votes/honey-votes.interface';
-import { VotingOptionType } from '../../src/honey-votes/honey-votes.interface';
+} from '../../src/honey-votes/honey-votes.constants';
+import { VotingOptionType } from '../../src/honey-votes/honey-votes.constants';
 import {
   VOTING_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTIONS_LIMIT_MAX,

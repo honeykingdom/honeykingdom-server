@@ -11,7 +11,7 @@ import { CreateChatGoalDto } from '../../src/honey-votes/chat-goal/dto/create-ch
 import {
   API_BASE,
   TwitchUserType,
-} from '../../src/honey-votes/honey-votes.interface';
+} from '../../src/honey-votes/honey-votes.constants';
 import {
   CHAT_GOAL_DEFAULT,
   CHAT_GOAL_PERMISSIONS_DEFAULT,
