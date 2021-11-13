@@ -9,8 +9,8 @@ import { TwitchChatModule } from '../../twitch-chat/twitch-chat.module';
 import { UsersModule } from '../users/users.module';
 import { ChatVotesService } from './chat-votes.service';
 import { ChatVotesController } from './chat-votes.controller';
-import { ChatVote } from './entities/ChatVote.entity';
-import { ChatVoting } from './entities/ChatVoting.entity';
+import { ChatVote } from './entities/chat-vote.entity';
+import { ChatVoting } from './entities/chat-voting.entity';
 
 @Module({
   imports: [

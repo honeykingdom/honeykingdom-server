@@ -14,9 +14,9 @@ import {
   ApiProperty,
   ApiPropertyOptional,
 } from '@nestjs/swagger';
-import { User } from '../../users/entities/User.entity';
-import { Vote } from './Vote.entity';
-import { VotingOption } from './VotingOption.entity';
+import { User } from '../../users/entities/user.entity';
+import { Vote } from './vote.entity';
+import { VotingOption } from './voting-option.entity';
 import { VotingOptionType } from '../../honey-votes.interface';
 import { VotingPermissions } from '../dto/VotingPermissions';
 import {

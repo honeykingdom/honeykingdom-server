@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserStateTags } from 'twitch-js';
-import { ChatVoting } from './ChatVoting.entity';
+import { ChatVoting } from './chat-voting.entity';
 import {
   CHAT_VOTE_CONTENT_MAX_LENGTH,
   CHAT_VOTE_TABLE_NAME,

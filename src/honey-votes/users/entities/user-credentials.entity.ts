@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
-import { User } from './User.entity';
+import { User } from './user.entity';
 
 const USER_CREDENTIALS_TABLE_NAME = 'hv_user_credentials';
 

@@ -24,7 +24,7 @@ import { API_BASE } from '../../honey-votes.interface';
 import { CreateVotingOptionDto } from '../dto/create-voting-option.dto';
 import { validationPipe } from '../../honey-votes.validation';
 import { VotingOptionsService } from './voting-options.service';
-import { VotingOption } from '../entities/VotingOption.entity';
+import { VotingOption } from '../entities/voting-option.entity';
 
 @ApiTags('HoneyVotes - Votes')
 @ApiBearerAuth()

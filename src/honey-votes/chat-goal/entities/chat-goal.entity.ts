@@ -9,7 +9,7 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 import { ChatGoalData } from './chat-goal-data.entity';
 import {
   CHAT_GOAL_DOWNVOTE_COMMAND_DEFAULT,

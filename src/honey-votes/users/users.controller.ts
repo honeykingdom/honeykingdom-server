@@ -18,7 +18,7 @@ import { JwtStrategyUser } from '../auth/auth.interface';
 import { PassportUser } from '../auth/decorators/passport-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { API_BASE } from '../honey-votes.interface';
-import { User } from './entities/User.entity';
+import { User } from './entities/user.entity';
 import { UserRoles } from './users.interface';
 import { UsersService } from './users.service';
 

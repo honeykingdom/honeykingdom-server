@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { POSTGRES_CONNECTION } from '../../app.constants';
 import { TwitchApiModule } from '../../twitch-api/twitch-api.module';
-import { User } from './entities/User.entity';
+import { User } from './entities/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 

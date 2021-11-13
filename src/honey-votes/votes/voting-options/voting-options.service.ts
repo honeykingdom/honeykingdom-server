@@ -16,10 +16,10 @@ import { VotingOptionType } from '../../honey-votes.interface';
 import {
   VotingOption,
   VotingOptionCard,
-} from '../entities/VotingOption.entity';
-import { Voting } from '../entities/Voting.entity';
-import { Vote } from '../entities/Vote.entity';
-import { User } from '../../users/entities/User.entity';
+} from '../entities/voting-option.entity';
+import { Voting } from '../entities/voting.entity';
+import { Vote } from '../entities/vote.entity';
+import { User } from '../../users/entities/user.entity';
 import { AxiosResponse } from 'axios';
 import { Cover, Game } from 'igdb-api-types';
 

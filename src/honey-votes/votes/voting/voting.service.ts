@@ -6,11 +6,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
 import { CreateVotingDto } from '../dto/create-voting.dto';
 import { UpdateVotingDto } from '../dto/update-voting.dto';
-import { Voting } from '../entities/Voting.entity';
+import { Voting } from '../entities/voting.entity';
 
 @Injectable()
 export class VotingService {

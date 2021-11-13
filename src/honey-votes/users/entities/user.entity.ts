@@ -8,11 +8,11 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserCredentials } from './UserCredentials.entity';
-import { ChatVoting } from '../../chat-votes/entities/ChatVoting.entity';
-import { Voting } from '../../votes/entities/Voting.entity';
-import { Vote } from '../../votes/entities/Vote.entity';
-import { VotingOption } from '../../votes/entities/VotingOption.entity';
+import { UserCredentials } from './user-credentials.entity';
+import { ChatVoting } from '../../chat-votes/entities/chat-voting.entity';
+import { Voting } from '../../votes/entities/voting.entity';
+import { Vote } from '../../votes/entities/vote.entity';
+import { VotingOption } from '../../votes/entities/voting-option.entity';
 
 const USER_TABLE_NAME = 'hv_user';
 

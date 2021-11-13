@@ -10,10 +10,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 import { VotingOptionType } from '../../honey-votes.interface';
-import { Vote } from './Vote.entity';
-import { Voting } from './Voting.entity';
+import { Vote } from './vote.entity';
+import { Voting } from './voting.entity';
 import {
   VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTION_CARD_SUBTITLE_MAX_LENGTH,

@@ -27,7 +27,7 @@ import { validationPipe } from '../honey-votes.validation';
 import { ChatVotesService } from './chat-votes.service';
 import { CreateChatVotingDto } from './dto/create-chat-voting.dto';
 import { UpdateChatVotingDto } from './dto/update-chat-voting.dto';
-import { ChatVoting } from './entities/ChatVoting.entity';
+import { ChatVoting } from './entities/chat-voting.entity';
 
 @ApiTags('HoneyVotes - Chat Votes')
 @ApiBearerAuth()

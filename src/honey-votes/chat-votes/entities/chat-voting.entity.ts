@@ -10,8 +10,8 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
-import { ChatVote } from './ChatVote.entity';
-import { User } from '../../users/entities/User.entity';
+import { ChatVote } from './chat-vote.entity';
+import { User } from '../../users/entities/user.entity';
 import {
   ChatVotingCommands,
   ChatVotingPermissions,

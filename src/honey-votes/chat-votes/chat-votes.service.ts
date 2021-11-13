@@ -12,15 +12,15 @@ import {
   POSTGRES_CONNECTION,
   TWITCH_CHAT_ANONYMOUS,
 } from '../../app.constants';
-import { ChatVote } from './entities/ChatVote.entity';
-import { ChatVoting } from './entities/ChatVoting.entity';
+import { ChatVote } from './entities/chat-vote.entity';
+import { ChatVoting } from './entities/chat-voting.entity';
 import { UpdateChatVotingDto } from './dto/update-chat-voting.dto';
 import {
   CreateChatVotingDto,
   ChatVotingPermissions,
 } from './dto/create-chat-voting.dto';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/entities/User.entity';
+import { User } from '../users/entities/user.entity';
 import { SubTier } from '../honey-votes.interface';
 import {
   CHAT_VOTING_COMMANDS_DEFAULT,

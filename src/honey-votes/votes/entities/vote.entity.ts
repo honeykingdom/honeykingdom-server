@@ -9,10 +9,10 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 import { VOTE_TABLE_NAME } from '../votes.constants';
-import { Voting } from './Voting.entity';
-import { VotingOption } from './VotingOption.entity';
+import { Voting } from './voting.entity';
+import { VotingOption } from './voting-option.entity';
 
 @Entity(VOTE_TABLE_NAME)
 export class Vote {

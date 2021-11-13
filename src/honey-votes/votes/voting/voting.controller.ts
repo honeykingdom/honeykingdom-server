@@ -29,7 +29,7 @@ import { CreateVotingDto } from '../dto/create-voting.dto';
 import { UpdateVotingDto } from '../dto/update-voting.dto';
 import { validationPipe } from '../../honey-votes.validation';
 import { VotingService } from './voting.service';
-import { Voting } from '../entities/Voting.entity';
+import { Voting } from '../entities/voting.entity';
 
 @ApiTags('HoneyVotes - Votes')
 @Controller(API_BASE)
