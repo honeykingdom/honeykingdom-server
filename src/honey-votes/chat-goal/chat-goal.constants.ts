@@ -22,12 +22,36 @@ export const CHAT_GOAL_VOTE_COMMAND_MAX_LENGTH = TWITCH_MESSAGE_MAX_LENGTH;
 export const CHAT_VOTES_MAX_VOTES_VALUE_DEFAULT = 100;
 
 export const CHAT_GOAL_PERMISSIONS_DEFAULT: ChatGoalPermissions = {
-  [TwitchUserType.Mod]: { canVote: true, votesAmount: 5 },
-  [TwitchUserType.Vip]: { canVote: true, votesAmount: 5 },
-  [TwitchUserType.SubTier1]: { canVote: true, votesAmount: 5 },
-  [TwitchUserType.SubTier2]: { canVote: true, votesAmount: 10 },
-  [TwitchUserType.SubTier3]: { canVote: true, votesAmount: 15 },
-  [TwitchUserType.Viewer]: { canVote: true, votesAmount: 1 },
+  [TwitchUserType.Mod]: {
+    canUpvote: true,
+    canDownvote: true,
+    votesAmount: 5,
+  },
+  [TwitchUserType.Vip]: {
+    canUpvote: true,
+    canDownvote: true,
+    votesAmount: 5,
+  },
+  [TwitchUserType.SubTier1]: {
+    canUpvote: true,
+    canDownvote: true,
+    votesAmount: 5,
+  },
+  [TwitchUserType.SubTier2]: {
+    canUpvote: true,
+    canDownvote: true,
+    votesAmount: 10,
+  },
+  [TwitchUserType.SubTier3]: {
+    canUpvote: true,
+    canDownvote: true,
+    votesAmount: 15,
+  },
+  [TwitchUserType.Viewer]: {
+    canUpvote: true,
+    canDownvote: false,
+    votesAmount: 1,
+  },
 };
 
 export const CHAT_GOAL_OPTIONS_DEFAULT: ChatGoalOptions = {

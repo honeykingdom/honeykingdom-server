@@ -6,7 +6,11 @@ import { TwitchUserType } from '../../honey-votes.interface';
 class ChatGoalPermissionsDefault {
   @IsBoolean()
   @ApiProperty()
-  canVote: boolean;
+  canUpvote: boolean;
+
+  @IsBoolean()
+  @ApiProperty()
+  canDownvote: boolean;
 
   @IsInt()
   @Min(0)

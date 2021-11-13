@@ -407,7 +407,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     if (!type) return;
 
-    if (!ChatGoalService.canVote(goal, privateMessage)) return;
+    if (!ChatGoalService.canVote(goal, privateMessage, type)) return;
 
     goal.votesCountByUser[userId] = (goal.votesCountByUser[userId] || 0) + 1;
 
@@ -463,6 +463,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
       votesCountByUser,
     }: GoalState,
     { tags }: PrivateMessage,
+    type: ChatEventType,
   ): boolean {
     const subscriberBadge = tags.badges.subscriber as number;
 
@@ -472,13 +473,44 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     const isVip = 'vip' in tags.badges;
     const isMod = 'moderator' in tags.badges;
 
+    if (
+      type === ChatEventType.Upvote &&
+      !viewer.canUpvote &&
+      !(subTier1.canUpvote && isSubTier1) &&
+      !(subTier2.canUpvote && isSubTier2) &&
+      !(subTier3.canUpvote && isSubTier3) &&
+      !(vip.canUpvote && isVip) &&
+      !(mod.canUpvote && isMod)
+    ) {
+      return false;
+    }
+
+    if (
+      type === ChatEventType.Downvote &&
+      !viewer.canDownvote &&
+      !(subTier1.canDownvote && isSubTier1) &&
+      !(subTier2.canDownvote && isSubTier2) &&
+      !(subTier3.canDownvote && isSubTier3) &&
+      !(vip.canDownvote && isVip) &&
+      !(mod.canDownvote && isMod)
+    ) {
+      return false;
+    }
+
+    const viewerCanVote = viewer.canUpvote || viewer.canDownvote;
+    const subTier1canVote = subTier1.canUpvote || subTier1.canDownvote;
+    const subTier2canVote = subTier2.canUpvote || subTier2.canDownvote;
+    const subTier3canVote = subTier3.canUpvote || subTier3.canDownvote;
+    const vipCanVote = vip.canUpvote || vip.canDownvote;
+    const modCanVote = mod.canUpvote || mod.canDownvote;
+
     const maxVotesCount = Math.max(
-      viewer.canVote ? viewer.votesAmount : 0,
-      subTier1.canVote && isSubTier1 ? subTier1.votesAmount : 0,
-      subTier2.canVote && isSubTier2 ? subTier2.votesAmount : 0,
-      subTier3.canVote && isSubTier3 ? subTier3.votesAmount : 0,
-      vip.canVote && isVip ? vip.votesAmount : 0,
-      mod.canVote && isMod ? mod.votesAmount : 0,
+      viewerCanVote ? viewer.votesAmount : 0,
+      subTier1canVote && isSubTier1 ? subTier1.votesAmount : 0,
+      subTier2canVote && isSubTier2 ? subTier2.votesAmount : 0,
+      subTier3canVote && isSubTier3 ? subTier3.votesAmount : 0,
+      vipCanVote && isVip ? vip.votesAmount : 0,
+      modCanVote && isMod ? mod.votesAmount : 0,
     );
 
     const currentVotesCount = votesCountByUser[tags.userId] || 0;
