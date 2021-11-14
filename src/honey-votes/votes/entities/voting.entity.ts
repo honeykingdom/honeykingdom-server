@@ -69,6 +69,10 @@ export class Voting {
   @ApiProperty({ default: VOTING_PERMISSIONS_DEFAULT })
   permissions: VotingPermissions;
 
+  @Column({ default: true })
+  @ApiProperty({ default: true })
+  showValues: boolean;
+
   @Column({
     type: 'enum',
     enum: VotingOptionType,

@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
-import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
 import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
@@ -21,123 +17,12 @@ export class VotesService {
     private readonly votingOptionRepo: Repository<VotingOption>,
     @InjectRepository(Vote, POSTGRES_CONNECTION)
     private readonly voteRepo: Repository<Vote>,
-    @InjectConnection(POSTGRES_CONNECTION)
-    private readonly connection: Connection,
   ) {}
 
   async createVote(
     userId: string,
     { votingOptionId }: CreateVoteDto,
   ): Promise<void> {
-    const hasAccess = await this.canCreateVote(userId, votingOptionId);
-
-    if (!hasAccess) throw new ForbiddenException();
-
-    // https://docs.nestjs.com/techniques/database#transactions
-    const queryRunner = this.connection.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const votingOption = await queryRunner.manager.findOne(
-        VotingOption,
-        votingOptionId,
-      );
-
-      if (!votingOption) throw new BadRequestException();
-
-      const votingId = votingOption.votingId;
-
-      const oldVote = await queryRunner.manager.findOne(Vote, {
-        where: { author: { id: userId }, voting: { id: votingId } },
-        relations: ['votingOption'],
-      });
-
-      if (oldVote) {
-        // don't create Vote twice for the same user and VotingOption
-        if (oldVote.votingOptionId === votingOptionId) {
-          throw new BadRequestException();
-        }
-
-        // remove old Vote and update old VotingOption fullVotesValue
-        if (oldVote.votingOptionId !== votingOptionId) {
-          const fullVotesValue =
-            oldVote.votingOption.fullVotesValue - oldVote.value;
-          const votingOption = { ...oldVote.votingOption, fullVotesValue };
-
-          await Promise.all([
-            queryRunner.manager.save(VotingOption, votingOption),
-            queryRunner.manager.delete(Vote, oldVote.id),
-          ]);
-        }
-      }
-
-      const vote = queryRunner.manager.create(Vote, {
-        author: { id: userId },
-        voting: { id: votingId },
-        votingOption,
-      });
-
-      await Promise.all([
-        queryRunner.manager.save(Vote, vote),
-        queryRunner.manager.save(VotingOption, {
-          ...votingOption,
-          fullVotesValue: votingOption.fullVotesValue + 1,
-        }),
-      ]);
-
-      await queryRunner.commitTransaction();
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
-      await queryRunner.release();
-    }
-  }
-
-  async deleteVote(
-    userId: string,
-    { votingOptionId }: DeleteVoteDto,
-  ): Promise<void> {
-    const queryRunner = this.connection.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const [user, vote] = await Promise.all([
-        queryRunner.manager.findOne(User, userId),
-        queryRunner.manager.findOne(Vote, {
-          where: {
-            author: { id: userId },
-            votingOption: { id: votingOptionId },
-          },
-          relations: ['author', 'voting', 'votingOption'],
-        }),
-      ]);
-
-      const hasAccess = await this.canDeleteVote(user, vote);
-
-      if (!hasAccess) throw new ForbiddenException();
-
-      vote.votingOption.fullVotesValue -= vote.value;
-
-      await Promise.all([
-        queryRunner.manager.delete(Vote, vote.id),
-        queryRunner.manager.save(VotingOption, vote.votingOption),
-      ]);
-
-      await queryRunner.commitTransaction();
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
-      await queryRunner.release();
-    }
-  }
-
-  private async canCreateVote(userId: string, votingOptionId: number) {
     const [user, votingOption] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingOptionRepo.findOne(votingOptionId, {
@@ -149,6 +34,42 @@ export class VotesService {
       }),
     ]);
 
+    const hasAccess = await this.canCreateVote(user, votingOption);
+
+    if (!hasAccess) throw new ForbiddenException();
+
+    const votingId = votingOption.votingId;
+
+    await this.voteRepo.save({
+      author: { id: userId },
+      voting: { id: votingId },
+      votingOption,
+    });
+  }
+
+  async deleteVote(
+    userId: string,
+    { votingOptionId }: DeleteVoteDto,
+  ): Promise<void> {
+    const [user, vote] = await Promise.all([
+      this.usersService.findOne(userId),
+      this.voteRepo.findOne({
+        where: {
+          author: { id: userId },
+          votingOption: { id: votingOptionId },
+        },
+        relations: ['author', 'voting', 'votingOption'],
+      }),
+    ]);
+
+    const hasAccess = await this.canDeleteVote(user, vote);
+
+    if (!hasAccess) throw new ForbiddenException();
+
+    await this.voteRepo.remove(vote);
+  }
+
+  private async canCreateVote(user: User, votingOption: VotingOption) {
     if (!votingOption || !user) return false;
     if (!votingOption.voting.canManageVotes) return false;
 

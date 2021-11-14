@@ -5,7 +5,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
@@ -18,15 +18,11 @@ import { VotingOption } from './voting-option.entity';
 export class Vote {
   static readonly tableName = VOTE_TABLE_NAME;
 
-  @PrimaryGeneratedColumn()
-  @ApiProperty()
-  id: number;
-
   @ManyToOne(() => User, (user) => user.votes, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'authorId' })
   author: User;
 
-  @RelationId((vote: Vote) => vote.author)
+  @PrimaryColumn()
   @ApiProperty()
   authorId: string;
 
@@ -34,7 +30,7 @@ export class Vote {
   @JoinColumn({ name: 'votingId' })
   voting: Voting;
 
-  @RelationId((vote: Vote) => vote.voting)
+  @PrimaryColumn()
   @ApiProperty()
   votingId: number;
 

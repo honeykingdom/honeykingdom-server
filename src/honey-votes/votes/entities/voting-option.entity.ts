@@ -54,10 +54,6 @@ export class VotingOption {
   @OneToMany(() => Vote, (vote) => vote.votingOption)
   votes: Vote[];
 
-  @Column({ default: 0 })
-  @ApiProperty()
-  fullVotesValue: number;
-
   @Column({ type: 'enum', enum: VotingOptionType })
   @ApiProperty({ enum: VotingOptionType, enumName: 'VotingOptionType' })
   type: VotingOptionType;

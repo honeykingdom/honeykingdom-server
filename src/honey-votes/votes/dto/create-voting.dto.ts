@@ -53,6 +53,11 @@ export class CreateVotingDtoBase {
   @ApiPropertyOptional()
   permissions?: VotingPermissions;
 
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional()
+  showValues?: boolean;
+
   @IsArray()
   @ArrayMinSize(1)
   @ArrayUnique()
