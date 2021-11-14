@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -28,7 +29,7 @@ import {
 } from './chat-votes.constants';
 
 @Injectable()
-export class ChatVotesService {
+export class ChatVotesService implements OnModuleInit {
   private readonly chatVotingList = new Map<string, ChatVoting>();
 
   constructor(
@@ -39,11 +40,9 @@ export class ChatVotesService {
     @InjectRepository(ChatVote, POSTGRES_CONNECTION)
     private readonly chatVoteRepo: Repository<ChatVote>,
     private readonly usersService: UsersService,
-  ) {
-    this.init();
-  }
+  ) {}
 
-  private async init() {
+  async onModuleInit() {
     const chatVotingList = await this.chatVotingRepo.find({
       relations: ['broadcaster'],
     });
