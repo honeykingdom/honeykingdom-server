@@ -43,7 +43,7 @@ export class VotingOptionsController {
     @PassportUser() user: JwtStrategyUser,
     @Body() data: CreateVotingOptionDto,
   ): Promise<VotingOption> {
-    return this.votingOptionsService.addVotingOption(user.id, data);
+    return this.votingOptionsService.createVotingOption(user.id, data);
   }
 
   @Delete('/voting-options/:votingOptionId')
@@ -54,7 +54,7 @@ export class VotingOptionsController {
     @PassportUser() user: JwtStrategyUser,
     @Param('votingOptionId', ParseIntPipe) votingOptionId: number,
   ): Promise<void> {
-    return this.votingOptionsService.removeVotingOption(
+    return this.votingOptionsService.deleteVotingOption(
       user.id,
       votingOptionId,
     );

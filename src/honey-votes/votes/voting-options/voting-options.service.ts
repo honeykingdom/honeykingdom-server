@@ -37,7 +37,7 @@ export class VotingOptionsService {
     private readonly voteRepo: Repository<Vote>,
   ) {}
 
-  async addVotingOption(
+  async createVotingOption(
     userId: string,
     data: CreateVotingOptionDto,
   ): Promise<VotingOption> {
@@ -73,7 +73,7 @@ export class VotingOptionsService {
     return savedVotingOption;
   }
 
-  async removeVotingOption(
+  async deleteVotingOption(
     userId: string,
     votingOptionId: number,
   ): Promise<void> {

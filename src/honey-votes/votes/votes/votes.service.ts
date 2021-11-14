@@ -11,7 +11,6 @@ import { UsersService } from '../../users/users.service';
 import { CreateVoteDto } from '../dto/create-vote.dto';
 import { DeleteVoteDto } from '../dto/delete-vote.dto';
 import { Vote } from '../entities/vote.entity';
-import { Voting } from '../entities/voting.entity';
 import { VotingOption } from '../entities/voting-option.entity';
 
 @Injectable()
@@ -26,7 +25,7 @@ export class VotesService {
     private readonly connection: Connection,
   ) {}
 
-  async addVote(
+  async createVote(
     userId: string,
     { votingOptionId }: CreateVoteDto,
   ): Promise<void> {
@@ -97,7 +96,7 @@ export class VotesService {
     }
   }
 
-  async removeVote(
+  async deleteVote(
     userId: string,
     { votingOptionId }: DeleteVoteDto,
   ): Promise<void> {

@@ -41,7 +41,7 @@ export class VotesController {
     @PassportUser() user: JwtStrategyUser,
     @Body() data: CreateVoteDto,
   ): Promise<void> {
-    return this.votesService.addVote(user.id, data);
+    return this.votesService.createVote(user.id, data);
   }
 
   @Delete('/votes')
@@ -52,6 +52,6 @@ export class VotesController {
     @PassportUser() user: JwtStrategyUser,
     @Body() data: DeleteVoteDto,
   ): Promise<void> {
-    return this.votesService.removeVote(user.id, data);
+    return this.votesService.deleteVote(user.id, data);
   }
 }

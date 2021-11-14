@@ -38,7 +38,7 @@ export class VotingService {
   }
 
   // TODO: add voting limit that users can create
-  async addVoting(
+  async createVoting(
     userId: string,
     { channelId, ...data }: CreateVotingDto,
   ): Promise<Voting> {
@@ -76,7 +76,7 @@ export class VotingService {
     return this.votingRepo.save({ ...voting, ...data } as Voting);
   }
 
-  async removeVoting(userId: string, votingId: number): Promise<void> {
+  async deleteVoting(userId: string, votingId: number): Promise<void> {
     const [user, voting] = await Promise.all([
       this.usersService.findOne(userId, { relations: ['credentials'] }),
       this.votingRepo.findOne(votingId, {
