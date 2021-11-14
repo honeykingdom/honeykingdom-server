@@ -18,7 +18,7 @@ Backend for [honey-votes.vercel.app](https://honey-votes.vercel.app/)
 - Users
 - Votes
 - Chat Votes
-- TODO: Chat Goal
+- Chat Goal
 
 ## Honey Bot
 
