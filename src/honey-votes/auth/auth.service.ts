@@ -6,6 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { Config } from '../../config/config.interface';
+import { BroadcasterType } from '../honey-votes.constants';
 import { UsersService } from '../users/users.service';
 import {
   JwtPayload,
@@ -67,6 +68,7 @@ export class AuthService {
       refreshToken,
       login,
       displayName,
+      broadcaster_type,
       profile_image_url: avatarUrl,
     } = user;
 
@@ -76,6 +78,7 @@ export class AuthService {
       displayName,
       avatarUrl,
       credentials: { accessToken, refreshToken, scope },
+      broadcasterType: broadcaster_type as BroadcasterType,
       areTokensValid: true,
     });
 

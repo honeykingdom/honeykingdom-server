@@ -13,6 +13,7 @@ import { ChatVoting } from '../../chat-votes/entities/chat-voting.entity';
 import { Voting } from '../../votes/entities/voting.entity';
 import { Vote } from '../../votes/entities/vote.entity';
 import { VotingOption } from '../../votes/entities/voting-option.entity';
+import { BroadcasterType } from '../../honey-votes.constants';
 
 const USER_TABLE_NAME = 'hv_user';
 
@@ -35,6 +36,14 @@ export class User {
   @Column()
   @ApiProperty()
   avatarUrl: string;
+
+  @Column({ default: BroadcasterType.None })
+  @ApiProperty({
+    default: BroadcasterType.None,
+    enum: BroadcasterType,
+    enumName: 'BroadcasterType',
+  })
+  broadcasterType: BroadcasterType;
 
   /** If `false` the user needs to re-login */
   @Column({ default: true })

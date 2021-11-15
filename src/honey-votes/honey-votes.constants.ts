@@ -24,3 +24,9 @@ export enum VotingOptionType {
   IgdbGame = 'igdbGame',
   Custom = 'custom',
 }
+
+export enum BroadcasterType {
+  None = '',
+  Partner = 'partner',
+  Affiliate = 'affiliate',
+}

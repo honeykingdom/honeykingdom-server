@@ -38,7 +38,12 @@ type CheckUserTypesInput = {
 
 type StoreUserInput = Pick<
   User,
-  'id' | 'login' | 'displayName' | 'avatarUrl' | 'areTokensValid'
+  | 'id'
+  | 'login'
+  | 'displayName'
+  | 'avatarUrl'
+  | 'broadcasterType'
+  | 'areTokensValid'
 > & {
   credentials: {
     scope: string[];
