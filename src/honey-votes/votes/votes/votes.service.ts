@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import NodeCache from 'node-cache';
 import { Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
 import { User } from '../../users/entities/user.entity';
@@ -11,6 +12,8 @@ import { VotingOption } from '../entities/voting-option.entity';
 
 @Injectable()
 export class VotesService {
+  voteLimits = new NodeCache({ stdTTL: 60 });
+
   constructor(
     private readonly usersService: UsersService,
     @InjectRepository(VotingOption, POSTGRES_CONNECTION)
@@ -73,12 +76,15 @@ export class VotesService {
     if (!votingOption || !user) return false;
     if (!votingOption.voting.canManageVotes) return false;
 
+    const key = `${user.id}-${votingOption.voting.id}`;
+
+    if (this.voteLimits.get(key)) return false;
+
     const { mod, vip, sub, follower, viewer } = votingOption.voting.permissions;
 
-    if (viewer.canVote) return true;
-
     if (
-      await this.usersService.checkUserTypes(
+      viewer.canVote ||
+      (await this.usersService.checkUserTypes(
         votingOption.voting.broadcaster,
         user,
         {
@@ -89,8 +95,10 @@ export class VotesService {
           minutesToFollowRequired: follower.minutesToFollowRequiredToVote,
           subTierRequired: sub.subTierRequiredToVote,
         },
-      )
+      ))
     ) {
+      this.voteLimits.set(key, true);
+
       return true;
     }
 
@@ -101,6 +109,10 @@ export class VotesService {
     if (!vote || !user) return false;
     if (vote.author.id !== user.id) return false;
     if (!vote.voting.canManageVotes) return false;
+
+    const key = `${user.id}-${vote.voting.id}`;
+
+    if (this.voteLimits.get(key)) return false;
 
     return true;
   }
