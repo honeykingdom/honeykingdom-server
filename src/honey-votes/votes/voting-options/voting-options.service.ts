@@ -266,7 +266,7 @@ export class VotingOptionsService {
       cardId: slug,
       cardTitle: name,
       cardDescription,
-      cardImageUrl: `https://images.igdb.com/igdb/image/upload/t_cover_big/${coverImageId}.jpg`,
+      cardImageId: coverImageId,
       cardUrl: `https://www.igdb.com/games/${slug}`,
     };
   }

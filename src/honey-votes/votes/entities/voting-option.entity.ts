@@ -81,6 +81,10 @@ export class VotingOption {
 
   @Column({ nullable: true })
   @ApiPropertyOptional()
+  cardImageId?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
   cardUrl?: string;
   // end card
 
@@ -100,5 +104,6 @@ export type VotingOptionCard = Pick<
   | 'cardSubtitle'
   | 'cardDescription'
   | 'cardImageUrl'
+  | 'cardImageId'
   | 'cardUrl'
 >;
