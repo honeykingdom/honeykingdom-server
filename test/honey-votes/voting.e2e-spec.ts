@@ -1,4 +1,6 @@
 import { Voting } from '../../src/honey-votes/votes/entities/voting.entity';
+import { VotingOption } from '../../src/honey-votes/votes/entities/voting-option.entity';
+import { Vote } from '../../src/honey-votes/votes/entities/vote.entity';
 import {
   API_BASE,
   SubTier,
@@ -285,6 +287,29 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
               [TwitchUserType.Viewer]: { canVote: true },
             } as any,
           },
+        });
+      });
+
+      test('showValues: valid', async () => {
+        const [user] = await ctx.createUsers();
+
+        await testCreateVoting(201, {
+          broadcaster: user,
+          initiator: user,
+          createVotingDto: { channelId: user.id, showValues: false },
+        });
+      });
+
+      test('showValues: invalid type', async () => {
+        const [user] = await ctx.createUsers();
+
+        await testCreateVoting(400, {
+          broadcaster: user,
+          initiator: user,
+          createVotingDto: {
+            channelId: user.id,
+            showValues: 1,
+          } as any,
         });
       });
 
