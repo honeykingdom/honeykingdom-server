@@ -66,8 +66,6 @@ const SUB_TIER: Record<
 
 const CACHE_TTL = 60 * 10; // 10 minutes
 
-// TODO: refresh token runs many times
-
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -80,6 +78,8 @@ export class UsersService {
   private readonly modsCache = new NodeCache({ stdTTL: CACHE_TTL });
   private readonly subsCache = new NodeCache({ stdTTL: CACHE_TTL });
   private readonly followersCache = new NodeCache({ stdTTL: CACHE_TTL });
+
+  private readonly refreshingTokens = new Map<string, Promise<User>>();
 
   constructor(
     private readonly configService: ConfigService<Config>,
@@ -336,7 +336,7 @@ export class UsersService {
         if (e.response.status === 401) {
           this.logger.log(`isSub: invalid access token. User: ${user.login}`);
 
-          const updatedUser = await this.refreshToken(user);
+          const updatedUser = await this.smartRefreshToken(user);
 
           if (updatedUser === null) return [null, null];
 
@@ -388,7 +388,7 @@ export class UsersService {
             `isFollower: invalid access token. User: ${user.login}`,
           );
 
-          const updatedUser = await this.refreshToken(user);
+          const updatedUser = await this.smartRefreshToken(user);
 
           if (updatedUser === null) {
             return [null, null];
@@ -446,7 +446,7 @@ export class UsersService {
             `getChannelEditors: invalid access token. User: ${channel.login}`,
           );
 
-          const updatedUser = await this.refreshToken(channel);
+          const updatedUser = await this.smartRefreshToken(channel);
 
           if (updatedUser === null) throw new UnauthorizedException();
 
@@ -495,7 +495,7 @@ export class UsersService {
             `getChannelMods: invalid access token. User: ${channel.login}`,
           );
 
-          const updatedUser = await this.refreshToken(channel);
+          const updatedUser = await this.smartRefreshToken(channel);
 
           if (updatedUser === null) throw new UnauthorizedException();
 
@@ -527,6 +527,24 @@ export class UsersService {
         client_id: this.clientId,
       });
     } catch (e) {}
+  }
+
+  private smartRefreshToken(user: User): Promise<User | null> {
+    const isAlreadyRefreshing = this.refreshingTokens.has(user.id);
+
+    if (isAlreadyRefreshing) return this.refreshingTokens.get(user.id);
+
+    const promise = (async () => {
+      const result = await this.refreshToken(user);
+
+      this.refreshingTokens.delete(user.id);
+
+      return result;
+    })();
+
+    this.refreshingTokens.set(user.id, promise);
+
+    return promise;
   }
 
   /**
