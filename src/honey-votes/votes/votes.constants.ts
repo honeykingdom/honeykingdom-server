@@ -35,6 +35,7 @@ export const VOTING_PERMISSIONS_DEFAULT: VotingPermissions = {
   },
   [TwitchUserType.Viewer]: { canVote: false, canAddOptions: false },
 };
+export const VOTING_SHOW_VALUES_DEFAULT = true;
 export const VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT: VotingOptionType[] = [
   VotingOptionType.KinopoiskMovie,
   VotingOptionType.IgdbGame,

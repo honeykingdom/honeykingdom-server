@@ -30,6 +30,7 @@ import {
   VOTING_PERMISSIONS_DEFAULT,
   VOTING_OPTIONS_LIMIT_MIN,
   VOTING_OPTIONS_LIMIT_MAX,
+  VOTING_SHOW_VALUES_DEFAULT,
 } from '../votes.constants';
 
 @ApiExtraModels(Vote)
@@ -69,8 +70,8 @@ export class Voting {
   @ApiProperty({ default: VOTING_PERMISSIONS_DEFAULT })
   permissions: VotingPermissions;
 
-  @Column({ default: true })
-  @ApiProperty({ default: true })
+  @Column({ default: VOTING_SHOW_VALUES_DEFAULT })
+  @ApiProperty({ default: VOTING_SHOW_VALUES_DEFAULT })
   showValues: boolean;
 
   @Column({
