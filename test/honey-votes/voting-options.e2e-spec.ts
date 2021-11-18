@@ -412,7 +412,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
               cardId: gameSlug,
               cardTitle: expect.any(String),
               cardDescription: expect.any(String),
-              cardImageUrl: expect.any(String),
+              cardImageId: expect.any(String),
               cardUrl: expect.any(String),
             },
           });
@@ -835,7 +835,11 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           } as Vote);
 
           return async () => {
-            expect(await ctx.voteRepo.findOne(vote.id)).toBeUndefined();
+            expect(
+              await ctx.voteRepo.findOne({
+                where: { author: vote.author, voting: vote.voting },
+              }),
+            ).toBeUndefined();
           };
         },
       });

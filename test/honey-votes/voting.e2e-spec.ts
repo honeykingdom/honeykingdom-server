@@ -545,44 +545,38 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
             const [votingOption1, votingOption2] =
               await ctx.votingOptionRepo.save([
                 {
-                  user: viewer1,
+                  author: viewer1,
                   voting,
                   type: VotingOptionType.Custom,
                   cardTitle: 'Test VotingOption 1',
-                },
+                } as VotingOption,
                 {
-                  user: viewer2,
+                  author: viewer2,
                   voting,
                   type: VotingOptionType.Custom,
                   cardTitle: 'Test VotingOption 2',
-                },
+                } as VotingOption,
               ]);
 
-            const [vote1, vote2, vote3, vote4] = await ctx.voteRepo.save([
+            const [vote1, vote2, vote3] = await ctx.voteRepo.save([
               {
-                user: viewer2,
+                author: viewer2,
                 voting,
                 votingOption: votingOption1,
                 value: 1,
-              },
+              } as Vote,
               {
-                user: viewer2,
+                author: viewer3,
                 voting,
                 votingOption: votingOption1,
                 value: 1,
-              },
+              } as Vote,
               {
-                user: viewer3,
-                voting,
-                votingOption: votingOption1,
-                value: 1,
-              },
-              {
-                user: viewer4,
+                author: viewer4,
                 voting,
                 votingOption: votingOption2,
                 value: 1,
-              },
+              } as Vote,
             ]);
 
             return async () => {
@@ -593,10 +587,21 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
                 await ctx.votingOptionRepo.findOne(votingOption2.id),
               ).toBeUndefined();
 
-              expect(await ctx.voteRepo.findOne(vote1.id)).toBeUndefined();
-              expect(await ctx.voteRepo.findOne(vote2.id)).toBeUndefined();
-              expect(await ctx.voteRepo.findOne(vote3.id)).toBeUndefined();
-              expect(await ctx.voteRepo.findOne(vote4.id)).toBeUndefined();
+              expect(
+                await ctx.voteRepo.findOne({
+                  where: { author: vote1.author, voting: vote1.voting },
+                }),
+              ).toBeUndefined();
+              expect(
+                await ctx.voteRepo.findOne({
+                  where: { author: vote2.author, voting: vote2.voting },
+                }),
+              ).toBeUndefined();
+              expect(
+                await ctx.voteRepo.findOne({
+                  where: { author: vote3.author, voting: vote3.voting },
+                }),
+              ).toBeUndefined();
             };
           },
         });

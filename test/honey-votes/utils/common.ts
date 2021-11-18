@@ -24,6 +24,7 @@ import {
   VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT,
   VOTING_OPTIONS_LIMIT_DEFAULT,
   VOTING_PERMISSIONS_DEFAULT,
+  VOTING_SHOW_VALUES_DEFAULT,
 } from '../../../src/honey-votes/votes/votes.constants';
 import {
   mockCheckUserSubscription,
@@ -42,6 +43,7 @@ const defaultVotingParams: Partial<Voting> = {
   canManageVotes: VOTING_CAN_MANAGE_VOTES_DEFAULT,
   canManageVotingOptions: VOTING_CAN_MANAGE_VOTING_OPTIONS_DEFAULT,
   permissions: VOTING_PERMISSIONS_DEFAULT,
+  showValues: VOTING_SHOW_VALUES_DEFAULT,
   allowedVotingOptionTypes: VOTING_ALLOWED_VOTING_OPTIONS_TYPES_DEFAULT,
   votingOptionsLimit: VOTING_OPTIONS_LIMIT_DEFAULT,
   createdAt: expect.anything(),
@@ -52,7 +54,6 @@ const defaultVotingOptionParams = {
   id: expect.any(Number),
   authorId: expect.any(String),
   votingId: expect.any(Number),
-  fullVotesValue: 0,
   type: expect.stringMatching(
     new RegExp(
       `^${[
@@ -67,13 +68,13 @@ const defaultVotingOptionParams = {
   cardSubtitle: null,
   cardDescription: null,
   cardImageUrl: null,
+  cardImageId: null,
   cardUrl: null,
   createdAt: expect.anything(),
   updatedAt: expect.anything(),
 };
 
 const defaultVoteParams = {
-  id: expect.any(Number),
   authorId: expect.any(String),
   votingId: expect.any(Number),
   votingOptionId: expect.any(Number),
@@ -674,7 +675,6 @@ export const createTestDeleteVote =
       voting,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
-      fullVotesValue: 1,
     } as VotingOption);
     const vote = await ctx.voteRepo.save({
       author: voteAuthor,
@@ -704,7 +704,11 @@ export const createTestDeleteVote =
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
-      expect(await ctx.voteRepo.findOne(vote.id)).toBeUndefined();
+      expect(
+        await ctx.voteRepo.findOne({
+          where: { author: vote.author, voting: vote.voting },
+        }),
+      ).toBeUndefined();
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
@@ -714,7 +718,11 @@ export const createTestDeleteVote =
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
-      expect(await ctx.voteRepo.findOne(vote.id)).toEqual(expectedVote);
+      expect(
+        await ctx.voteRepo.findOne({
+          where: { author: vote.author, voting: vote.voting },
+        }),
+      ).toEqual(expectedVote);
     }
 
     // @ts-expect-error

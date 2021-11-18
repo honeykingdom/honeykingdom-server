@@ -297,6 +297,7 @@ describe('HoneyVotes - Users (e2e)', () => {
           login: user.login,
           displayName: user.displayName,
           avatarUrl: user.avatarUrl,
+          broadcasterType: user.broadcasterType,
           areTokensValid: true,
         } as Partial<User>);
     });
