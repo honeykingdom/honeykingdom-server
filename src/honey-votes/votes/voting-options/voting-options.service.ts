@@ -59,7 +59,11 @@ export class VotingOptionsService {
 
     const votingOption = this.votingOptionRepo.create({
       author,
-      authorLogin: author.login,
+      authorData: {
+        login: author.login,
+        displayName: author.displayName,
+        avatarUrl: author.avatarUrl,
+      },
       voting,
       type,
       ...card,

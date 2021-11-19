@@ -21,6 +21,20 @@ import {
   VOTING_OPTION_TABLE_NAME,
 } from '../votes.constants';
 
+interface IVotingOptionAuthorData
+  extends Pick<User, 'login' | 'displayName' | 'avatarUrl'> {}
+
+class VotingOptionAuthorData implements IVotingOptionAuthorData {
+  @ApiProperty()
+  login: string;
+
+  @ApiProperty()
+  displayName: string;
+
+  @ApiProperty()
+  avatarUrl: string;
+}
+
 @Entity(VOTING_OPTION_TABLE_NAME)
 export class VotingOption {
   static readonly tableName = VOTING_OPTION_TABLE_NAME;
@@ -37,9 +51,12 @@ export class VotingOption {
   @ApiProperty()
   authorId: string;
 
-  @Column({ default: '' })
-  @ApiProperty({ default: '' })
-  authorLogin: string;
+  @Column({ type: 'jsonb', default: {} })
+  @ApiProperty({
+    default: {},
+    description: 'This column needs only to get an author via ws',
+  })
+  authorData: VotingOptionAuthorData;
 
   @ManyToOne(() => Voting, (voting) => voting.votingOptions, {
     onDelete: 'CASCADE',
