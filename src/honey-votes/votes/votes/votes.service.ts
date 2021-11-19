@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import NodeCache from 'node-cache';
 import { Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
+import HoneyError from '../../honey-error.enum';
 import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
 import { CreateVoteDto } from '../dto/create-vote.dto';
@@ -12,7 +13,7 @@ import { VotingOption } from '../entities/voting-option.entity';
 
 @Injectable()
 export class VotesService {
-  voteLimits = new NodeCache({ stdTTL: 60 });
+  voteLimits = new NodeCache({ stdTTL: 5 });
 
   constructor(
     private readonly usersService: UsersService,
@@ -74,11 +75,15 @@ export class VotesService {
 
   private async canCreateVote(user: User, votingOption: VotingOption) {
     if (!votingOption || !user) return false;
-    if (!votingOption.voting.canManageVotes) return false;
+    if (!votingOption.voting.canManageVotes) {
+      throw new ForbiddenException(HoneyError.VoteCreateDisabled);
+    }
 
     const key = `${user.id}-${votingOption.voting.id}`;
 
-    if (this.voteLimits.get(key)) return false;
+    if (this.voteLimits.get(key)) {
+      throw new ForbiddenException(HoneyError.VoteCreateTooQuickly);
+    }
 
     const { mod, vip, sub, follower, viewer } = votingOption.voting.permissions;
 
@@ -102,17 +107,24 @@ export class VotesService {
       return true;
     }
 
-    return false;
+    throw new ForbiddenException(HoneyError.VoteCreateNoPermission);
   }
 
   private async canDeleteVote(user: User, vote: Vote) {
     if (!vote || !user) return false;
-    if (vote.author.id !== user.id) return false;
-    if (!vote.voting.canManageVotes) return false;
+    if (!vote.voting.canManageVotes) {
+      throw new ForbiddenException(HoneyError.VoteDeleteDisabled);
+    }
+
+    if (vote.author.id !== user.id) {
+      throw new ForbiddenException(HoneyError.VoteDeleteNotOwner);
+    }
 
     const key = `${user.id}-${vote.voting.id}`;
 
-    if (this.voteLimits.get(key)) return false;
+    if (this.voteLimits.get(key)) {
+      throw new ForbiddenException(HoneyError.VoteDeleteTooQuickly);
+    }
 
     return true;
   }

@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
+import HoneyError from '../../honey-error.enum';
 import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
 import { CreateVotingDto } from '../dto/create-voting.dto';
@@ -111,6 +112,10 @@ export class VotingService {
 
     const isEditor = await this.usersService.isEditor(channel, user);
 
+    if (!isEditor) {
+      throw new ForbiddenException(HoneyError.VotingNoPermission);
+    }
+
     return isEditor;
   }
 
@@ -125,6 +130,10 @@ export class VotingService {
     if (isOwner) return true;
 
     const isEditor = await this.usersService.isEditor(voting.broadcaster, user);
+
+    if (!isEditor) {
+      throw new ForbiddenException(HoneyError.VotingNoPermission);
+    }
 
     return isEditor;
   }

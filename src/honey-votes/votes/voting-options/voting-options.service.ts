@@ -2,11 +2,15 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AxiosResponse } from 'axios';
 import { Repository } from 'typeorm';
 import { getYear } from 'date-fns';
+import { Cover, Game } from 'igdb-api-types';
 import { POSTGRES_CONNECTION } from '../../../app.constants';
+import HoneyError from '../../honey-error.enum';
 import { UsersService } from '../../users/users.service';
 import { KinopoiskApiService } from '../../../kinopoisk-api/kinopoisk-api.service';
 import { GetFilmData } from '../../../kinopoisk-api/kinopoisk-api.interface';
@@ -20,8 +24,6 @@ import {
 import { Voting } from '../entities/voting.entity';
 import { Vote } from '../entities/vote.entity';
 import { User } from '../../users/entities/user.entity';
-import { AxiosResponse } from 'axios';
-import { Cover, Game } from 'igdb-api-types';
 
 @Injectable()
 export class VotingOptionsService {
@@ -94,7 +96,9 @@ export class VotingOptionsService {
     votingOptionType: VotingOptionType,
   ): Promise<boolean> {
     if (!voting || !user) return false;
-    if (!voting.canManageVotingOptions) return false;
+    if (!voting.canManageVotingOptions) {
+      throw new ForbiddenException(HoneyError.VotingOptionCreateDisabled);
+    }
 
     const isOwner = voting.broadcaster.id === user.id;
 
@@ -111,10 +115,19 @@ export class VotingOptionsService {
       }),
     ]);
 
-    if (votingOptionsCount >= voting.votingOptionsLimit) return false;
-    if (votingOptionsByUserCount >= 1) return false;
-    if (!voting.allowedVotingOptionTypes.includes(votingOptionType))
-      return false;
+    if (votingOptionsCount >= voting.votingOptionsLimit) {
+      throw new ForbiddenException(HoneyError.VotingOptionCreateLimitReached);
+    }
+
+    if (votingOptionsByUserCount >= 1) {
+      throw new ForbiddenException(
+        HoneyError.VotingOptionCreateAlreadyCreatedByUser,
+      );
+    }
+
+    if (!voting.allowedVotingOptionTypes.includes(votingOptionType)) {
+      throw new ForbiddenException(HoneyError.VotingOptionCreateDisabled);
+    }
 
     const params = voting.permissions;
 
@@ -134,7 +147,7 @@ export class VotingOptionsService {
       return true;
     }
 
-    return false;
+    throw new ForbiddenException(HoneyError.VotingOptionCreateNoPermission);
   }
 
   private async canDeleteVotingOption(
@@ -165,9 +178,17 @@ export class VotingOptionsService {
 
     if (isEditor) return true;
 
-    if (!votingOption.voting.canManageVotingOptions) return false;
-    if (votingOption.authorId !== user.id) return false;
-    if (votesCount > 0) return false;
+    if (!votingOption.voting.canManageVotingOptions) {
+      throw new BadRequestException(HoneyError.VotingOptionDeleteDisabled);
+    }
+
+    if (votingOption.authorId !== user.id) {
+      throw new BadRequestException(HoneyError.VotingOptionDeleteNotOwner);
+    }
+
+    if (votesCount > 0) {
+      throw new BadRequestException(HoneyError.VotingOptionDeleteHasVotes);
+    }
 
     return true;
   }
@@ -195,7 +216,9 @@ export class VotingOptionsService {
       where: { voting: { id: data.votingId }, ...where },
     });
 
-    if (sameVotingOption) throw new BadRequestException();
+    if (sameVotingOption) {
+      throw new BadRequestException(HoneyError.VotingOptionCreateAlreadyExists);
+    }
 
     if (data.type === VotingOptionType.KinopoiskMovie) {
       return await this.getKinopoiskMovieCard((payload as PayloadKp).id);
@@ -216,7 +239,13 @@ export class VotingOptionsService {
     try {
       response = await this.kinopoiskApiService.getFilmData(movieId);
     } catch (e) {
-      throw new BadRequestException();
+      if (e.response.status === 404) {
+        throw new BadRequestException(
+          HoneyError.VotingOptionCreateKinopoiskMovieNotFound,
+        );
+      }
+
+      throw new InternalServerErrorException();
     }
 
     const {
@@ -250,10 +279,14 @@ export class VotingOptionsService {
     try {
       response = await this.igdbApiService.game(body);
     } catch (e) {
-      throw new BadRequestException();
+      throw new InternalServerErrorException();
     }
 
-    if (response.data.length === 0) throw new BadRequestException();
+    if (response.data.length === 0) {
+      throw new BadRequestException(
+        HoneyError.VotingOptionCantIgdbGameNotFound,
+      );
+    }
 
     const { cover, first_release_date, genres, name, slug } = response.data[0];
     const coverImageId = (cover as Cover).image_id;
