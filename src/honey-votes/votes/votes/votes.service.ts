@@ -13,7 +13,7 @@ import { VotingOption } from '../entities/voting-option.entity';
 
 @Injectable()
 export class VotesService {
-  voteLimits = new NodeCache({ stdTTL: 5 });
+  voteLimits = new NodeCache({ stdTTL: 60 });
 
   constructor(
     private readonly usersService: UsersService,
