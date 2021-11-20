@@ -24,6 +24,7 @@ import {
 import { Voting } from '../entities/voting.entity';
 import { Vote } from '../entities/vote.entity';
 import { User } from '../../users/entities/user.entity';
+import { VOTING_OPTION_CARD_TITLE_MAX_LENGTH } from '../votes.constants';
 
 @Injectable()
 export class VotingOptionsService {
@@ -258,13 +259,18 @@ export class VotingOptionsService {
       posterUrlPreview,
     } = response.data;
 
-    const cardDescription = `${[year, genres.map((g) => g.genre).join(', ')]
+    const cardDescription = `${[year, genres?.map((g) => g.genre).join(', ')]
       .filter(Boolean)
       .join(' - ')}`;
 
+    const cardTitle =
+      nameRu.length > VOTING_OPTION_CARD_TITLE_MAX_LENGTH
+        ? `${nameRu.slice(0, VOTING_OPTION_CARD_TITLE_MAX_LENGTH - 3)}...`
+        : nameRu;
+
     return {
       cardId: `${kinopoiskId}`,
-      cardTitle: nameRu,
+      cardTitle,
       cardSubtitle: nameEn,
       cardDescription,
       cardImageUrl: posterUrlPreview || posterUrl,
@@ -289,19 +295,24 @@ export class VotingOptionsService {
     }
 
     const { cover, first_release_date, genres, name, slug } = response.data[0];
-    const coverImageId = (cover as Cover).image_id;
+    const coverImageId = (cover as Cover)?.image_id;
 
     const year = first_release_date
       ? getYear(first_release_date * 1000)
       : undefined;
 
-    const cardDescription = `${[year, genres.map((g) => g.name).join(', ')]
+    const cardDescription = `${[year, genres?.map((g) => g.name).join(', ')]
       .filter(Boolean)
       .join(' - ')}`;
 
+    const cardTitle =
+      name.length > VOTING_OPTION_CARD_TITLE_MAX_LENGTH
+        ? `${name.slice(0, VOTING_OPTION_CARD_TITLE_MAX_LENGTH - 3)}...`
+        : name;
+
     return {
       cardId: slug,
-      cardTitle: name,
+      cardTitle,
       cardDescription,
       cardImageId: coverImageId,
       cardUrl: `https://www.igdb.com/games/${slug}`,
