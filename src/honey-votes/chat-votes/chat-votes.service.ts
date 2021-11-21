@@ -43,20 +43,19 @@ export class ChatVotesService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const chatVotingList = await this.chatVotingRepo.find({
+    const chatVotingItems = await this.chatVotingRepo.find({
       relations: ['broadcaster'],
     });
 
-    const chatsToListen = chatVotingList.filter(
-      (chatVoting) => chatVoting.listening,
-    );
-
-    chatsToListen.forEach((chatVoting) => {
+    chatVotingItems.forEach((chatVoting) => {
       this.chatVotingList.set(chatVoting.broadcaster.id, chatVoting);
-      this.twitchChatService.joinChannel(
-        chatVoting.broadcaster.login,
-        ChatVotesService.name,
-      );
+
+      if (chatVoting.listening) {
+        this.twitchChatService.joinChannel(
+          chatVoting.broadcaster.login,
+          ChatVotesService.name,
+        );
+      }
     });
 
     this.twitchChatService.addChatListener((message) =>
