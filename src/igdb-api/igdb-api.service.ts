@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { AxiosPromise } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { Game } from 'igdb-api-types';
 import { Config } from '../config/config.interface';
@@ -25,7 +26,7 @@ export class IgdbApiService {
     this.accessToken = configService.get<string>('IGDB_ACCESS_TOKEN');
   }
 
-  game(data: string) {
+  game(data: string): AxiosPromise<Game[]> {
     const url = 'https://api.igdb.com/v4/games';
 
     return lastValueFrom(
