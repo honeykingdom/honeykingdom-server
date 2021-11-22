@@ -1,4 +1,5 @@
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
+import { Chat } from 'twitch-js';
 import { TwitchChatModuleAsyncOptions } from './twitch-chat-options.interface';
 import { TwitchChatModuleOptions } from './twitch-chat-options.interface';
 import { TwitchChatService } from './twitch-chat.service';
@@ -7,7 +8,6 @@ import {
   getChatConnectionToken,
   getChatModuleToken,
 } from './twitch-chat.utils';
-import { Chat } from 'twitch-js';
 
 @Global()
 @Module({})
