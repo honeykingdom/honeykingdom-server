@@ -180,15 +180,15 @@ export class VotingOptionsService {
     if (isEditor) return true;
 
     if (!votingOption.voting.canManageVotingOptions) {
-      throw new BadRequestException(HoneyError.VotingOptionDeleteDisabled);
+      throw new ForbiddenException(HoneyError.VotingOptionDeleteDisabled);
     }
 
     if (votingOption.authorId !== user.id) {
-      throw new BadRequestException(HoneyError.VotingOptionDeleteNotOwner);
+      throw new ForbiddenException(HoneyError.VotingOptionDeleteNotOwner);
     }
 
     if (votesCount > 0) {
-      throw new BadRequestException(HoneyError.VotingOptionDeleteHasVotes);
+      throw new ForbiddenException(HoneyError.VotingOptionDeleteHasVotes);
     }
 
     return true;
