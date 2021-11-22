@@ -1,7 +1,6 @@
 import Joi from 'joi';
-import ms from 'ms';
 
-export interface Config {
+export type Config = {
   NODE_ENV: 'development' | 'production' | 'test';
   PORT: string;
 
@@ -44,7 +43,7 @@ export interface Config {
   IGDB_CLIENT_ID: string;
   IGDB_CLIENT_SECRET: string;
   IGDB_ACCESS_TOKEN: string;
-}
+};
 
 export const validationSchema = Joi.object({
   NODE_ENV: Joi.string()
