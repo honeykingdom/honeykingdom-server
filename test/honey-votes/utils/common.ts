@@ -369,7 +369,7 @@ export const createTestCreateVotingOption =
     const expectedVotingOption: Partial<VotingOption> = {
       ...defaultVotingOptionParams,
       authorId: initiator.id,
-      authorLogin: expect.any(String),
+      authorData: expect.anything(),
       votingId: voting.id,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
@@ -479,7 +479,7 @@ export const createTestDeleteVotingOption =
       ...defaultVotingOptionParams,
       id: votingOption.id,
       authorId: author.id,
-      authorLogin: expect.any(String),
+      authorData: expect.anything(),
       votingId: voting.id,
       type: VotingOptionType.Custom,
       cardTitle: 'Test VotingOption',
