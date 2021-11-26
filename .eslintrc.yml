@@ -1,0 +1,23 @@
+root: true
+env:
+  node: true
+  jest: true
+parserOptions:
+  project: "./tsconfig.json"
+  sourceType: 'module'
+extends:
+  - 'airbnb-typescript/base'
+  - plugin:@typescript-eslint/recommended
+  - prettier
+ignorePatterns:
+  - src/kinopoisk-api/kinopoisk-api.generated.ts
+rules:
+  import/extensions: 'off'
+  import/no-extraneous-dependencies: 'off'
+  '@typescript-eslint/ban-ts-comment': 'warn'
+  '@typescript-eslint/lines-between-class-members': 'off'
+  '@typescript-eslint/no-empty-interface': 'off'
+  '@typescript-eslint/interface-name-prefix': 'off'
+  '@typescript-eslint/explicit-function-return-type': 'off'
+  '@typescript-eslint/explicit-module-boundary-types': 'off'
+  '@typescript-eslint/no-explicit-any': 'off'
