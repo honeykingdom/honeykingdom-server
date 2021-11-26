@@ -419,7 +419,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     const isVotingFinished = votesValue >= goal.options.maxVotesValue;
 
-    let changes: Partial<GoalState['state']> = { votesValue };
+    const changes: Partial<GoalState['state']> = { votesValue };
 
     if (isVotingFinished) {
       changes.status = ChatGoalStatus.VotingFinished;

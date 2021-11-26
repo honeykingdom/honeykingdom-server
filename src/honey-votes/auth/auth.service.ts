@@ -68,7 +68,7 @@ export class AuthService {
       refreshToken,
       login,
       displayName,
-      broadcaster_type,
+      broadcaster_type: broadcasterType,
       profile_image_url: avatarUrl,
     } = user;
 
@@ -78,7 +78,7 @@ export class AuthService {
       displayName,
       avatarUrl,
       credentials: { accessToken, refreshToken, scope },
-      broadcasterType: broadcaster_type as BroadcasterType,
+      broadcasterType: broadcasterType as BroadcasterType,
       areTokensValid: true,
     });
 

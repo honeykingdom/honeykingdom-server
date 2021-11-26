@@ -62,6 +62,7 @@ export class RecentMessagesService {
 
   handleChatMessage(privateMessage: PrivateMessage) {
     const {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       _raw,
       channel: channelRaw,
       message,

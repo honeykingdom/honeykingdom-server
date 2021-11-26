@@ -36,7 +36,9 @@ export class AuthController {
   @Get('/auth/twitch')
   @UseGuards(TwitchAuthGuard)
   @ApiExcludeEndpoint()
-  async twitchAuth() {}
+  async twitchAuth() {
+    return;
+  }
 
   @Get('/auth/twitch/redirect')
   @UseGuards(TwitchAuthGuard)

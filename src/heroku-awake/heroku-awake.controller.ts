@@ -4,8 +4,6 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('Heroku Awake')
 @Controller('api')
 export class HerokuAwakeController {
-  constructor() {}
-
   @Get('ping')
   ping() {
     return 'pong';

@@ -222,11 +222,11 @@ export class VotingOptionsService {
     }
 
     if (data.type === VotingOptionType.KinopoiskMovie) {
-      return await this.getKinopoiskMovieCard((payload as PayloadKp).id);
+      return this.getKinopoiskMovieCard((payload as PayloadKp).id);
     }
 
     if (data.type === VotingOptionType.IgdbGame) {
-      return await this.getIgdbGameCard((payload as PayloadIgdb).slug);
+      return this.getIgdbGameCard((payload as PayloadIgdb).slug);
     }
 
     return this.getCustomCard(payload);
@@ -294,11 +294,17 @@ export class VotingOptionsService {
       );
     }
 
-    const { cover, first_release_date, genres, name, slug } = response.data[0];
+    const {
+      cover,
+      first_release_date: firstReleaseDate,
+      genres,
+      name,
+      slug,
+    } = response.data[0];
     const coverImageId = (cover as Cover)?.image_id;
 
-    const year = first_release_date
-      ? getYear(first_release_date * 1000)
+    const year = firstReleaseDate
+      ? getYear(firstReleaseDate * 1000)
       : undefined;
 
     const cardDescription = `${[year, genres?.map((g) => g.name).join(', ')]

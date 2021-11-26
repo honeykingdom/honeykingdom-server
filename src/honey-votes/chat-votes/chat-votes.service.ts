@@ -323,7 +323,7 @@ export class ChatVotesService implements OnModuleInit {
     subTierRequired: SubTier,
   ) {
     if (subMonthsRequired > 0) {
-      const [, monthsText] = message.tags['badgeInfo'].split('/');
+      const [, monthsText] = message.tags.badgeInfo.split('/');
 
       if (!monthsText) return false;
 
