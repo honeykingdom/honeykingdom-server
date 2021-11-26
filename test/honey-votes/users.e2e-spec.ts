@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { DeepPartial } from 'typeorm';
