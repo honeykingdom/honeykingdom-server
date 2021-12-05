@@ -290,7 +290,7 @@ export class VotingOptionsService {
 
     if (response.data.length === 0) {
       throw new BadRequestException(
-        HoneyError.VotingOptionCantIgdbGameNotFound,
+        HoneyError.VotingOptionCreateIgdbGameNotFound,
       );
     }
 

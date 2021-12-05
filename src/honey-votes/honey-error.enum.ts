@@ -1,5 +1,5 @@
 enum HoneyError {
-  VotingNoPermission = 'VotingNoPermission',
+  VotingCreateNoPermission = 'VotingCreateNoPermission',
   // TODO:
   VotingCreateLimitReached = 'VotingCreateLimitReached',
 
@@ -9,7 +9,7 @@ enum HoneyError {
   VotingOptionCreateNoPermission = 'VotingOptionCreateNoPermission',
   VotingOptionCreateAlreadyExists = 'VotingOptionCreateAlreadyExists',
   VotingOptionCreateKinopoiskMovieNotFound = 'VotingOptionCreateKinopoiskMovieNotFound',
-  VotingOptionCantIgdbGameNotFound = 'VotingOptionCantIgdbGameNotFound',
+  VotingOptionCreateIgdbGameNotFound = 'VotingOptionCreateIgdbGameNotFound',
 
   VotingOptionDeleteDisabled = 'VotingOptionDeleteDisabled',
   VotingOptionDeleteNotOwner = 'VotingOptionDeleteNotOwner',
