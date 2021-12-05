@@ -26,7 +26,6 @@ import {
 } from './chat-goal.interface';
 import { PrivateMessage } from 'twitch-js';
 import { ChatGoalEvent } from './entities/chat-goal-event.entity';
-import { ChatVoteEvent } from './classes/chat-vote-event';
 import {
   CHAT_GOAL_OPTIONS_DEFAULT,
   CHAT_GOAL_STATE_DEFAULT,
@@ -429,12 +428,10 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
       this.updateGoalState(roomId, changes),
       this.sendVoteEvent(roomId, {
         type,
-        payload: {
-          userId,
-          userLogin: username,
-          userDisplayName: displayName,
-          votesCount: goal.votesCountByUser[userId],
-        },
+        userId,
+        userLogin: username,
+        userDisplayName: displayName,
+        votesCount: goal.votesCountByUser[userId],
       }),
     ]);
   }
@@ -519,11 +516,10 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     return currentVotesCount < maxVotesCount;
   }
 
-  private sendVoteEvent(goalId: string, action: ChatVoteEvent) {
+  private sendVoteEvent(chatGoalId: string, action: Partial<ChatGoalEvent>) {
     return this.goalEventRepo.save({
-      chatGoalId: goalId,
-      seed: Date.now(),
-      action,
-    });
+      chatGoalId,
+      ...action,
+    } as ChatGoalEvent);
   }
 }

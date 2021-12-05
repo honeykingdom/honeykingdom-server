@@ -1,7 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryColumn,
+  VersionColumn,
+} from 'typeorm';
 import { CHAT_GOAL_EVENT_TABLE_NAME } from '../chat-goal.constants';
-import { ChatVoteEvent } from '../classes/chat-vote-event';
+import { ChatGoalEventType } from '../chat-goal.interface';
 import { ChatGoal } from './chat-goal.entity';
 
 @Entity(CHAT_GOAL_EVENT_TABLE_NAME)
@@ -18,11 +25,27 @@ export class ChatGoalEvent {
   @ApiProperty()
   chatGoalId: string;
 
-  @Column({ type: 'bigint', default: 0 })
+  @VersionColumn({ default: 0 })
   @ApiProperty()
-  seed: number;
+  version: number;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({ type: 'enum', enum: ChatGoalEventType })
+  @ApiProperty({ enum: ChatGoalEventType, enumName: 'ChatGoalEventType' })
+  type: ChatGoalEventType;
+
+  @Column({ default: '' })
   @ApiProperty()
-  action: ChatVoteEvent;
+  userId: string;
+
+  @Column({ default: '' })
+  @ApiProperty()
+  userLogin: string;
+
+  @Column({ default: '' })
+  @ApiProperty()
+  userDisplayName: string;
+
+  @Column({ default: 1 })
+  @ApiProperty()
+  votesCount: number;
 }
