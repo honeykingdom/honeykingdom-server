@@ -1,27 +1,27 @@
 enum HoneyError {
-  VotingCreateNoPermission = 'VotingCreateNoPermission',
+  VotingCreateNoPermission = 'votingCreateNoPermission',
   // TODO:
-  VotingCreateLimitReached = 'VotingCreateLimitReached',
+  VotingCreateLimitReached = 'votingCreateLimitReached',
 
-  VotingOptionCreateDisabled = 'VotingOptionCreateDisabled',
-  VotingOptionCreateLimitReached = 'VotingOptionCreateLimitReached',
-  VotingOptionCreateAlreadyCreatedByUser = 'VotingOptionCreateAlreadyCreatedByUser',
-  VotingOptionCreateNoPermission = 'VotingOptionCreateNoPermission',
-  VotingOptionCreateAlreadyExists = 'VotingOptionCreateAlreadyExists',
-  VotingOptionCreateKinopoiskMovieNotFound = 'VotingOptionCreateKinopoiskMovieNotFound',
-  VotingOptionCreateIgdbGameNotFound = 'VotingOptionCreateIgdbGameNotFound',
+  VotingOptionCreateDisabled = 'votingOptionCreateDisabled',
+  VotingOptionCreateLimitReached = 'votingOptionCreateLimitReached',
+  VotingOptionCreateAlreadyCreatedByUser = 'votingOptionCreateAlreadyCreatedByUser',
+  VotingOptionCreateNoPermission = 'votingOptionCreateNoPermission',
+  VotingOptionCreateAlreadyExists = 'votingOptionCreateAlreadyExists',
+  VotingOptionCreateKinopoiskMovieNotFound = 'votingOptionCreateKinopoiskMovieNotFound',
+  VotingOptionCreateIgdbGameNotFound = 'votingOptionCreateIgdbGameNotFound',
 
-  VotingOptionDeleteDisabled = 'VotingOptionDeleteDisabled',
-  VotingOptionDeleteNotOwner = 'VotingOptionDeleteNotOwner',
-  VotingOptionDeleteHasVotes = 'VotingOptionDeleteHasVotes',
+  VotingOptionDeleteDisabled = 'votingOptionDeleteDisabled',
+  VotingOptionDeleteNotOwner = 'votingOptionDeleteNotOwner',
+  VotingOptionDeleteHasVotes = 'votingOptionDeleteHasVotes',
 
-  VoteCreateDisabled = 'VoteCreateDisabled',
-  VoteCreateTooQuickly = 'VoteCreateTooQuickly',
-  VoteCreateNoPermission = 'VoteCreateNoPermission',
+  VoteCreateDisabled = 'voteCreateDisabled',
+  VoteCreateTooQuickly = 'voteCreateTooQuickly',
+  VoteCreateNoPermission = 'voteCreateNoPermission',
 
-  VoteDeleteDisabled = 'VoteDeleteDisabled',
-  VoteDeleteNotOwner = 'VoteDeleteNotOwner',
-  VoteDeleteTooQuickly = 'VoteDeleteTooQuickly',
+  VoteDeleteDisabled = 'voteDeleteDisabled',
+  VoteDeleteNotOwner = 'voteDeleteNotOwner',
+  VoteDeleteTooQuickly = 'voteDeleteTooQuickly',
 }
 
 export default HoneyError;
