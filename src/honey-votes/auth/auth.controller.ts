@@ -54,15 +54,11 @@ export class AuthController {
   }
 
   @Post('/auth/refresh-token')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'OK', type: RefreshTokenResponse })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   refreshToken(
-    @PassportUser() user: JwtStrategyUser,
     @Body() { refreshToken }: RefreshTokenDto,
   ): Promise<RefreshTokenResponse> {
-    return this.authService.refreshToken(user.id, refreshToken);
+    return this.authService.refreshToken(refreshToken);
   }
 }

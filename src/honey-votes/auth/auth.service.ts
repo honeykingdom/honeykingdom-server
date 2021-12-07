@@ -85,14 +85,7 @@ export class AuthService {
     return this.signTokens({ sub: id, login });
   }
 
-  async refreshToken(
-    userId: string,
-    refreshToken: string,
-  ): Promise<RefreshTokenResponse> {
-    const user = await this.usersService.findOne(userId);
-
-    if (!user) throw new BadRequestException();
-
+  async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
     let refreshTokenPayload: JwtPayload;
 
     try {
@@ -104,7 +97,9 @@ export class AuthService {
       throw new BadRequestException();
     }
 
-    if (refreshTokenPayload.sub !== user.id) throw new BadRequestException();
+    const user = await this.usersService.findOne(refreshTokenPayload.sub);
+
+    if (!user) throw new BadRequestException();
 
     return this.signTokens({ sub: user.id, login: user.login });
   }
