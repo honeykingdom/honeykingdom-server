@@ -205,8 +205,12 @@ export class UsersService {
     } as User);
   }
 
-  decryptToken(token: string) {
-    return decrypt(token, this.cryptoSecret);
+  decryptToken(token: string): string | null {
+    try {
+      return decrypt(token, this.cryptoSecret);
+    } catch (e) {
+      return null;
+    }
   }
 
   async checkUserTypes(
