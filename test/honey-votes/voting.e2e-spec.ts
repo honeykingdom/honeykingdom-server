@@ -28,22 +28,6 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
   const testUpdateVoting = createTestUpdateVoting(ctx);
   const testDeleteVoting = createTestDeleteVoting(ctx);
 
-  describe('/voting (GET)', () => {
-    it.todo('should return voting list');
-
-    it.todo('should empty array if channelId is not exists');
-  });
-
-  describe('/voting/:votingId (GET)', () => {
-    it.todo('should return Voting by id');
-
-    it.todo('should return 404 if channelId is not exists');
-
-    it.todo('should return 404 if Voting is not exists');
-
-    it.todo('should return 403 if Voting is not assigned to this channelId');
-  });
-
   describe('/voting (POST)', () => {
     describe('permissions', () => {
       it('should create Voting by broadcaster', async () => {
