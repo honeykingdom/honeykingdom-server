@@ -21,4 +21,12 @@ export class InstagramService {
 
     return id;
   }
+
+  async getLastPostUrl(nickname: string): Promise<string> {
+    const lastPostId = await this.getLastPostId(nickname);
+
+    return lastPostId
+      ? `https://www.instagram.com/p/${lastPostId}/`
+      : `https://www.instagram.com/${nickname}/`;
+  }
 }

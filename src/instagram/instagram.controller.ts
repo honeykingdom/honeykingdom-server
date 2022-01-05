@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { InstagramService } from './instagram.service';
 
 @ApiTags('Instagram')
@@ -7,10 +7,15 @@ import { InstagramService } from './instagram.service';
 export class InstagramController {
   constructor(private readonly instagramService: InstagramService) {}
 
-  @Get('/last-post-id/:nickname')
+  @Get('/:nickname/last-post-id')
   @ApiOkResponse({ type: String })
-  @ApiNotFoundResponse({ description: 'Not found' })
   getLastPostId(@Param('nickname') nickname: string): Promise<string> {
     return this.instagramService.getLastPostId(nickname);
+  }
+
+  @Get('/:nickname/last-post-url')
+  @ApiOkResponse({ type: String })
+  getLastPostUrl(@Param('nickname') nickname: string): Promise<string> {
+    return this.instagramService.getLastPostUrl(nickname);
   }
 }
