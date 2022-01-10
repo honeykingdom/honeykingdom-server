@@ -51,7 +51,9 @@ export class InstagramService {
       this.logger.log(`user: ${nickname}, id: ${userId}, url: ${lastPostId}`);
 
       return url;
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
 
     return `https://www.instagram.com/${nickname}/`;
   }
