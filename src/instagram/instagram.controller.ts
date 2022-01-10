@@ -7,12 +7,6 @@ import { InstagramService } from './instagram.service';
 export class InstagramController {
   constructor(private readonly instagramService: InstagramService) {}
 
-  @Get('/:nickname/last-post-id')
-  @ApiOkResponse({ type: String })
-  getLastPostId(@Param('nickname') nickname: string): Promise<string> {
-    return this.instagramService.getLastPostId(nickname);
-  }
-
   @Get('/:nickname/last-post-url')
   @ApiOkResponse({ type: String })
   getLastPostUrl(@Param('nickname') nickname: string): Promise<string> {
