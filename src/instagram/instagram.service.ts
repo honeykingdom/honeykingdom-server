@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import NodeCache from 'node-cache';
 
 const USER_ID = /app_insta\.user_id = '(\d+)';/;
 const CSRF_TOKEN_REGEX = /<meta name="csrf-token" content="(.+)">/;
@@ -10,6 +11,8 @@ const INSTASTORIES_SESSION_REGEX = /instastories_session=([^;]+);/;
 @Injectable()
 export class InstagramService {
   private readonly logger = new Logger(InstagramService.name);
+
+  private readonly lastPostUrlsCache = new NodeCache({ stdTTL: 60 * 60 }); // 1 hour
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -60,6 +63,10 @@ export class InstagramService {
   }
 
   async getLastPostUrl(nickname: string): Promise<string> {
+    if (this.lastPostUrlsCache.has(nickname)) {
+      return this.lastPostUrlsCache.get(nickname);
+    }
+
     try {
       const page = await lastValueFrom(
         this.httpService.get<string>(
@@ -86,6 +93,7 @@ export class InstagramService {
       const url = `https://www.instagram.com/p/${lastPostId}/`;
 
       this.logger.log(`user: ${nickname}, url: ${lastPostId}`);
+      this.lastPostUrlsCache.set(nickname, url);
 
       return url;
     } catch (e) {
