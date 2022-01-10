@@ -13,7 +13,8 @@ export class InstagramService {
 
   constructor(private readonly httpService: HttpService) {}
 
-  async getLastPostUrl(nickname: string): Promise<string> {
+  /** @deprecated */
+  async getLastPostUrlOld(nickname: string): Promise<string> {
     try {
       const page = await lastValueFrom(
         this.httpService.get<string>(
@@ -49,6 +50,42 @@ export class InstagramService {
       const url = `https://www.instagram.com/p/${lastPostId}/`;
 
       this.logger.log(`user: ${nickname}, id: ${userId}, url: ${lastPostId}`);
+
+      return url;
+    } catch (e) {
+      console.error(e);
+    }
+
+    return `https://www.instagram.com/${nickname}/`;
+  }
+
+  async getLastPostUrl(nickname: string): Promise<string> {
+    try {
+      const page = await lastValueFrom(
+        this.httpService.get<string>(
+          `https://www.anonigviewer.com/profile.php?u=${nickname}&c=posts`,
+        ),
+      );
+
+      const sr = page.data.match(/var sr = "([^;]+)";/)[1];
+
+      const response = await lastValueFrom(
+        this.httpService.post(
+          'https://www.anonigviewer.com/fetch.php',
+          `sr=${sr}&a=`,
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              Referer: `https://www.anonigviewer.com/profile.php?u=${nickname}&c=posts`,
+            },
+          },
+        ),
+      );
+
+      const lastPostId = response.data.d.posts[0].shortcode;
+      const url = `https://www.instagram.com/p/${lastPostId}/`;
+
+      this.logger.log(`user: ${nickname}, url: ${lastPostId}`);
 
       return url;
     } catch (e) {
