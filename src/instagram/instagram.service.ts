@@ -68,11 +68,8 @@ export class InstagramService {
     }
 
     try {
-      const page = await lastValueFrom(
-        this.httpService.get<string>(
-          `https://www.anonigviewer.com/profile.php?u=${nickname}&c=posts`,
-        ),
-      );
+      const pageUrl = `https://www.anonigviewer.com/profile.php?u=${nickname}&c=posts`;
+      const page = await lastValueFrom(this.httpService.get<string>(pageUrl));
 
       const sr = page.data.match(/var sr = "([^;]+)";/)[1];
 
@@ -83,7 +80,7 @@ export class InstagramService {
           {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
-              Referer: `https://www.anonigviewer.com/profile.php?u=${nickname}&c=posts`,
+              Referer: pageUrl,
             },
           },
         ),
