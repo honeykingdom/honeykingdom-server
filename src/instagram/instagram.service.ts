@@ -38,7 +38,7 @@ export class InstagramService {
       const lastPostId = response.data.d.posts[0].shortcode;
       const url = `https://www.instagram.com/p/${lastPostId}/`;
 
-      this.logger.log(`user: ${nickname}, url: ${lastPostId}`);
+      this.logger.log(`user: ${nickname}, url: ${url}`);
       this.lastPostUrlsCache.set(nickname, url);
 
       return url;
