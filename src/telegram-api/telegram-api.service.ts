@@ -6,7 +6,6 @@ import { Repository } from 'typeorm';
 import { lastValueFrom } from 'rxjs';
 import { EventEmitter } from 'events';
 import ms from 'ms';
-import { POSTGRES_CONNECTION } from '../app.constants';
 import { Config } from '../config/config.interface';
 import parseTelegramPost from './utils/parseTelegramPost';
 import { TelegramChannel } from './entities/telegram-channel.entity';
@@ -31,7 +30,7 @@ export class TelegramApiService extends EventEmitter {
   constructor(
     private readonly configService: ConfigService<Config>,
     private readonly httpService: HttpService,
-    @InjectRepository(TelegramChannel, POSTGRES_CONNECTION)
+    @InjectRepository(TelegramChannel)
     private readonly telegramChannelRepo: Repository<TelegramChannel>,
   ) {
     super();

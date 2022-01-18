@@ -2,7 +2,6 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import NodeCache from 'node-cache';
 import { Repository } from 'typeorm';
-import { POSTGRES_CONNECTION } from '../../../app.constants';
 import HoneyError from '../../honey-error.enum';
 import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
@@ -17,9 +16,9 @@ export class VotesService {
 
   constructor(
     private readonly usersService: UsersService,
-    @InjectRepository(VotingOption, POSTGRES_CONNECTION)
+    @InjectRepository(VotingOption)
     private readonly votingOptionRepo: Repository<VotingOption>,
-    @InjectRepository(Vote, POSTGRES_CONNECTION)
+    @InjectRepository(Vote)
     private readonly voteRepo: Repository<Vote>,
   ) {}
 

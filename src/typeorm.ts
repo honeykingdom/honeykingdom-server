@@ -1,16 +1,17 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { POSTGRES_CONNECTION } from './app.constants';
+import { MONGODB_CONNECTION } from './app.constants';
 import { Config } from './config/config.interface';
 import { honeyVotesEntities } from './honey-votes/honey-votes.entities';
 import { Message } from './recent-messages/entities/message.entity';
 import { TelegramChannel } from './telegram-api/entities/telegram-channel.entity';
 
 export const typeOrmMongoDbModule = TypeOrmModule.forRootAsync({
+  name: MONGODB_CONNECTION,
   imports: [ConfigModule],
   useFactory: (configService: ConfigService<Config>) => ({
     type: 'mongodb',
-    url: configService.get('RECENT_MESSAGES_MONGODB_URI', { infer: true }),
+    url: configService.get('MONGODB_URI', { infer: true }),
     entities: [Message],
     synchronize:
       configService.get('NODE_ENV', { infer: true }) !== 'production',
@@ -19,7 +20,6 @@ export const typeOrmMongoDbModule = TypeOrmModule.forRootAsync({
 });
 
 export const typeOrmPostgresModule = TypeOrmModule.forRootAsync({
-  name: POSTGRES_CONNECTION,
   imports: [ConfigModule],
   useFactory: (configService: ConfigService<Config>) => ({
     type: 'postgres',
@@ -29,10 +29,9 @@ export const typeOrmPostgresModule = TypeOrmModule.forRootAsync({
     password: configService.get('POSTGRES_PASSWORD', { infer: true }),
     database: configService.get('POSTGRES_DATABASE', { infer: true }),
     entities: [...honeyVotesEntities, TelegramChannel],
-    synchronize:
-      configService.get('NODE_ENV', { infer: true }) !== 'production',
+    synchronize: false,
     dropSchema: configService.get('NODE_ENV', { infer: true }) === 'test',
-    // logging: configService.get('NODE_ENV', { infer: true }) !== 'production',
+    logging: configService.get('NODE_ENV', { infer: true }) === 'development',
     // https://stackoverflow.com/questions/58220333
     keepConnectionAlive:
       configService.get('NODE_ENV', { infer: true }) === 'test',

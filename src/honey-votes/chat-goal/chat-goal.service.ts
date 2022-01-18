@@ -9,10 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 import { TwitchChatService } from '../../twitch-chat/twitch-chat.service';
 import { InjectChat } from '../../twitch-chat/twitch-chat.decorators';
-import {
-  POSTGRES_CONNECTION,
-  TWITCH_CHAT_ANONYMOUS,
-} from '../../app.constants';
+import { TWITCH_CHAT_ANONYMOUS } from '../../app.constants';
 import { ChatGoal } from './entities/chat-goal.entity';
 import { ChatGoalData } from './entities/chat-goal-data.entity';
 import { UsersService } from '../users/users.service';
@@ -43,11 +40,11 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
   constructor(
     @InjectChat(TWITCH_CHAT_ANONYMOUS)
     private readonly twitchChatService: TwitchChatService,
-    @InjectRepository(ChatGoal, POSTGRES_CONNECTION)
+    @InjectRepository(ChatGoal)
     private readonly goalRepo: Repository<ChatGoal>,
-    @InjectRepository(ChatGoalEvent, POSTGRES_CONNECTION)
+    @InjectRepository(ChatGoalEvent)
     private readonly goalEventRepo: Repository<ChatGoalEvent>,
-    @InjectRepository(ChatGoalData, POSTGRES_CONNECTION)
+    @InjectRepository(ChatGoalData)
     private readonly goalVotesCountRepo: Repository<ChatGoalData>,
     private readonly usersService: UsersService,
   ) {}

@@ -7,7 +7,6 @@ export type Config = {
   RECENT_MESSAGES_CHANNELS: string;
   RECENT_MESSAGES_LIMIT: string;
   RECENT_MESSAGES_CORS_ORIGIN: string;
-  RECENT_MESSAGES_MONGODB_URI: string;
   RECENT_MESSAGES_REDIRECT_URL: string;
 
   HEROKU_AWAKE_BASE_URL: string;
@@ -27,6 +26,8 @@ export type Config = {
   POSTGRES_DATABASE: string;
   POSTGRES_USER: string;
   POSTGRES_PASSWORD: string;
+
+  MONGODB_URI: string;
 
   HONEY_VOTES_BASE_URL: string;
   HONEY_VOTES_FRONTEND_BASE_URL: string;
@@ -56,7 +57,6 @@ export const validationSchema = Joi.object({
   RECENT_MESSAGES_CHANNELS: Joi.string().required(),
   RECENT_MESSAGES_LIMIT: Joi.number().default(500),
   RECENT_MESSAGES_CORS_ORIGIN: Joi.string().required(),
-  RECENT_MESSAGES_MONGODB_URI: Joi.string().required(),
   RECENT_MESSAGES_REDIRECT_URL: Joi.string().required(),
 
   HEROKU_AWAKE_BASE_URL: Joi.string().required(),
@@ -76,6 +76,8 @@ export const validationSchema = Joi.object({
   POSTGRES_DATABASE: Joi.string().required(),
   POSTGRES_USER: Joi.string().required(),
   POSTGRES_PASSWORD: Joi.string().required(),
+
+  MONGODB_URI: Joi.string().required(),
 
   HONEY_VOTES_BASE_URL: Joi.string().required(),
   HONEY_VOTES_FRONTEND_BASE_URL: Joi.string().required(),

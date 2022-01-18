@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { POSTGRES_CONNECTION } from '../../../app.constants';
 import HoneyError from '../../honey-error.enum';
 import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
@@ -17,7 +16,7 @@ import { Voting } from '../entities/voting.entity';
 export class VotingService {
   constructor(
     private readonly usersService: UsersService,
-    @InjectRepository(Voting, POSTGRES_CONNECTION)
+    @InjectRepository(Voting)
     private readonly votingRepo: Repository<Voting>,
   ) {}
 

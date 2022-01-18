@@ -9,10 +9,7 @@ import { Repository } from 'typeorm';
 import { PrivateMessage } from 'twitch-js';
 import { TwitchChatService } from '../../twitch-chat/twitch-chat.service';
 import { InjectChat } from '../../twitch-chat/twitch-chat.decorators';
-import {
-  POSTGRES_CONNECTION,
-  TWITCH_CHAT_ANONYMOUS,
-} from '../../app.constants';
+import { TWITCH_CHAT_ANONYMOUS } from '../../app.constants';
 import { ChatVote } from './entities/chat-vote.entity';
 import { ChatVoting } from './entities/chat-voting.entity';
 import { UpdateChatVotingDto } from './dto/update-chat-voting.dto';
@@ -35,9 +32,9 @@ export class ChatVotesService implements OnModuleInit {
   constructor(
     @InjectChat(TWITCH_CHAT_ANONYMOUS)
     private readonly twitchChatService: TwitchChatService,
-    @InjectRepository(ChatVoting, POSTGRES_CONNECTION)
+    @InjectRepository(ChatVoting)
     private readonly chatVotingRepo: Repository<ChatVoting>,
-    @InjectRepository(ChatVote, POSTGRES_CONNECTION)
+    @InjectRepository(ChatVote)
     private readonly chatVoteRepo: Repository<ChatVote>,
     private readonly usersService: UsersService,
   ) {}

@@ -11,7 +11,6 @@ import { AxiosResponse } from 'axios';
 import NodeCache from 'node-cache';
 import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
-import { POSTGRES_CONNECTION } from '../../app.constants';
 import { Config } from '../../config/config.interface';
 import { TwitchApiService } from '../../twitch-api/twitch-api.service';
 import { SubTier, TwitchUserType } from '../honey-votes.constants';
@@ -83,7 +82,7 @@ export class UsersService {
 
   constructor(
     private readonly configService: ConfigService<Config>,
-    @InjectRepository(User, POSTGRES_CONNECTION)
+    @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly twitchApiService: TwitchApiService,
   ) {

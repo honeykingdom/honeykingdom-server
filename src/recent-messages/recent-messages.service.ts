@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PrivateMessage } from 'twitch-js';
-import { TWITCH_CHAT_ANONYMOUS } from '../app.constants';
+import { MONGODB_CONNECTION, TWITCH_CHAT_ANONYMOUS } from '../app.constants';
 import { Config } from '../config/config.interface';
 import { InjectChat } from '../twitch-chat/twitch-chat.decorators';
 import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
@@ -21,7 +21,7 @@ export class RecentMessagesService {
     private readonly configService: ConfigService<Config>,
     @InjectChat(TWITCH_CHAT_ANONYMOUS)
     private readonly twitchChatService: TwitchChatService,
-    @InjectRepository(Message)
+    @InjectRepository(Message, MONGODB_CONNECTION)
     private readonly messageRepository: Repository<Message>,
   ) {
     this.messagesLimit = Number.parseInt(

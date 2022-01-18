@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { POSTGRES_CONNECTION } from '../../app.constants';
 import { KinopoiskApiModule } from '../../kinopoisk-api/kinopoisk-api.module';
 import { IgdbApiModule } from '../../igdb-api/igdb-api.module';
 import { UsersModule } from '../users/users.module';
@@ -22,10 +21,7 @@ import { VotesService } from './votes/votes.service';
     UsersModule,
     KinopoiskApiModule,
     IgdbApiModule,
-    TypeOrmModule.forFeature(
-      [User, Voting, VotingOption, Vote],
-      POSTGRES_CONNECTION,
-    ),
+    TypeOrmModule.forFeature([User, Voting, VotingOption, Vote]),
   ],
   providers: [VotingService, VotingOptionsService, VotesService],
   controllers: [VotingController, VotingOptionsController, VotesController],

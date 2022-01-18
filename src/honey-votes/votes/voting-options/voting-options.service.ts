@@ -9,7 +9,6 @@ import { AxiosResponse } from 'axios';
 import { Repository } from 'typeorm';
 import { getYear } from 'date-fns';
 import { Cover, Game } from 'igdb-api-types';
-import { POSTGRES_CONNECTION } from '../../../app.constants';
 import HoneyError from '../../honey-error.enum';
 import { UsersService } from '../../users/users.service';
 import { KinopoiskApiService } from '../../../kinopoisk-api/kinopoisk-api.service';
@@ -32,11 +31,11 @@ export class VotingOptionsService {
     private readonly usersService: UsersService,
     private readonly kinopoiskApiService: KinopoiskApiService,
     private readonly igdbApiService: IgdbApiService,
-    @InjectRepository(Voting, POSTGRES_CONNECTION)
+    @InjectRepository(Voting)
     private readonly votingRepo: Repository<Voting>,
-    @InjectRepository(VotingOption, POSTGRES_CONNECTION)
+    @InjectRepository(VotingOption)
     private readonly votingOptionRepo: Repository<VotingOption>,
-    @InjectRepository(Vote, POSTGRES_CONNECTION)
+    @InjectRepository(Vote)
     private readonly voteRepo: Repository<Vote>,
   ) {}
 
