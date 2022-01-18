@@ -17,14 +17,9 @@ export class InstagramService {
     }
 
     try {
-      const pageUrl = `https://www.instagram.com/${nickname}/?__a=1`;
-      const cookie = `sessionid=${process.env.INSTAGRAM_SESSION_ID}`;
-      const response = await lastValueFrom(
-        this.httpService.get(pageUrl, { headers: { cookie } }),
-      );
-
+      const userInfo = await this.getUserInfo(nickname);
       const lastPostId =
-        response.data.graphql.user.edge_owner_to_timeline_media.edges[0].node
+        userInfo.graphql.user.edge_owner_to_timeline_media.edges[0].node
           .shortcode;
       const url = `https://www.instagram.com/p/${lastPostId}/`;
 
@@ -37,5 +32,15 @@ export class InstagramService {
     }
 
     return `https://www.instagram.com/${nickname}/`;
+  }
+
+  private async getUserInfo(nickname: string): Promise<any> {
+    const url = `https://www.instagram.com/${nickname}/?__a=1`;
+    const cookie = `sessionid=${process.env.INSTAGRAM_SESSION_ID}`;
+    const response = await lastValueFrom(
+      this.httpService.get(url, { headers: { cookie } }),
+    );
+
+    return response.data;
   }
 }
