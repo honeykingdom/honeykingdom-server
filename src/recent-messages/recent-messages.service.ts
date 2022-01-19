@@ -62,8 +62,7 @@ export class RecentMessagesService {
 
   handleChatMessage(privateMessage: PrivateMessage) {
     const {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      _raw,
+      _raw: raw,
       channel: channelRaw,
       message,
       username,
@@ -84,12 +83,12 @@ export class RecentMessagesService {
       channelRecentMessages.shift();
     }
 
-    channelRecentMessages.push(_raw);
+    channelRecentMessages.push(raw);
 
     if (process.env.NODE_ENV === 'production') {
       this.messageRepository
         .insert({
-          raw: _raw,
+          raw,
           channel,
           message,
           username,
