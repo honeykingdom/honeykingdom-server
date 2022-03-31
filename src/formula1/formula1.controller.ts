@@ -37,10 +37,15 @@ export class Formula1Controller {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  handleCron() {
+  handleConnectionStatus() {
     if (this.formula1Service.isConnected() && this.connections.size === 0) {
       this.formula1Service.disconnect();
     }
+  }
+
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  handlePing() {
+    this.broadcast('{}');
   }
 
   private broadcast(data: any) {
