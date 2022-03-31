@@ -10,7 +10,6 @@ export type Config = {
   RECENT_MESSAGES_REDIRECT_URL: string;
 
   HEROKU_AWAKE_BASE_URL: string;
-  HEROKU_AWAKE_INTERVAL: string;
 
   TELEGRAM_API_CHECK_INTERVAL: string;
 
@@ -63,7 +62,6 @@ export const validationSchema = Joi.object({
   RECENT_MESSAGES_REDIRECT_URL: Joi.string().required(),
 
   HEROKU_AWAKE_BASE_URL: Joi.string().required(),
-  HEROKU_AWAKE_INTERVAL: Joi.string().default('15 min'),
 
   TELEGRAM_API_CHECK_INTERVAL: Joi.string().default('2 min'),
 
