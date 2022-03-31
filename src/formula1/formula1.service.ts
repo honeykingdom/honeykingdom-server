@@ -90,5 +90,7 @@ export class Formula1Service extends EventEmitter {
 
     this.client.end();
     this.client = null;
+    this.connected = false;
+    this.connecting = false;
   }
 }

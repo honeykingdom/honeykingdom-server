@@ -1,5 +1,5 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Request, Response } from 'express';
 import { Formula1Service } from './formula1.service';
 
@@ -36,8 +36,7 @@ export class Formula1Controller {
     req.on('close', () => this.connections.delete(res));
   }
 
-  // Check every 10 minutes if there is no connections, disconnect
-  @Cron('*/10 * * * * *')
+  @Cron(CronExpression.EVERY_10_MINUTES)
   handleCron() {
     if (this.formula1Service.isConnected() && this.connections.size === 0) {
       this.formula1Service.disconnect();
