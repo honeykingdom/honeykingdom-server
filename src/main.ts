@@ -14,6 +14,7 @@ async function bootstrap() {
     origin: [
       configService.get<string>('RECENT_MESSAGES_CORS_ORIGIN'),
       configService.get<string>('HONEY_VOTES_FRONTEND_BASE_URL'),
+      configService.get<string>('F1_CORS_ORIGIN'),
       'http://localhost:3001',
     ],
   });

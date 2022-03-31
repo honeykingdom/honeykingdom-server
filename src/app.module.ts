@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { validationSchema } from './config/config.interface';
 import { RecentMessagesModule } from './recent-messages/recent-messages.module';
 import { HerokuAwakeModule } from './heroku-awake/heroku-awake.module';
@@ -11,11 +12,13 @@ import {
   twitchChatAnonymousModule,
   twitchChatHoneyKingdomModule,
 } from './twitch-chat';
+import { Formula1Module } from './formula1/formula1.module';
 
 @Module({
   imports: [
     HerokuAwakeModule,
     ConfigModule.forRoot({ validationSchema }),
+    ScheduleModule.forRoot(),
     typeOrmMongoDbModule,
     typeOrmPostgresModule,
     twitchChatAnonymousModule,
@@ -24,6 +27,7 @@ import {
     HoneyBotModule,
     HoneyVotesModule,
     InstagramModule,
+    Formula1Module,
   ],
   providers: [],
   controllers: [],
