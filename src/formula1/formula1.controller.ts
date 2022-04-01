@@ -1,9 +1,11 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { ApiExcludeController } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Formula1Service } from './formula1.service';
 
 @Controller('api/f1')
+@ApiExcludeController()
 export class Formula1Controller {
   private static SSE_HEADERS = {
     'Content-Type': 'text/event-stream',
