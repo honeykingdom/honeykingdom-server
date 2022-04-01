@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AppController } from './app.controller';
 import { validationSchema } from './config/config.interface';
 import { RecentMessagesModule } from './recent-messages/recent-messages.module';
 import { HerokuAwakeModule } from './heroku-awake/heroku-awake.module';
@@ -30,6 +31,6 @@ import { Formula1Module } from './formula1/formula1.module';
     Formula1Module,
   ],
   providers: [],
-  controllers: [],
+  controllers: [AppController],
 })
 export class AppModule {}
