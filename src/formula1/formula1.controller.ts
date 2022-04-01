@@ -11,6 +11,8 @@ export class Formula1Controller {
     'Cache-Control': 'no-cache',
   };
 
+  private static EVERY_50_SECONDS = '*/50 * * * * *';
+
   private readonly connections = new Set<Response>();
 
   constructor(private readonly formula1Service: Formula1Service) {
@@ -43,7 +45,9 @@ export class Formula1Controller {
     }
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  // https://devcenter.heroku.com/articles/request-timeout#long-polling-and-streaming-responses
+  // Heroku: If no data is sent during the 55 second window, the connection will be terminated.
+  @Cron(Formula1Controller.EVERY_50_SECONDS)
   handlePing() {
     this.broadcast('{}');
   }
