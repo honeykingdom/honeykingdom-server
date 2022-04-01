@@ -22,7 +22,7 @@ export class Formula1Service extends EventEmitter {
     return this.connected;
   }
 
-  async connect() {
+  connect() {
     if (this.connected || this.connecting) return;
 
     this.connecting = true;

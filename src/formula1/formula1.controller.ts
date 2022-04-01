@@ -39,7 +39,7 @@ export class Formula1Controller {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  handleConnectionStatus() {
+  private handleConnectionStatus() {
     if (this.formula1Service.isConnected() && this.connections.size === 0) {
       this.formula1Service.disconnect();
     }
@@ -48,7 +48,7 @@ export class Formula1Controller {
   // https://devcenter.heroku.com/articles/request-timeout#long-polling-and-streaming-responses
   // Heroku: If no data is sent during the 55 second window, the connection will be terminated.
   @Cron(Formula1Controller.EVERY_50_SECONDS)
-  handlePing() {
+  private handlePing() {
     this.broadcast('{}');
   }
 
