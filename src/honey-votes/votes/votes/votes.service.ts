@@ -1,6 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  CACHE_MANAGER,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import NodeCache from 'node-cache';
+import { Cache } from 'cache-manager';
 import { Repository } from 'typeorm';
 import HoneyError from '../../honey-error.enum';
 import { User } from '../../users/entities/user.entity';
@@ -12,7 +17,11 @@ import { VotingOption } from '../entities/voting-option.entity';
 
 @Injectable()
 export class VotesService {
-  voteLimits = new NodeCache({ stdTTL: 60 });
+  private static CACHE_TTL = 60;
+  private static CACHE_KEY = {
+    voteLimit: (userId: string, votingId: number) =>
+      `vote-limit.${userId}.${votingId}`,
+  };
 
   constructor(
     private readonly usersService: UsersService,
@@ -20,6 +29,7 @@ export class VotesService {
     private readonly votingOptionRepo: Repository<VotingOption>,
     @InjectRepository(Vote)
     private readonly voteRepo: Repository<Vote>,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
 
   async createVote(
@@ -78,9 +88,12 @@ export class VotesService {
       throw new ForbiddenException(HoneyError.VoteCreateDisabled);
     }
 
-    const key = `${user.id}-${votingOption.voting.id}`;
+    const key = VotesService.CACHE_KEY.voteLimit(
+      user.id,
+      votingOption.voting.id,
+    );
 
-    if (this.voteLimits.get(key)) {
+    if (this.cache.get<boolean>(key)) {
       throw new ForbiddenException(HoneyError.VoteCreateTooQuickly);
     }
 
@@ -101,7 +114,7 @@ export class VotesService {
         },
       ))
     ) {
-      this.voteLimits.set(key, true);
+      this.cache.set<boolean>(key, true, { ttl: VotesService.CACHE_TTL });
 
       return true;
     }
@@ -119,9 +132,9 @@ export class VotesService {
       throw new ForbiddenException(HoneyError.VoteDeleteNotOwner);
     }
 
-    const key = `${user.id}-${vote.voting.id}`;
+    const key = VotesService.CACHE_KEY.voteLimit(user.id, vote.voting.id);
 
-    if (this.voteLimits.get(key)) {
+    if (this.cache.get(key)) {
       throw new ForbiddenException(HoneyError.VoteDeleteTooQuickly);
     }
 

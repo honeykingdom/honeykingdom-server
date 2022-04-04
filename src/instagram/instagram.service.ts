@@ -1,20 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import NodeCache from 'node-cache';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class InstagramService {
+  static CACHE_TTL = 60 * 30; // 30 min
+
   private readonly logger = new Logger(InstagramService.name);
 
-  private readonly lastPostUrlsCache = new NodeCache({ stdTTL: 60 * 30 }); // 30 min
-
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+  ) {}
 
   async getLastPostUrl(nickname: string): Promise<string> {
-    if (this.lastPostUrlsCache.has(nickname)) {
-      return this.lastPostUrlsCache.get(nickname);
-    }
+    const cachedLastPostUrl = await this.cache.get<string>(nickname);
+
+    if (cachedLastPostUrl) return cachedLastPostUrl;
 
     try {
       const userInfo = await this.getUserInfo(nickname);
@@ -24,7 +27,7 @@ export class InstagramService {
       const url = `https://www.instagram.com/p/${lastPostId}/`;
 
       this.logger.log(`user: ${nickname}, url: ${url}`);
-      this.lastPostUrlsCache.set(nickname, url);
+      this.cache.set<string>(nickname, url);
 
       return url;
     } catch (e) {

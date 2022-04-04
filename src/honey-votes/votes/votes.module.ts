@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { KinopoiskApiModule } from '../../kinopoisk-api/kinopoisk-api.module';
@@ -22,6 +22,7 @@ import { VotesService } from './votes/votes.service';
     KinopoiskApiModule,
     IgdbApiModule,
     TypeOrmModule.forFeature([User, Voting, VotingOption, Vote]),
+    CacheModule.register(),
   ],
   providers: [VotingService, VotingOptionsService, VotesService],
   controllers: [VotingController, VotingOptionsController, VotesController],

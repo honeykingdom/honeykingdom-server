@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  CACHE_MANAGER,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -8,7 +10,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
-import NodeCache from 'node-cache';
+import { Cache } from 'cache-manager';
 import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
 import { Config } from '../../config/config.interface';
@@ -63,20 +65,24 @@ const SUB_TIER: Record<
   '3000': SubTier.Tier3,
 };
 
-const CACHE_TTL = 60 * 10; // 10 minutes
-
 @Injectable()
 export class UsersService {
+  static CACHE_TTL = 60 * 10; // 10 minutes
+
+  private static CACHE_KEY = {
+    editors: (channelId: string) => `editors.${channelId}`,
+    mods: (channelId: string) => `mods.${channelId}`,
+    vips: (channelId: string) => `vips.${channelId}`,
+    subs: (channelId: string, userId: string) => `subs.${channelId}-${userId}`,
+    followers: (channelId: string, userId: string) =>
+      `followers.${channelId}-${userId}`,
+  };
+
   private readonly logger = new Logger(UsersService.name);
 
   private readonly clientId: string;
   private readonly clientSecret: string;
   private readonly cryptoSecret: string;
-
-  private readonly editorsCache = new NodeCache({ stdTTL: CACHE_TTL });
-  private readonly modsCache = new NodeCache({ stdTTL: CACHE_TTL });
-  private readonly subsCache = new NodeCache({ stdTTL: CACHE_TTL });
-  private readonly followersCache = new NodeCache({ stdTTL: CACHE_TTL });
 
   private readonly refreshingTokens = new Map<string, Promise<User>>();
 
@@ -85,6 +91,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly twitchApiService: TwitchApiService,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {
     this.clientId = configService.get<string>('HONEY_VOTES_TWITCH_CLIENT_ID');
     this.clientSecret = configService.get<string>(
@@ -242,77 +249,56 @@ export class UsersService {
   }
 
   async isEditor(channel: User, user: User): Promise<boolean> {
-    const key = channel.id;
-    let editorIds = this.editorsCache.get<Set<string>>(key);
+    const key = UsersService.CACHE_KEY.editors(channel.id);
+    const editorIds = await this.getCachedData(key, () =>
+      this.getChannelEditors(channel),
+    );
 
-    if (!editorIds) {
-      try {
-        editorIds = await this.getChannelEditors(channel);
-
-        this.editorsCache.set<Set<string>>(key, editorIds);
-      } catch (e) {
-        return null;
-      }
-    }
-
-    return editorIds.has(user.id);
+    return editorIds?.has(user.id);
   }
 
   async isMod(channel: User, user: User): Promise<boolean> {
-    const key = channel.id;
-    let modIds = this.modsCache.get<Set<string>>(key);
+    const key = UsersService.CACHE_KEY.mods(channel.id);
+    const modIds = await this.getCachedData(key, () =>
+      this.getChannelMods(channel),
+    );
 
-    if (!modIds) {
-      try {
-        modIds = await this.getChannelMods(channel);
-
-        this.modsCache.set<Set<string>>(channel.id, modIds);
-      } catch (e) {
-        return null;
-      }
-    }
-
-    return modIds.has(user.id);
+    return modIds?.has(user.id);
   }
 
   async isVip(channel: User, user: User): Promise<boolean> {
     return null;
   }
 
-  async isSub(channel: User, user: User): Promise<IsSub> {
-    const key = `${channel.id}.${user.id}`;
+  isSub(channel: User, user: User): Promise<IsSub> {
+    const key = UsersService.CACHE_KEY.subs(channel.id, user.id);
 
-    let subData = this.subsCache.get<IsSub>(key);
-
-    if (!subData) {
-      try {
-        subData = await this.getIsSub(channel, user);
-
-        this.subsCache.set<IsSub>(key, subData);
-      } catch (e) {
-        return null;
-      }
-    }
-
-    return subData;
+    return this.getCachedData(key, () => this.getIsSub(channel, user));
   }
 
-  async isFollower(channel: User, user: User): Promise<IsFollower> {
-    const key = `${channel.id}.${user.id}`;
+  isFollower(channel: User, user: User): Promise<IsFollower | null> {
+    const key = UsersService.CACHE_KEY.followers(channel.id, user.id);
 
-    let followerData = this.followersCache.get<IsFollower>(key);
+    return this.getCachedData(key, () => this.getIsFollower(channel, user));
+  }
 
-    if (!followerData) {
-      try {
-        followerData = await this.getIsFollower(channel, user);
+  private async getCachedData<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+  ): Promise<T | null> {
+    let data = await this.cache.get<T>(key);
 
-        this.followersCache.set<IsFollower>(key, followerData);
-      } catch (e) {
-        return null;
-      }
+    if (data) return data;
+
+    try {
+      data = await fetcher();
+
+      this.cache.set<T>(key, data);
+
+      return data;
+    } catch (e) {
+      return null;
     }
-
-    return followerData;
   }
 
   async getIsSub(channel: User, user: User): Promise<IsSub> {
