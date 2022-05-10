@@ -35,13 +35,13 @@ export class HoneyBotService {
       .split(';')
       .forEach((channel) => this.channels.add(channel));
 
-    const telegramToChat = JSON.parse(
-      this.configService.get('HONEY_BOT_TELEGRAM_TO_CHAT'),
-    ) as Record<string, string[]>;
+    // const telegramToChat = JSON.parse(
+    //   this.configService.get('HONEY_BOT_TELEGRAM_TO_CHAT'),
+    // ) as Record<string, string[]>;
 
-    Object.entries(telegramToChat).forEach(([channel, telegramChannels]) =>
-      this.telegramChannels.set(channel, telegramChannels),
-    );
+    // Object.entries(telegramToChat).forEach(([channel, telegramChannels]) =>
+    //   this.telegramChannels.set(channel, telegramChannels),
+    // );
 
     this.channels.forEach((channel) => this.watchChannel(channel));
 
