@@ -44,8 +44,6 @@ export type Config = {
   IGDB_CLIENT_SECRET: string;
   IGDB_ACCESS_TOKEN: string;
 
-  INSTAGRAM_SESSION_ID: string;
-
   F1_COOKIE_GCLB: string;
   F1_CORS_ORIGIN: string;
 };
@@ -95,8 +93,6 @@ export const validationSchema = Joi.object({
   IGDB_CLIENT_ID: Joi.string().required(),
   IGDB_CLIENT_SECRET: Joi.string().required(),
   IGDB_ACCESS_TOKEN: Joi.string().required(),
-
-  INSTAGRAM_SESSION_ID: Joi.string().required(),
 
   F1_COOKIE_GCLB: Joi.string().required(),
   F1_CORS_ORIGIN: Joi.string().required(),
