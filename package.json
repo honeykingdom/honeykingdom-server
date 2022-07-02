@@ -42,6 +42,7 @@
     "@nestjs/schedule": "^1.1.0",
     "@nestjs/swagger": "^5.2.1",
     "@nestjs/typeorm": "^8.0.3",
+    "async-mutex": "^0.3.2",
     "bitly": "^7.1.2",
     "cache-manager": "^3.6.1",
     "cheerio": "^1.0.0-rc.10",
