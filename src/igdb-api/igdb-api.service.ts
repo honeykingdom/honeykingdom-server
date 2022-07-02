@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
 import { AxiosPromise } from 'axios';
-import { lastValueFrom } from 'rxjs';
 import { Game } from 'igdb-api-types';
-import { Config } from '../config/config.interface';
+import { IgdbRequestService } from './igdb-request.service';
 
 /**
  * There is a rate limit of 4 requests per second.
@@ -13,32 +10,11 @@ import { Config } from '../config/config.interface';
  */
 @Injectable()
 export class IgdbApiService {
-  private readonly clientId: string;
-  private readonly clientSecret: string;
-  private readonly accessToken: string;
+  constructor(private readonly igdbRequestService: IgdbRequestService) {}
 
-  constructor(
-    private readonly configService: ConfigService<Config>,
-    private readonly httpService: HttpService,
-  ) {
-    this.clientId = configService.get<string>('IGDB_CLIENT_ID');
-    this.clientSecret = configService.get<string>('IGDB_CLIENT_SECRET');
-    this.accessToken = configService.get<string>('IGDB_ACCESS_TOKEN');
-  }
+  private static readonly GAMES_URL = 'https://api.igdb.com/v4/games';
 
-  game(data: string): AxiosPromise<Game[]> {
-    const url = 'https://api.igdb.com/v4/games';
-
-    return lastValueFrom(
-      this.httpService.post<Game[]>(url, data, { headers: this.getHeaders() }),
-    );
-  }
-
-  private getHeaders() {
-    return {
-      'Client-ID': this.clientId,
-      Authorization: `Bearer ${this.accessToken}`,
-      Accept: 'application/json',
-    };
+  games(data: string): AxiosPromise<Game[]> {
+    return this.igdbRequestService.post<Game[]>(IgdbApiService.GAMES_URL, data);
   }
 }
