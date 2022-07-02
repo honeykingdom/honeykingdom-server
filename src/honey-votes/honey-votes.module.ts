@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { ChatGoalModule } from './chat-goal/chat-goal.module';
 import { ChatVotesModule } from './chat-votes/chat-votes.module';
+import { GamesModule } from './games/games.module';
 import { UsersModule } from './users/users.module';
 import { VotesModule } from './votes/votes.module';
 
@@ -12,6 +13,7 @@ import { VotesModule } from './votes/votes.module';
     VotesModule,
     ChatVotesModule,
     ChatGoalModule,
+    GamesModule,
   ],
 })
 export class HoneyVotesModule {}

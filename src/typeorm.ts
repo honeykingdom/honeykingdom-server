@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MONGODB_CONNECTION } from './app.constants';
 import { Config } from './config/config.interface';
 import { honeyVotesEntities } from './honey-votes/honey-votes.entities';
+import { IgdbApiOptions } from './igdb-api/entities/igdb-api-options.entity';
 import { Message } from './recent-messages/entities/message.entity';
 import { TelegramChannel } from './telegram-api/entities/telegram-channel.entity';
 
@@ -28,7 +29,7 @@ export const typeOrmPostgresModule = TypeOrmModule.forRootAsync({
     username: configService.get('POSTGRES_USER', { infer: true }),
     password: configService.get('POSTGRES_PASSWORD', { infer: true }),
     database: configService.get('POSTGRES_DATABASE', { infer: true }),
-    entities: [...honeyVotesEntities, TelegramChannel],
+    entities: [...honeyVotesEntities, TelegramChannel, IgdbApiOptions],
     synchronize: false,
     dropSchema: configService.get('NODE_ENV', { infer: true }) === 'test',
     logging: configService.get('NODE_ENV', { infer: true }) === 'development',
