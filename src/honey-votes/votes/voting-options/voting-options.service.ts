@@ -282,7 +282,7 @@ export class VotingOptionsService {
     let response: AxiosResponse<Game[]>;
 
     try {
-      response = await this.igdbApiService.game(body);
+      response = await this.igdbApiService.games(body);
     } catch (e) {
       throw new InternalServerErrorException();
     }
