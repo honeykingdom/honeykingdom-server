@@ -40,9 +40,6 @@ export type Config = {
 
   KINOPOISK_API_KEY: string;
 
-  IGDB_CLIENT_ID: string;
-  IGDB_CLIENT_SECRET: string;
-
   F1_COOKIE_GCLB: string;
   F1_CORS_ORIGIN: string;
 };
@@ -88,9 +85,6 @@ export const validationSchema = Joi.object({
   HONEY_VOTES_CRYPTO_SECRET: Joi.string().length(32).required(),
 
   KINOPOISK_API_KEY: Joi.string().required(),
-
-  IGDB_CLIENT_ID: Joi.string().required(),
-  IGDB_CLIENT_SECRET: Joi.string().required(),
 
   F1_COOKIE_GCLB: Joi.string().required(),
   F1_CORS_ORIGIN: Joi.string().required(),

@@ -34,8 +34,10 @@ export class IgdbRequestService {
     @InjectRepository(IgdbApiOptions)
     private readonly igdbApiOptionsRepo: Repository<IgdbApiOptions>,
   ) {
-    this.clientId = configService.get<string>('IGDB_CLIENT_ID');
-    this.clientSecret = configService.get<string>('IGDB_CLIENT_SECRET');
+    this.clientId = configService.get<string>('HONEY_VOTES_TWITCH_CLIENT_ID');
+    this.clientSecret = configService.get<string>(
+      'HONEY_VOTES_TWITCH_CLIENT_SECRET',
+    );
   }
 
   async post<T>(url: string, data: string): Promise<AxiosResponse<T>> {
