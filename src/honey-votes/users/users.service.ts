@@ -13,6 +13,7 @@ import { AxiosResponse } from 'axios';
 import { Cache } from 'cache-manager';
 import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
+import { Mutex } from 'async-mutex';
 import { Config } from '../../config/config.interface';
 import { TwitchApiService } from '../../twitch-api/twitch-api.service';
 import { SubTier, TwitchUserType } from '../honey-votes.constants';
@@ -84,7 +85,7 @@ export class UsersService {
   private readonly clientSecret: string;
   private readonly cryptoSecret: string;
 
-  private readonly refreshingTokens = new Map<string, Promise<User>>();
+  private readonly mutexes = new Map<string, Mutex>();
 
   constructor(
     private readonly configService: ConfigService<Config>,
@@ -518,22 +519,27 @@ export class UsersService {
     } catch (e) {}
   }
 
-  private smartRefreshToken(user: User): Promise<User | null> {
-    const isAlreadyRefreshing = this.refreshingTokens.has(user.id);
+  private async smartRefreshToken(user: User): Promise<User | null> {
+    let mutex = this.mutexes.get(user.id);
+    let result: User;
 
-    if (isAlreadyRefreshing) return this.refreshingTokens.get(user.id);
+    if (mutex) {
+      await mutex.waitForUnlock();
+    } else {
+      mutex = new Mutex();
+      this.mutexes.set(user.id, mutex);
+      const release = await mutex.acquire();
 
-    const promise = (async () => {
-      const result = await this.refreshToken(user);
+      try {
+        result = await this.refreshToken(user);
+      } finally {
+        release();
+      }
 
-      this.refreshingTokens.delete(user.id);
+      this.mutexes.delete(user.id);
+    }
 
-      return result;
-    })();
-
-    this.refreshingTokens.set(user.id, promise);
-
-    return promise;
+    return result;
   }
 
   /**
