@@ -8,6 +8,7 @@
     "kinopoisk",
     "nestjs",
     "postgres",
+    "signalr",
     "supabase",
     "timestamptz",
     "typeorm"
