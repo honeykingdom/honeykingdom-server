@@ -51,7 +51,6 @@
     "cookie-parser": "^1.4.6",
     "date-fns": "^2.28.0",
     "igdb-api-types": "^0.1.0",
-    "joi": "^17.6.0",
     "mongodb": "^3.7.0",
     "ms": "^2.1.3",
     "node-signalr": "^2.0.6",
@@ -65,7 +64,8 @@
     "rxjs": "^7.5.5",
     "swagger-ui-express": "^4.3.0",
     "twitch-js": "^2.0.0-beta.43",
-    "typeorm": "0.2"
+    "typeorm": "0.2",
+    "zod": "^3.17.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.2.5",
