@@ -1,91 +1,53 @@
-import Joi from 'joi';
+import { ConfigModuleOptions } from '@nestjs/config';
+import { z } from 'zod';
 
-export type Config = {
-  NODE_ENV: 'development' | 'production' | 'test';
-  PORT: string;
-
-  RECENT_MESSAGES_CHANNELS: string;
-  RECENT_MESSAGES_LIMIT: string;
-  RECENT_MESSAGES_CORS_ORIGIN: string;
-  RECENT_MESSAGES_REDIRECT_URL: string;
-
-  HEROKU_AWAKE_BASE_URL: string;
-
-  TELEGRAM_API_CHECK_INTERVAL: string;
-
-  HONEY_BOT_USERNAME: string;
-  HONEY_BOT_TOKEN: string;
-  HONEY_BOT_CHANNELS: string;
-  HONEY_BOT_TELEGRAM_TO_CHAT: string;
-
-  LINK_SHORTENER_ACCESS_TOKEN: string;
-
-  POSTGRES_HOST: string;
-  POSTGRES_PORT: string;
-  POSTGRES_DATABASE: string;
-  POSTGRES_USER: string;
-  POSTGRES_PASSWORD: string;
-
-  MONGODB_URI: string;
-
-  HONEY_VOTES_BASE_URL: string;
-  HONEY_VOTES_FRONTEND_BASE_URL: string;
-  HONEY_VOTES_ACCESS_TOKEN_SECRET: string;
-  HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: string;
-  HONEY_VOTES_REFRESH_TOKEN_SECRET: string;
-  HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME: string;
-  HONEY_VOTES_TWITCH_CLIENT_ID: string;
-  HONEY_VOTES_TWITCH_CLIENT_SECRET: string;
-  HONEY_VOTES_CRYPTO_SECRET: string;
-
-  KINOPOISK_API_KEY: string;
-
-  F1_COOKIE_GCLB: string;
-  F1_CORS_ORIGIN: string;
-};
-
-export const validationSchema = Joi.object({
-  NODE_ENV: Joi.string()
-    .valid('development', 'production', 'test')
+export const configSchema = z.object({
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
     .default('development'),
-  PORT: Joi.number().default(3000),
+  PORT: z.number().default(3000),
 
-  RECENT_MESSAGES_CHANNELS: Joi.string().required(),
-  RECENT_MESSAGES_LIMIT: Joi.number().default(500),
-  RECENT_MESSAGES_CORS_ORIGIN: Joi.string().required(),
-  RECENT_MESSAGES_REDIRECT_URL: Joi.string().required(),
+  RECENT_MESSAGES_CHANNELS: z.string(),
+  RECENT_MESSAGES_LIMIT: z.number().default(500),
+  RECENT_MESSAGES_CORS_ORIGIN: z.string(),
+  RECENT_MESSAGES_REDIRECT_URL: z.string(),
 
-  HEROKU_AWAKE_BASE_URL: Joi.string().required(),
+  HEROKU_AWAKE_BASE_URL: z.string(),
 
-  TELEGRAM_API_CHECK_INTERVAL: Joi.string().default('2 min'),
+  TELEGRAM_API_CHECK_INTERVAL: z.string().default('2 min'),
 
-  HONEY_BOT_USERNAME: Joi.string().required(),
-  HONEY_BOT_TOKEN: Joi.string().required(),
-  HONEY_BOT_CHANNELS: Joi.string().required(),
-  HONEY_BOT_TELEGRAM_TO_CHAT: Joi.string().required(),
+  HONEY_BOT_USERNAME: z.string(),
+  HONEY_BOT_TOKEN: z.string(),
+  HONEY_BOT_CHANNELS: z.string(),
+  HONEY_BOT_TELEGRAM_TO_CHAT: z.string(),
 
-  LINK_SHORTENER_ACCESS_TOKEN: Joi.string().required(),
+  LINK_SHORTENER_ACCESS_TOKEN: z.string(),
 
-  POSTGRES_HOST: Joi.string().required(),
-  POSTGRES_PORT: Joi.number().required(),
-  POSTGRES_DATABASE: Joi.string().required(),
-  POSTGRES_USER: Joi.string().required(),
-  POSTGRES_PASSWORD: Joi.string().required(),
+  POSTGRES_HOST: z.string(),
+  POSTGRES_PORT: z.number(),
+  POSTGRES_DATABASE: z.string(),
+  POSTGRES_USER: z.string(),
+  POSTGRES_PASSWORD: z.string(),
 
-  MONGODB_URI: Joi.string().required(),
+  MONGODB_URI: z.string(),
 
-  HONEY_VOTES_BASE_URL: Joi.string().required(),
-  HONEY_VOTES_FRONTEND_BASE_URL: Joi.string().required(),
-  HONEY_VOTES_ACCESS_TOKEN_SECRET: Joi.string().required(),
-  HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: Joi.string().required(),
-  HONEY_VOTES_REFRESH_TOKEN_SECRET: Joi.string().required(),
-  HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME: Joi.string().required(),
-  HONEY_VOTES_TWITCH_CLIENT_ID: Joi.string().required(),
-  HONEY_VOTES_TWITCH_CLIENT_SECRET: Joi.string().required(),
-  HONEY_VOTES_CRYPTO_SECRET: Joi.string().length(32).required(),
+  HONEY_VOTES_BASE_URL: z.string(),
+  HONEY_VOTES_FRONTEND_BASE_URL: z.string(),
+  HONEY_VOTES_ACCESS_TOKEN_SECRET: z.string(),
+  HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: z.string(),
+  HONEY_VOTES_REFRESH_TOKEN_SECRET: z.string(),
+  HONEY_VOTES_REFRESH_TOKEN_EXPIRE_TIME: z.string(),
+  HONEY_VOTES_TWITCH_CLIENT_ID: z.string(),
+  HONEY_VOTES_TWITCH_CLIENT_SECRET: z.string(),
+  HONEY_VOTES_CRYPTO_SECRET: z.string().length(32),
 
-  KINOPOISK_API_KEY: Joi.string().required(),
+  KINOPOISK_API_KEY: z.string(),
 
-  F1_COOKIE_GCLB: Joi.string().required(),
-  F1_CORS_ORIGIN: Joi.string().required(),
+  F1_COOKIE_GCLB: z.string(),
+  F1_CORS_ORIGIN: z.string(),
 });
+
+export type Config = z.infer<typeof configSchema>;
+
+export const validate: ConfigModuleOptions['validate'] = (config) =>
+  configSchema.parse(config);

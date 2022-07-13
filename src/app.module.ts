@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
-import { validationSchema } from './config/config.interface';
+import { validate } from './config/config.interface';
 import { RecentMessagesModule } from './recent-messages/recent-messages.module';
 import { HerokuAwakeModule } from './heroku-awake/heroku-awake.module';
 import { HoneyBotModule } from './honey-bot/honey-bot.module';
@@ -18,7 +18,7 @@ import { Formula1Module } from './formula1/formula1.module';
 @Module({
   imports: [
     HerokuAwakeModule,
-    ConfigModule.forRoot({ validationSchema }),
+    ConfigModule.forRoot({ validate }),
     ScheduleModule.forRoot(),
     typeOrmMongoDbModule,
     typeOrmPostgresModule,
