@@ -14,6 +14,7 @@ import { Cache } from 'cache-manager';
 import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
 import { Mutex } from 'async-mutex';
+import { Commands, NoticeMessages } from 'twitch-js';
 import { Config } from '../../config/config.interface';
 import { TwitchApiService } from '../../twitch-api/twitch-api.service';
 import { SubTier, TwitchUserType } from '../honey-votes.constants';
@@ -25,6 +26,9 @@ import {
   GetUserFollowsResponse,
   RefreshTokenResponse,
 } from '../../twitch-api/twitch-api.interface';
+import { InjectChat } from '../../twitch-chat/twitch-chat.decorators';
+import { TWITCH_CHAT_ANONYMOUS } from '../../app.constants';
+import { TwitchChatService } from '../../twitch-chat/twitch-chat.service';
 import { decrypt, encrypt } from '../../crypto/crypto';
 import { UserRoles } from './users.interface';
 
@@ -93,6 +97,8 @@ export class UsersService {
     private readonly userRepo: Repository<User>,
     private readonly twitchApiService: TwitchApiService,
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    @InjectChat(TWITCH_CHAT_ANONYMOUS)
+    private readonly twitchChatService: TwitchChatService,
   ) {
     this.clientId = configService.get<string>('HONEY_VOTES_TWITCH_CLIENT_ID');
     this.clientSecret = configService.get<string>(
@@ -268,7 +274,12 @@ export class UsersService {
   }
 
   async isVip(channel: User, user: User): Promise<boolean> {
-    return null;
+    const key = UsersService.CACHE_KEY.vips(channel.id);
+    const vipIds = await this.getCachedData(key, () =>
+      this.getChannelVips(channel.login),
+    );
+
+    return vipIds?.has(user.id);
   }
 
   isSub(channel: User, user: User): Promise<IsSub> {
@@ -506,8 +517,40 @@ export class UsersService {
     return new Set(response.data.data.map((u) => u.user_id));
   }
 
-  private async getChannelVips(channelId: string): Promise<Set<string>> {
-    throw new Error('Not implemented');
+  private async getChannelVips(channel: string): Promise<Set<string>> {
+    const GET_VIPS_TIMEOUT = 5000;
+    const off = (f: any) => this.twitchChatService.chat.off(Commands.NOTICE, f);
+
+    const parseVips = (notice: any): Set<string> => {
+      if (notice.event === 'NO_VIPS') return new Set();
+      if (notice.event === 'VIPS_SUCCESS') {
+        const vips = notice.message
+          .slice(0, -1)
+          .split(':')[1]
+          .split(', ')
+          .map((n) => n.toLowerCase());
+        return new Set<string>(vips);
+      }
+      return new Set();
+    };
+
+    return new Promise((resolve) => {
+      const fn = (notice: NoticeMessages) => {
+        if (notice.channel.slice(1) === channel) {
+          resolve(parseVips(notice));
+          off(fn);
+          return;
+        }
+
+        setTimeout(() => {
+          resolve(new Set());
+          off(fn);
+        }, GET_VIPS_TIMEOUT);
+      };
+
+      this.twitchChatService.chat.on(Commands.NOTICE, fn);
+      this.twitchChatService.say(channel, '/vips');
+    });
   }
 
   private async revokeToken(accessToken: string) {
