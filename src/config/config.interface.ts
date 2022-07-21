@@ -5,10 +5,16 @@ export const configSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
-  PORT: z.string().default('3000'),
+  PORT: z.preprocess(
+    (v) => parseInt(v as string, 10),
+    z.number().default(3000),
+  ),
 
   RECENT_MESSAGES_CHANNELS: z.string(),
-  RECENT_MESSAGES_LIMIT: z.string().default('500'),
+  RECENT_MESSAGES_LIMIT: z.preprocess(
+    (v) => parseInt(v as string, 10),
+    z.number().default(500),
+  ),
   RECENT_MESSAGES_CORS_ORIGIN: z.string(),
   RECENT_MESSAGES_REDIRECT_URL: z.string(),
 
@@ -23,12 +29,7 @@ export const configSchema = z.object({
 
   LINK_SHORTENER_ACCESS_TOKEN: z.string(),
 
-  POSTGRES_HOST: z.string(),
-  POSTGRES_PORT: z.string(),
-  POSTGRES_DATABASE: z.string(),
-  POSTGRES_USER: z.string(),
-  POSTGRES_PASSWORD: z.string(),
-
+  POSTGRES_URL: z.string(),
   MONGODB_URI: z.string(),
 
   HONEY_VOTES_BASE_URL: z.string(),
