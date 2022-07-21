@@ -7,10 +7,7 @@ export class TwitchChatService {
   /** Map<channel: string, connections: Set<string>> */
   private readonly channels = new Map<string, Set<string>>();
 
-  constructor(
-    private readonly chat: Chat,
-    private readonly connectionName: string,
-  ) {
+  constructor(readonly chat: Chat, private readonly connectionName: string) {
     this.logger = new Logger(`TwitchChat: ${connectionName}`);
 
     // chat.on(Commands.JOIN, ({ channel }) => this.logger.log(`join ${channel}`));
