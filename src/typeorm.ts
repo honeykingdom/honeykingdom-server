@@ -24,11 +24,7 @@ export const typeOrmPostgresModule = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (configService: ConfigService<Config>) => ({
     type: 'postgres',
-    host: configService.get('POSTGRES_HOST', { infer: true }),
-    port: parseInt(configService.get('POSTGRES_PORT', { infer: true })),
-    username: configService.get('POSTGRES_USER', { infer: true }),
-    password: configService.get('POSTGRES_PASSWORD', { infer: true }),
-    database: configService.get('POSTGRES_DATABASE', { infer: true }),
+    url: configService.get('POSTGRES_URL', { infer: true }),
     entities: [...honeyVotesEntities, TelegramChannel, IgdbApiOptions],
     synchronize: false,
     dropSchema: configService.get('NODE_ENV', { infer: true }) === 'test',
