@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { User } from './entities/user.entity';
 import { SubTier, TwitchUserType } from '../honey-votes.constants';
 
 export class UserRoles {
@@ -26,3 +27,12 @@ export class UserRoles {
   @ApiProperty({ nullable: true })
   subTier: SubTier | null;
 }
+
+export type StoreUserCredentials = {
+  scope: string[];
+  accessToken: string;
+  refreshToken: string;
+};
+export type StoreUser = Omit<User, 'credentials'> & {
+  credentials: StoreUserCredentials;
+};
