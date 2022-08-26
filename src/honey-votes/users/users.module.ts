@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TwitchApiModule } from '../../twitch-api/twitch-api.module';
 import { User } from './entities/user.entity';
-import { TwitchUsersService } from './twitch-users.service';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -15,7 +14,7 @@ import { UsersService } from './users.service';
     TwitchApiModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService, TwitchUsersService],
+  providers: [UsersService],
   exports: [UsersService],
 })
 export class UsersModule {}

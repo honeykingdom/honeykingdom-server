@@ -260,8 +260,8 @@ export class UsersService {
       userToken: string,
     ) =>
       [
-        sub ? this.getIsSub(channel.id, user.id, userToken) : null,
-        follower ? this.getIsFollower(channel.id, user.id, userToken) : null,
+        sub ? this.isSub(channel.id, user.id, userToken) : null,
+        follower ? this.isFollower(channel.id, user.id, userToken) : null,
       ] as const;
 
     const roles: UserRoles = {
@@ -336,7 +336,7 @@ export class UsersService {
     return roles;
   }
 
-  private async getIsSub(
+  async isSub(
     channelId: string,
     userId: string,
     userAccessToken: string,
@@ -368,7 +368,7 @@ export class UsersService {
     return isSub;
   }
 
-  private async getIsFollower(
+  async isFollower(
     channelId: string,
     userId: string,
     userAccessToken: string,
@@ -399,6 +399,24 @@ export class UsersService {
 
     this.cache.set(key, isFollower);
     return isFollower;
+  }
+
+  async isEditor(channel: User, user: User) {
+    const token = this.decryptToken(channel.credentials.encryptedAccessToken);
+    const editors = await this.getChannelEditors(channel.id, token);
+    return editors.has(user.id);
+  }
+
+  async isMod(channel: User, user: User) {
+    const token = this.decryptToken(channel.credentials.encryptedAccessToken);
+    const mods = await this.getChannelMods(channel.id, token);
+    return mods.has(user.id);
+  }
+
+  async isVip(channel: User, user: User) {
+    const token = this.decryptToken(channel.credentials.encryptedAccessToken);
+    const vips = await this.getChannelVips(channel.id, token);
+    return vips.has(user.id);
   }
 
   private async getChannelEditors(
