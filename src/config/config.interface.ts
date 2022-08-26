@@ -46,7 +46,7 @@ export const configSchema = z.object({
 
   INSTAGRAM_COOKIE: z.string(),
 
-  F1_COOKIE_GCLB: z.string(),
+  F1_COOKIE: z.string(),
   F1_CORS_ORIGIN: z.string(),
 });
 

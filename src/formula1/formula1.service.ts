@@ -32,7 +32,7 @@ export class Formula1Service extends EventEmitter {
         'streaming',
       ]);
 
-      this.client.headers.Cookie = `GCLB=${process.env.F1_COOKIE_GCLB}`;
+      this.client.headers.Cookie = process.env.F1_COOKIE;
 
       this.client.on('connected', async () => {
         this.logger.log('Connected.');
