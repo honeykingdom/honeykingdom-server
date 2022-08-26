@@ -10,6 +10,8 @@ export const configSchema = z.object({
     z.number().default(3000),
   ),
 
+  APP_BASE_URL: z.string(),
+
   RECENT_MESSAGES_CHANNELS: z.string(),
   RECENT_MESSAGES_LIMIT: z.preprocess(
     (v) => parseInt(v as string, 10),
@@ -17,8 +19,6 @@ export const configSchema = z.object({
   ),
   RECENT_MESSAGES_CORS_ORIGIN: z.string(),
   RECENT_MESSAGES_REDIRECT_URL: z.string(),
-
-  HEROKU_AWAKE_BASE_URL: z.string(),
 
   TELEGRAM_API_CHECK_INTERVAL: z.string().default('2 min'),
 

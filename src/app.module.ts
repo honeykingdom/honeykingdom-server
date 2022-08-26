@@ -4,7 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { validate } from './config/config.interface';
 import { RecentMessagesModule } from './recent-messages/recent-messages.module';
-import { HerokuAwakeModule } from './heroku-awake/heroku-awake.module';
+import { AppAwakeModule } from './app-awake/app-awake.module';
 import { HoneyBotModule } from './honey-bot/honey-bot.module';
 import { HoneyVotesModule } from './honey-votes/honey-votes.module';
 import { InstagramModule } from './instagram/instagram.module';
@@ -17,7 +17,7 @@ import { Formula1Module } from './formula1/formula1.module';
 
 @Module({
   imports: [
-    HerokuAwakeModule,
+    AppAwakeModule,
     ConfigModule.forRoot({ validate }),
     ScheduleModule.forRoot(),
     typeOrmMongoDbModule,

@@ -1,29 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { lastValueFrom } from 'rxjs';
 import { Config } from '../config/config.interface';
 
-// https://devcenter.heroku.com/articles/autoidle
+// https://render.com/docs/free#free-web-services
 @Injectable()
-export class HerokuAwakeService {
-  private static EVERY_15_MINUTES = '0 */15 * * * *';
-
+export class AppAwakeService {
   private readonly url: string;
 
   constructor(
     private readonly configService: ConfigService<Config>,
     private readonly httpService: HttpService,
   ) {
-    const baseUrl = this.configService.get('HEROKU_AWAKE_BASE_URL', {
-      infer: true,
-    });
+    const baseUrl = this.configService.get('APP_BASE_URL', { infer: true });
 
     this.url = `${baseUrl}/api/ping`;
   }
 
-  @Cron(HerokuAwakeService.EVERY_15_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   private handleCron() {
     lastValueFrom(this.httpService.get(this.url));
   }
