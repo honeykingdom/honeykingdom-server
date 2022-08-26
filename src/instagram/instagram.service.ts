@@ -42,7 +42,10 @@ export class InstagramService {
     const url = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${nickname}`;
     const response = await lastValueFrom(
       this.httpService.get(url, {
-        headers: { 'x-ig-app-id': InstagramService.INSTAGRAM_APP_ID },
+        headers: {
+          'x-ig-app-id': InstagramService.INSTAGRAM_APP_ID,
+          cookie: process.env.INSTAGRAM_COOKIE,
+        },
       }),
     );
 

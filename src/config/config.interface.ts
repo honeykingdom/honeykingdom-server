@@ -44,6 +44,8 @@ export const configSchema = z.object({
 
   KINOPOISK_API_KEY: z.string(),
 
+  INSTAGRAM_COOKIE: z.string(),
+
   F1_COOKIE_GCLB: z.string(),
   F1_CORS_ORIGIN: z.string(),
 });
