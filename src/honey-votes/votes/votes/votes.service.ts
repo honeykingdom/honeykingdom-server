@@ -101,7 +101,7 @@ export class VotesService {
 
     if (
       viewer.canVote ||
-      (await this.usersService.checkUserTypes(
+      (await this.usersService.isHasPermissions(
         votingOption.voting.broadcaster,
         user,
         {

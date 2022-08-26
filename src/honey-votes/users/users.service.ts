@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   CACHE_MANAGER,
+  HttpStatus,
   Inject,
   Injectable,
   Logger,
@@ -9,30 +10,18 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AxiosResponse } from 'axios';
 import { Cache } from 'cache-manager';
 import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
-import { Mutex } from 'async-mutex';
-// import { Commands, NoticeMessages } from 'twitch-js';
 import { Config } from '../../config/config.interface';
 import { TwitchApiService } from '../../twitch-api/twitch-api.service';
 import { SubTier, TwitchUserType } from '../honey-votes.constants';
 import { User } from './entities/user.entity';
-import {
-  CheckUserSubscriptionResponse,
-  GetChannelEditorsResponse,
-  GetModeratorsResponse,
-  GetUserFollowsResponse,
-  RefreshTokenResponse,
-} from '../../twitch-api/twitch-api.interface';
-// import { InjectChat } from '../../twitch-chat/twitch-chat.decorators';
-// import { TWITCH_CHAT_ANONYMOUS } from '../../app.constants';
-// import { TwitchChatService } from '../../twitch-chat/twitch-chat.service';
+import { CheckUserSubscriptionResponse } from '../../twitch-api/twitch-api.interface';
 import { decrypt, encrypt } from '../../crypto/crypto';
-import { UserRoles } from './users.interface';
+import { StoreUserCredentials, UserRoles } from './users.interface';
 
-type CheckUserTypesInput = {
+type Permissions = {
   [TwitchUserType.Editor]?: boolean;
   [TwitchUserType.Mod]?: boolean;
   [TwitchUserType.Vip]?: boolean;
@@ -70,6 +59,24 @@ const SUB_TIER: Record<
   '3000': SubTier.Tier3,
 };
 
+const EMPTY_TOKEN = '';
+
+type UserRolesClaims = {
+  editor: boolean;
+  mod: boolean;
+  vip: boolean;
+  sub: boolean;
+  follower: boolean;
+};
+
+const USER_ROLES_ALL_CLAIMS: UserRolesClaims = {
+  editor: true,
+  mod: true,
+  vip: true,
+  sub: true,
+  follower: true,
+};
+
 @Injectable()
 export class UsersService {
   static CACHE_TTL = 60 * 10; // 10 minutes
@@ -89,14 +96,12 @@ export class UsersService {
   private readonly clientSecret: string;
   private readonly cryptoSecret: string;
 
-  private readonly mutexes = new Map<string, Mutex>();
-
   constructor(
     private readonly configService: ConfigService<Config>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    private readonly twitchApiService: TwitchApiService,
-    @Inject(CACHE_MANAGER) private readonly cache: Cache, // @InjectChat(TWITCH_CHAT_ANONYMOUS) // private readonly twitchChatService: TwitchChatService,
+    private readonly twitchApi: TwitchApiService,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {
     this.clientId = configService.get<string>('HONEY_VOTES_TWITCH_CLIENT_ID');
     this.clientSecret = configService.get<string>(
@@ -107,7 +112,7 @@ export class UsersService {
     });
   }
 
-  async getChannelByLogin(login: string): Promise<User> {
+  async findByLogin(login: string): Promise<User> {
     const channel = await this.userRepo.findOne({ where: { login } });
 
     if (!channel) throw new NotFoundException();
@@ -115,54 +120,12 @@ export class UsersService {
     return channel;
   }
 
-  async getChannelById(id: string): Promise<User> {
+  async findById(id: string): Promise<User> {
     const channel = await this.userRepo.findOne(id);
 
     if (!channel) throw new NotFoundException();
 
     return channel;
-  }
-
-  async getUserRoles(
-    userId: string,
-    channelId?: string,
-    channelLogin?: string,
-  ): Promise<UserRoles> {
-    if ((!channelId && !channelLogin) || (channelId && channelLogin)) {
-      throw new BadRequestException();
-    }
-
-    const conditions: FindConditions<User> = {};
-
-    if (channelId) conditions.id = channelId;
-    if (channelLogin) conditions.login = channelLogin;
-
-    const [user, channel] = await Promise.all([
-      this.findOne(userId, { relations: ['credentials'] }),
-      this.userRepo.findOne(conditions, { relations: ['credentials'] }),
-    ]);
-
-    if (!user || !channel) throw new NotFoundException();
-
-    const [editor, mod, vip, [sub, tier], [follower, minutesFollowed]] =
-      await Promise.all([
-        this.isEditor(channel, user),
-        this.isMod(channel, user),
-        this.isVip(channel, user),
-        this.isSub(channel, user),
-        this.isFollower(channel, user),
-      ]);
-
-    return {
-      broadcaster: user.id === channel.id,
-      editor,
-      mod,
-      vip,
-      sub,
-      follower,
-      minutesFollowed,
-      subTier: tier,
-    };
   }
 
   async findOne(
@@ -224,28 +187,52 @@ export class UsersService {
     }
   }
 
-  async checkUserTypes(
+  async userRoles(
+    userId: string,
+    channelId?: string,
+    channelLogin?: string,
+    claims = USER_ROLES_ALL_CLAIMS,
+  ): Promise<UserRoles> {
+    if ((!channelId && !channelLogin) || (channelId && channelLogin)) {
+      throw new BadRequestException();
+    }
+
+    const conditions: FindConditions<User> = {};
+
+    if (channelId) conditions.id = channelId;
+    if (channelLogin) conditions.login = channelLogin;
+
+    const [user, channel] = await Promise.all([
+      this.findOne(userId, { relations: ['credentials'] }),
+      this.userRepo.findOne(conditions, { relations: ['credentials'] }),
+    ]);
+
+    if (!user || !channel) throw new NotFoundException();
+
+    return this.getUserRoles(channel, user, claims);
+  }
+
+  async isHasPermissions(
     channel: User,
     user: User,
-    types: CheckUserTypesInput = {},
+    p: Permissions = {},
   ): Promise<boolean> {
-    const [editor, mod, vip, [sub, tier], [follower, minutesFollowed]] =
-      await Promise.all([
-        types.editor ? this.isEditor(channel, user) : undefined,
-        types.mod ? this.isMod(channel, user) : undefined,
-        types.vip ? this.isVip(channel, user) : undefined,
-        types.sub ? this.isSub(channel, user) : ([null, null] as IsSub),
-        types.follower
-          ? this.isFollower(channel, user)
-          : ([null, null] as IsFollower),
-      ]);
+    const claims: UserRolesClaims = {
+      editor: p.editor,
+      mod: p.mod,
+      vip: p.vip,
+      sub: p.sub,
+      follower: p.follower,
+    };
+
+    const roles = await this.getUserRoles(channel, user, claims);
 
     if (
-      (follower && minutesFollowed >= types.minutesToFollowRequired) ||
-      (sub && tier >= types.subTierRequired) ||
-      vip ||
-      mod ||
-      editor
+      (roles.follower && roles.minutesFollowed >= p.minutesToFollowRequired) ||
+      (roles.sub && roles.subTier >= p.subTierRequired) ||
+      roles.vip ||
+      roles.mod ||
+      roles.editor
     ) {
       return true;
     }
@@ -253,385 +240,301 @@ export class UsersService {
     return false;
   }
 
-  async isEditor(channel: User, user: User): Promise<boolean> {
-    const key = UsersService.CACHE_KEY.editors(channel.id);
-    const editorIds = await this.getCachedData(key, () =>
-      this.getChannelEditors(channel),
-    );
+  private async getUserRoles(
+    channel: User,
+    user: User,
+    claims: UserRolesClaims,
+  ): Promise<UserRoles> {
+    const getChannelTokenPromises = (
+      { editor, mod, vip }: UserRolesClaims,
+      channelToken: string,
+    ) =>
+      [
+        editor ? this.getChannelEditors(channel.id, channelToken) : null,
+        mod ? this.getChannelMods(channel.id, channelToken) : null,
+        vip ? this.getChannelVips(channel.id, channelToken) : null,
+      ] as const;
 
-    return editorIds?.has(user.id);
-  }
+    const getUserTokenPromises = (
+      { sub, follower }: UserRolesClaims,
+      userToken: string,
+    ) =>
+      [
+        sub ? this.getIsSub(channel.id, user.id, userToken) : null,
+        follower ? this.getIsFollower(channel.id, user.id, userToken) : null,
+      ] as const;
 
-  async isMod(channel: User, user: User): Promise<boolean> {
-    const key = UsersService.CACHE_KEY.mods(channel.id);
-    const modIds = await this.getCachedData(key, () =>
-      this.getChannelMods(channel),
-    );
-
-    return modIds?.has(user.id);
-  }
-
-  async isVip(channel: User, user: User): Promise<boolean> {
-    /* const key = UsersService.CACHE_KEY.vips(channel.id);
-    const vipIds = await this.getCachedData(key, () =>
-      this.getChannelVips(channel.login),
-    );
-
-    return vipIds?.has(user.id); */
-
-    return null;
-  }
-
-  isSub(channel: User, user: User): Promise<IsSub> {
-    const key = UsersService.CACHE_KEY.subs(channel.id, user.id);
-
-    return this.getCachedData(key, () => this.getIsSub(channel, user));
-  }
-
-  isFollower(channel: User, user: User): Promise<IsFollower | null> {
-    const key = UsersService.CACHE_KEY.followers(channel.id, user.id);
-
-    return this.getCachedData(key, () => this.getIsFollower(channel, user));
-  }
-
-  private async getCachedData<T>(
-    key: string,
-    fetcher: () => Promise<T>,
-  ): Promise<T | null> {
-    let data = await this.cache.get<T>(key);
-
-    if (data) return data;
-
-    try {
-      data = await fetcher();
-
-      this.cache.set<T>(key, data);
-
-      return data;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async getIsSub(channel: User, user: User): Promise<IsSub> {
-    if (!user.areTokensValid) {
-      this.logger.log(
-        `isSub: areTokensValid === false. User: ${channel.login}`,
-      );
-
-      return [null, null];
-    }
-
-    let response: AxiosResponse<CheckUserSubscriptionResponse>;
-    let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
-
-    // TODO: remove loops or add iteration limit
-    while (true) {
-      try {
-        response = await this.twitchApiService.checkUserSubscription(
-          { broadcaster_id: channel.id, user_id: user.id },
-          { clientId: this.clientId, accessToken },
-        );
-        break;
-      } catch (e) {
-        if (e.response.status === 401) {
-          this.logger.log(`isSub: invalid access token. User: ${user.login}`);
-
-          const updatedUser = await this.smartRefreshToken(user);
-
-          if (updatedUser === null) return [null, null];
-
-          accessToken = this.decryptToken(
-            updatedUser.credentials.encryptedAccessToken,
-          );
-        } else if (e.response.status === 404) {
-          return [false, null];
-        } else {
-          this.logger.error(
-            `isSub: unknown error. User: ${user.login}`,
-            e.stack,
-          );
-
-          return [null, null];
-        }
-      }
-    }
-
-    const tier = SUB_TIER[response.data.data[0].tier];
-
-    return [true, tier];
-  }
-
-  // TODO: if user token not valid take channel token
-  async getIsFollower(channel: User, user: User): Promise<IsFollower> {
-    if (!user.areTokensValid) {
-      this.logger.log(
-        `isFollower: areTokensValid === false. User: ${channel.login}`,
-      );
-
-      return [null, null];
-    }
-
-    let response: AxiosResponse<GetUserFollowsResponse>;
-    let accessToken = this.decryptToken(user.credentials.encryptedAccessToken);
-
-    while (true) {
-      try {
-        response = await this.twitchApiService.getUserFollows(
-          { from_id: user.id, to_id: channel.id },
-          { clientId: this.clientId, accessToken },
-        );
-
-        break;
-      } catch (e) {
-        if (e.response.status === 401) {
-          this.logger.log(
-            `isFollower: invalid access token. User: ${user.login}`,
-          );
-
-          const updatedUser = await this.smartRefreshToken(user);
-
-          if (updatedUser === null) {
-            return [null, null];
-          }
-
-          accessToken = this.decryptToken(
-            updatedUser.credentials.encryptedAccessToken,
-          );
-        } else {
-          this.logger.error(
-            `isFollower: unknown error. User: ${user.login}`,
-            e.stack,
-          );
-
-          return [null, null];
-        }
-      }
-    }
-
-    if (response.data.total === 0) {
-      return [false, null];
-    }
-
-    const followedAt = new Date(response.data.data[0].followed_at);
-    const minutesFollowed = differenceInMinutes(new Date(), followedAt);
-
-    return [true, minutesFollowed];
-  }
-
-  async getChannelEditors(channel: User): Promise<Set<string>> {
-    if (!channel.areTokensValid) {
-      this.logger.log(
-        `getChannelEditors: areTokensValid === false. User: ${channel.login}`,
-      );
-
-      throw new UnauthorizedException();
-    }
-
-    let response: AxiosResponse<GetChannelEditorsResponse>;
-    let accessToken = this.decryptToken(
-      channel.credentials.encryptedAccessToken,
-    );
-
-    while (true) {
-      try {
-        response = await this.twitchApiService.getChannelEditors(channel.id, {
-          clientId: this.clientId,
-          accessToken,
-        });
-
-        break;
-      } catch (e) {
-        if (e.response.status === 401) {
-          this.logger.log(
-            `getChannelEditors: invalid access token. User: ${channel.login}`,
-          );
-
-          const updatedUser = await this.smartRefreshToken(channel);
-
-          if (updatedUser === null) throw new UnauthorizedException();
-
-          accessToken = this.decryptToken(
-            updatedUser.credentials.encryptedAccessToken,
-          );
-        } else {
-          this.logger.error(
-            `getChannelEditors: unknown error. User: ${channel.login}`,
-            e.stack,
-          );
-
-          return new Set();
-        }
-      }
-    }
-
-    return new Set(response.data.data.map((u) => u.user_id));
-  }
-
-  private async getChannelMods(channel: User): Promise<Set<string>> {
-    if (!channel.areTokensValid) {
-      this.logger.log(
-        `getChannelMods: areTokensValid === false. User: ${channel.login}`,
-      );
-
-      throw new UnauthorizedException();
-    }
-
-    let response: AxiosResponse<GetModeratorsResponse>;
-    let accessToken = this.decryptToken(
-      channel.credentials.encryptedAccessToken,
-    );
-
-    while (true) {
-      try {
-        response = await this.twitchApiService.getModerators(channel.id, {
-          clientId: this.clientId,
-          accessToken,
-        });
-
-        break;
-      } catch (e) {
-        if (e.response.status === 401) {
-          this.logger.log(
-            `getChannelMods: invalid access token. User: ${channel.login}`,
-          );
-
-          const updatedUser = await this.smartRefreshToken(channel);
-
-          if (updatedUser === null) throw new UnauthorizedException();
-
-          accessToken = this.decryptToken(
-            updatedUser.credentials.encryptedAccessToken,
-          );
-        } else {
-          this.logger.error(
-            `getChannelMods: unknown error. User: ${channel.login}`,
-            e.stack,
-          );
-
-          return new Set();
-        }
-      }
-    }
-
-    return new Set(response.data.data.map((u) => u.user_id));
-  }
-
-  private async getChannelVips(channel: string): Promise<Set<string>> {
-    /* const GET_VIPS_TIMEOUT = 5000;
-    const off = (f: any) => this.twitchChatService.chat.off(Commands.NOTICE, f);
-
-    const parseVips = (notice: any): Set<string> => {
-      if (notice.event === 'NO_VIPS') return new Set();
-      if (notice.event === 'VIPS_SUCCESS') {
-        const vips = notice.message
-          .slice(0, -1)
-          .split(':')[1]
-          .split(', ')
-          .map((n) => n.toLowerCase());
-        return new Set<string>(vips);
-      }
-      return new Set();
+    const roles: UserRoles = {
+      broadcaster: channel.id === user.id,
+      editor: null,
+      mod: null,
+      vip: null,
+      sub: null,
+      follower: null,
+      minutesFollowed: null,
+      subTier: null,
     };
 
-    return new Promise((resolve) => {
-      const fn = (notice: NoticeMessages) => {
-        if (notice.channel.slice(1) === channel) {
-          resolve(parseVips(notice));
-          off(fn);
-          return;
+    if (channel.areTokensValid) {
+      let channelToken = this.decryptToken(
+        channel.credentials.encryptedAccessToken,
+      );
+
+      for (const i of Array(2).keys()) {
+        if (!channelToken) break;
+
+        try {
+          const [editors, mods, vips] = await Promise.all(
+            getChannelTokenPromises(claims, channelToken),
+          );
+
+          roles.editor = editors.has(user.id);
+          roles.mod = mods.has(user.id);
+          roles.vip = vips.has(user.id);
+
+          break;
+        } catch (e) {
+          if (e instanceof UnauthorizedException) {
+            channelToken = await this.refreshAndStoreUserToken(channel);
+          } else {
+            channelToken = EMPTY_TOKEN;
+          }
         }
+      }
+    } else {
+      this.logger.log(`Invalid tokens: ${channel.login}`);
+    }
 
-        setTimeout(() => {
-          resolve(new Set());
-          off(fn);
-        }, GET_VIPS_TIMEOUT);
-      };
+    if (user.areTokensValid) {
+      let userToken = this.decryptToken(user.credentials.encryptedAccessToken);
 
-      this.twitchChatService.chat.on(Commands.NOTICE, fn);
-      this.twitchChatService.say(channel, '/vips');
-    }); */
+      for (const i of Array(2).keys()) {
+        if (!userToken) break;
 
-    return new Set();
+        try {
+          const [[isSub, subTier], [isFollower, minutesFollowed]] =
+            await Promise.all(getUserTokenPromises(claims, userToken));
+
+          roles.sub = isSub;
+          roles.subTier = subTier;
+          roles.follower = isFollower;
+          roles.minutesFollowed = minutesFollowed;
+
+          break;
+        } catch (e) {
+          if (e instanceof UnauthorizedException) {
+            userToken = await this.refreshAndStoreUserToken(user);
+          } else {
+            userToken = EMPTY_TOKEN;
+          }
+        }
+      }
+    } else {
+      this.logger.log(`Invalid tokens: ${user.login}`);
+    }
+
+    return roles;
+  }
+
+  private async getIsSub(
+    channelId: string,
+    userId: string,
+    userAccessToken: string,
+  ): Promise<IsSub> {
+    const key = UsersService.CACHE_KEY.subs(channelId, userId);
+    let isSub = await this.cache.get<IsSub>(key);
+    if (isSub) return isSub;
+
+    try {
+      const response = await this.twitchApi.checkUserSubscription(
+        { broadcaster_id: channelId, user_id: userId },
+        { clientId: this.clientId, accessToken: userAccessToken },
+      );
+
+      const tier = SUB_TIER[response.data.data[0].tier];
+
+      isSub = [true, tier];
+    } catch (e) {
+      if (e.response.status === HttpStatus.UNAUTHORIZED) {
+        throw new UnauthorizedException();
+      } else if (e.response.status === HttpStatus.NOT_FOUND) {
+        isSub = [false, null];
+      } else {
+        isSub = [null, null];
+      }
+    }
+
+    this.cache.set(key, isSub);
+    return isSub;
+  }
+
+  private async getIsFollower(
+    channelId: string,
+    userId: string,
+    userAccessToken: string,
+  ): Promise<IsFollower> {
+    const key = UsersService.CACHE_KEY.followers(channelId, userId);
+    let isFollower = await this.cache.get<IsFollower>(key);
+    if (isFollower) return isFollower;
+
+    try {
+      const response = await this.twitchApi.getUserFollows(
+        { from_id: userId, to_id: channelId },
+        { clientId: this.clientId, accessToken: userAccessToken },
+      );
+
+      if (response.data.total === 0) return [false, null];
+
+      const followedAt = new Date(response.data.data[0].followed_at);
+      const minutesFollowed = differenceInMinutes(new Date(), followedAt);
+
+      isFollower = [true, minutesFollowed];
+    } catch (e) {
+      if (e.response.status === HttpStatus.UNAUTHORIZED) {
+        throw new UnauthorizedException();
+      } else {
+        isFollower = [null, null];
+      }
+    }
+
+    this.cache.set(key, isFollower);
+    return isFollower;
+  }
+
+  private async getChannelEditors(
+    channelId: string,
+    channelAccessToken: string,
+  ): Promise<Set<string>> {
+    const key = UsersService.CACHE_KEY.editors(channelId);
+    let editors = await this.cache.get<Set<string>>(key);
+
+    try {
+      const response = await this.twitchApi.getChannelEditors(channelId, {
+        clientId: this.clientId,
+        accessToken: channelAccessToken,
+      });
+
+      editors = new Set(response.data.data.map((u) => u.user_id));
+    } catch (e) {
+      if (e.response.status === HttpStatus.UNAUTHORIZED) {
+        throw new UnauthorizedException();
+      } else {
+        editors = new Set();
+      }
+    }
+
+    this.cache.set(key, editors);
+    return editors;
+  }
+
+  private async getChannelMods(
+    channelId: string,
+    channelAccessToken: string,
+  ): Promise<Set<string>> {
+    const key = UsersService.CACHE_KEY.mods(channelId);
+    let mods = await this.cache.get<Set<string>>(key);
+    if (mods) return mods;
+
+    try {
+      const response = await this.twitchApi.getModerators(channelId, {
+        clientId: this.clientId,
+        accessToken: channelAccessToken,
+      });
+
+      mods = new Set(response.data.data.map((u) => u.user_id));
+    } catch (e) {
+      if (e.response.status === HttpStatus.UNAUTHORIZED) {
+        throw new UnauthorizedException();
+      } else {
+        mods = new Set();
+      }
+    }
+
+    this.cache.set(key, mods);
+    return mods;
+  }
+
+  private async getChannelVips(
+    channelId: string,
+    channelAccessToken: string,
+  ): Promise<Set<string>> {
+    const key = UsersService.CACHE_KEY.vips(channelId);
+    let vips = await this.cache.get<Set<string>>(key);
+
+    try {
+      const response = await this.twitchApi.getVips(channelId, {
+        clientId: this.clientId,
+        accessToken: channelAccessToken,
+      });
+
+      vips = new Set(response.data.data.map((u) => u.user_id));
+    } catch (e) {
+      if (e.response.status === HttpStatus.UNAUTHORIZED) {
+        throw new UnauthorizedException();
+      } else {
+        vips = new Set();
+      }
+    }
+
+    this.cache.set(key, vips);
+    return vips;
   }
 
   private async revokeToken(accessToken: string) {
     try {
-      return await this.twitchApiService.revokeToken({
+      return await this.twitchApi.revokeToken({
         token: accessToken,
         client_id: this.clientId,
       });
     } catch (e) {}
   }
 
-  private async smartRefreshToken(user: User): Promise<User | null> {
-    let mutex = this.mutexes.get(user.id);
-    let result: User;
+  private async refreshAndStoreUserToken(user: User): Promise<string> {
+    try {
+      const refreshToken = this.decryptToken(
+        user.credentials.encryptedRefreshToken,
+      );
+      const credentials = await this.refreshToken(refreshToken);
 
-    if (mutex) {
-      await mutex.waitForUnlock();
-    } else {
-      mutex = new Mutex();
-      this.mutexes.set(user.id, mutex);
-      const release = await mutex.acquire();
+      this.logger.log(`Success: ${user.login}`, 'refreshUserToken');
 
-      try {
-        result = await this.refreshToken(user);
-      } finally {
-        release();
-      }
+      this.store({
+        ...user,
+        credentials,
+        areTokensValid: true,
+      });
 
-      this.mutexes.delete(user.id);
+      return credentials.accessToken;
+    } catch (e) {
+      this.logger.error(`Failed: ${user.login}`, e.stack, 'refreshUserToken');
+
+      this.store({
+        ...user,
+        credentials: {
+          accessToken: EMPTY_TOKEN,
+          refreshToken: EMPTY_TOKEN,
+          scope: [],
+        },
+        areTokensValid: false,
+      });
+
+      return EMPTY_TOKEN;
     }
-
-    return result;
   }
 
-  /**
-   * Try to refresh tokens and write them to the db
-   * @returns null if refresh failed
-   * @returns the updated user if refresh succeeded
-   */
-  private async refreshToken(user: User): Promise<User | null> {
-    const refreshToken = this.decryptToken(
-      user.credentials.encryptedRefreshToken,
-    );
-    let response: AxiosResponse<RefreshTokenResponse>;
-
-    try {
-      response = await this.twitchApiService.refreshToken({
-        refresh_token: refreshToken,
-        client_id: this.clientId,
-        client_secret: this.clientSecret,
-      });
-    } catch (e) {
-      if (e.response.status === 400) {
-        await this.store({
-          ...user,
-          credentials: { accessToken: '', refreshToken: '', scope: [] },
-          areTokensValid: false,
-        });
-
-        this.logger.log(
-          `refreshToken: Failed. User: ${user.login}. ${e.response.data?.message}`,
-        );
-
-        return null;
-      }
-    }
-
-    const newUser = await this.store({
-      ...user,
-      credentials: {
-        accessToken: response.data.access_token,
-        refreshToken: response.data.refresh_token,
-        scope: response.data.scope,
-      },
-      areTokensValid: true,
+  private async refreshToken(
+    refreshToken: string,
+  ): Promise<StoreUserCredentials | null> {
+    const response = await this.twitchApi.refreshToken({
+      refresh_token: refreshToken,
+      client_id: this.clientId,
+      client_secret: this.clientSecret,
     });
 
-    this.logger.log(`refreshToken: Success. User: ${user.login}`);
-
-    return newUser;
+    return {
+      accessToken: response.data.access_token,
+      refreshToken: response.data.refresh_token,
+      scope: response.data.scope,
+    };
   }
 }

@@ -134,7 +134,7 @@ export class VotingOptionsService {
     if (params.viewer.canAddOptions) return true;
 
     if (
-      await this.usersService.checkUserTypes(voting.broadcaster, user, {
+      await this.usersService.isHasPermissions(voting.broadcaster, user, {
         mod: params.mod.canAddOptions,
         vip: params.vip.canAddOptions,
         sub: params.sub.canAddOptions,

@@ -37,8 +37,8 @@ export class UsersController {
     @Query('login') login: string,
     @Query('id') id: string,
   ): Promise<User> {
-    if (id) return this.usersService.getChannelById(id);
-    if (login) return this.usersService.getChannelByLogin(login);
+    if (id) return this.usersService.findById(id);
+    if (login) return this.usersService.findByLogin(login);
 
     throw new BadRequestException();
   }
@@ -66,6 +66,6 @@ export class UsersController {
     @Query('login') login: string,
     @Query('id') id: string,
   ): Promise<UserRoles> {
-    return this.usersService.getUserRoles(user.id, id, login);
+    return this.usersService.userRoles(user.id, id, login);
   }
 }
