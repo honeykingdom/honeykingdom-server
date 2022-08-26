@@ -5,9 +5,6 @@
   "author": "DmitryScaletta",
   "private": true,
   "license": "MIT",
-  "engines": {
-    "node": "16.x"
-  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
