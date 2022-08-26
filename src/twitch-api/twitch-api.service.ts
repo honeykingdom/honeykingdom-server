@@ -6,6 +6,7 @@ import {
   CheckUserSubscriptionParams,
   CheckUserSubscriptionResponse,
   GetChannelEditorsResponse,
+  GetVipsResponse,
   GetModeratorsResponse,
   GetUserFollowsParams,
   GetUserFollowsResponse,
@@ -71,6 +72,23 @@ export class TwitchApiService {
     return lastValueFrom(
       this.httpService.get<GetChannelEditorsResponse>(url, config),
     );
+  }
+
+  /**
+   * * 200 - OK
+   * * 400 - Bad Request
+   * * 401 - Unauthorized
+   *
+   * https://dev.twitch.tv/docs/api/reference#get-vips
+   */
+  getVips(
+    broadcasterId: string,
+    credentials: TwitchCredentials,
+  ): AxiosPromise<GetVipsResponse> {
+    const url = `https://api.twitch.tv/helix/channels/vips?broadcaster_id=${broadcasterId}`;
+    const config = { headers: this.getHeaders(credentials) };
+
+    return lastValueFrom(this.httpService.get<GetVipsResponse>(url, config));
   }
 
   /**

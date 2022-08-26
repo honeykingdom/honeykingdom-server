@@ -7,6 +7,7 @@ import { TwitchStrategyUser, TwitchUserResponse } from '../auth.interface';
 
 export const scope = [
   'channel:read:editors', // getChannelEditors
+  'channel:read:vips', // getChannelVips
   'user:read:subscriptions', // checkUserSubscription
   'moderation:read', // getModerators
 ];

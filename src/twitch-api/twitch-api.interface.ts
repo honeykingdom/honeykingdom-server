@@ -41,6 +41,18 @@ export type GetChannelEditorsResponse = {
   }[];
 };
 
+// GetVips
+export type GetVipsResponse = {
+  data: {
+    user_id: string;
+    user_name: string;
+    user_login: string;
+  }[];
+  pagination: {
+    cursor: string;
+  };
+};
+
 // GetModerators
 export type GetModeratorsResponse = {
   data: {
