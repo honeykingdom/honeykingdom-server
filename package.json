@@ -8,6 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
+    "heroku-postbuild": "nest build && yarn migration:run",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -22,9 +23,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "posttest:e2e": "docker-compose stop test-db",
     "test:db": "cd test/db && docker-compose down && docker-compose up -d && sleep 5",
-    "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
-    "migration:generate": "yarn build && typeorm migration:generate -n",
-    "migration:run": "typeorm migration:run",
+    "typeorm": "ts-node ./node_modules/typeorm/cli",
+    "migration:run": "yarn typeorm migration:run -- -d ./typeOrm.config.ts",
+    "migration:generate": "yarn typeorm -- -d ./typeOrm.config.ts migration:generate",
     "generate:kinopoisk-types": "npx openapi-typescript https://kinopoiskapiunofficial.tech/documentation/api/openapi.json --output src/kinopoisk-api/kinopoisk-api.generated.ts"
   },
   "dependencies": {
