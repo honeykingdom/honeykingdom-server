@@ -8,7 +8,7 @@ export default new DataSource({
   synchronize: false,
   logging: false,
   entities: ['dist/**/!(message).entity.js'],
-  migrations: ['dist/migrations/*.js'],
+  migrations: ['dist/src/migrations/*.js'],
   subscribers: ['src/subscriber/**/*{.ts,.js}'],
   migrationsTableName: '_typeorm_migrations',
 });
