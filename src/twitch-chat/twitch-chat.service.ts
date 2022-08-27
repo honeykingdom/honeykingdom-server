@@ -52,46 +52,32 @@ export class TwitchChatService implements OnModuleInit {
 
     this.on('register', () => {
       [...this.channels.keys()].forEach((channel) => {
-        try {
-          this.chat.join(channel);
-        } catch (e) {
-          this.logger.error(e);
-        }
+        this.chat
+          .join(channel)
+          .catch((e) => this.logger.error(`JOIN ${channel} ${e}`));
       });
     });
   }
 
   async onModuleInit() {
-    try {
-      await this.chat.connect();
-      this.logger.log('connected');
-    } catch (e) {
-      this.logger.error(e);
-    }
+    await this.chat.connect().catch((e) => this.logger.error(e));
+    this.logger.log('connected');
   }
 
   join(channel: string, moduleId: string) {
     this.initChannel(channel);
     this.channels.get(channel).add(moduleId);
     if (!this.chat?.isRegistered) return;
-    try {
-      return this.chat.join(channel);
-    } catch (e) {
-      this.logger.error(e);
-    }
+    return this.chat
+      .join(channel)
+      .catch((e) => this.logger.error(`JOIN ${channel} ${e}`));
   }
 
   part(channel: string, moduleId: string) {
     this.initChannel(channel);
     this.channels.get(channel).delete(moduleId);
     if (!this.chat?.isRegistered) return;
-    if (this.channels.get(channel).size === 0) {
-      try {
-        return this.chat.part(channel);
-      } catch (e) {
-        this.logger.error(e);
-      }
-    }
+    if (this.channels.get(channel).size === 0) return this.chat.part(channel);
   }
 
   private initChannel(channel: string) {
@@ -99,11 +85,9 @@ export class TwitchChatService implements OnModuleInit {
   }
 
   say(channel: string, message: string) {
-    try {
-      return this.chat.say(channel, message);
-    } catch (e) {
-      this.logger.error(e);
-    }
+    return this.chat
+      .say(channel, message)
+      .catch((e) => this.logger.error(`SAY ${channel} ${e}`));
   }
 
   on(event: 'message', listener: OnMessage);
