@@ -6,6 +6,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "postinstall": "patch-package",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "heroku-postbuild": "nest build && yarn migration:run",
@@ -56,6 +57,7 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "passport-twitch-strategy": "^2.2.0",
+    "patch-package": "^6.4.7",
     "pg": "^8.8.0",
     "ramda": "^0.28.0",
     "reflect-metadata": "^0.1.13",
