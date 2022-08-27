@@ -8,9 +8,6 @@ import { TwitchChatModuleOptions } from './twitch-chat-options.interface';
 import { OnMessage } from './twitch-chat.interface';
 import { TWITCH_CHAT_OPTIONS_TOKEN } from './twitch-chat.module-definition';
 
-// [2022-08-27T01:32:37.605Z] ❌ twurple:chat:irc ERROR Disconnected unexpectedly: [1006]
-// TODO: try to reconnect if disconnected
-
 @Injectable()
 export class TwitchChatService implements OnModuleInit {
   private readonly logger: Logger;
@@ -58,7 +55,7 @@ export class TwitchChatService implements OnModuleInit {
         try {
           this.chat.join(channel);
         } catch (e) {
-          console.error(e);
+          this.logger.error(e);
         }
       });
     });
@@ -77,14 +74,24 @@ export class TwitchChatService implements OnModuleInit {
     this.initChannel(channel);
     this.channels.get(channel).add(moduleId);
     if (!this.chat?.isRegistered) return;
-    return this.chat.join(channel);
+    try {
+      return this.chat.join(channel);
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   part(channel: string, moduleId: string) {
     this.initChannel(channel);
     this.channels.get(channel).delete(moduleId);
     if (!this.chat?.isRegistered) return;
-    if (this.channels.get(channel).size === 0) return this.chat.part(channel);
+    if (this.channels.get(channel).size === 0) {
+      try {
+        return this.chat.part(channel);
+      } catch (e) {
+        this.logger.error(e);
+      }
+    }
   }
 
   private initChannel(channel: string) {
@@ -92,7 +99,11 @@ export class TwitchChatService implements OnModuleInit {
   }
 
   say(channel: string, message: string) {
-    return this.chat.say(channel, message);
+    try {
+      return this.chat.say(channel, message);
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   on(event: 'message', listener: OnMessage);
