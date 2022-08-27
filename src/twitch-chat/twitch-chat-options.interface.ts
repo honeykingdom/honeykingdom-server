@@ -1,15 +1,7 @@
-import { ModuleMetadata } from '@nestjs/common/interfaces';
+import type { TokenData } from './twitch-chat.interface';
 
-export type TwitchChatModuleOptions = {
-  username?: string;
-  token?: string;
-};
-
-export interface TwitchChatModuleAsyncOptions
-  extends Pick<ModuleMetadata, 'imports'> {
-  name?: string;
-  useFactory?: (
-    ...args: any[]
-  ) => Promise<TwitchChatModuleOptions> | TwitchChatModuleOptions;
-  inject?: any[];
+export interface TwitchChatModuleOptions {
+  clientId?: string;
+  clientSecret?: string;
+  tokenData?: TokenData;
 }

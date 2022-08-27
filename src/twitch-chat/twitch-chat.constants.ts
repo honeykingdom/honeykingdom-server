@@ -1,5 +1,12 @@
-export const TWITCH_CHAT_CONNECTION = 'TwitchChatConnection';
-export const TWITCH_CHAT_MODULE = 'TwitchChatModule';
+import type { TokenData } from './twitch-chat.interface';
+
+export const EMPTY_TOKEN_DATA: TokenData = {
+  accessToken: '',
+  refreshToken: '',
+  scope: [],
+  expiresIn: 0,
+  obtainmentTimestamp: 0,
+};
 
 /**
  * Tier 1: 0-96

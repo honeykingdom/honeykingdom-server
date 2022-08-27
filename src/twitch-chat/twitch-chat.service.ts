@@ -1,52 +1,123 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Chat, ChatEvents, Commands, PrivateMessage } from 'twitch-js';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AuthProvider, RefreshingAuthProvider } from '@twurple/auth';
+import { ChatClient } from '@twurple/chat';
+import { Repository } from 'typeorm';
+import { TwitchChatOptions } from './entities/twitch-chat-options.entity';
+import { TwitchChatModuleOptions } from './twitch-chat-options.interface';
+import { OnMessage } from './twitch-chat.interface';
+import { TWITCH_CHAT_OPTIONS_TOKEN } from './twitch-chat.module-definition';
+
+// [2022-08-27T01:32:37.605Z] ❌ twurple:chat:irc ERROR Disconnected unexpectedly: [1006]
+// TODO: try to reconnect if disconnected
 
 @Injectable()
-export class TwitchChatService {
+export class TwitchChatService implements OnModuleInit {
   private readonly logger: Logger;
-  /** Map<channel: string, connections: Set<string>> */
+
   private readonly channels = new Map<string, Set<string>>();
 
-  constructor(readonly chat: Chat, private readonly connectionName: string) {
-    this.logger = new Logger(`TwitchChat: ${connectionName}`);
+  private readonly chat: ChatClient;
 
-    // chat.on(Commands.JOIN, ({ channel }) => this.logger.log(`join ${channel}`));
-    // chat.on(Commands.PART, ({ channel }) =>
-    //   this.logger.log(`part: ${channel}`),
-    // );
-  }
+  constructor(
+    @Inject(TWITCH_CHAT_OPTIONS_TOKEN) private options: TwitchChatModuleOptions,
+    @InjectRepository(TwitchChatOptions)
+    private readonly twitchChatOptionsRepo: Repository<TwitchChatOptions>,
+  ) {
+    const { clientId, clientSecret, tokenData } = options;
+    let authProvider: AuthProvider;
 
-  joinChannel(channel: string, moduleId: string) {
-    if (!this.channels.has(channel)) {
-      this.channels.set(channel, new Set());
+    const isAnonymous = !tokenData;
+
+    if (!isAnonymous) {
+      authProvider = new RefreshingAuthProvider(
+        {
+          clientId,
+          clientSecret,
+          onRefresh: (newTokenData) =>
+            this.twitchChatOptionsRepo.update(clientId, {
+              tokenData: newTokenData,
+            }),
+        },
+        options.tokenData,
+      );
     }
 
-    this.channels.get(channel).add(moduleId);
+    this.logger = new Logger(
+      `TwitchChat: ${isAnonymous ? 'Anonymous' : 'Main'}`,
+    );
 
+    this.chat = new ChatClient({ authProvider });
+
+    this.chat.onAnyMessage((msg) => console.log((msg as any)._raw));
+
+    setTimeout(() => {
+      this.chat.reconnect();
+    }, 10000);
+
+    this.on('register', () => {
+      [...this.channels.keys()].forEach((channel) => this.chat.join(channel));
+    });
+  }
+
+  async onModuleInit() {
+    await this.chat.connect();
+    this.logger.log('connected');
+  }
+
+  join(channel: string, moduleId: string) {
+    this.initChannel(channel);
+    this.channels.get(channel).add(moduleId);
+    if (!this.chat?.isRegistered) return;
     return this.chat.join(channel);
   }
 
-  partChannel(channel: string, moduleId: string) {
-    if (!this.channels.has(channel)) {
-      this.channels.set(channel, new Set());
-    }
-
+  part(channel: string, moduleId: string) {
+    this.initChannel(channel);
     this.channels.get(channel).delete(moduleId);
+    if (!this.chat?.isRegistered) return;
+    if (this.channels.get(channel).size === 0) return this.chat.part(channel);
+  }
 
-    if (this.channels.get(channel).size === 0) {
-      return this.chat.part(channel);
-    }
+  private initChannel(channel: string) {
+    if (!this.channels.has(channel)) this.channels.set(channel, new Set());
   }
 
   say(channel: string, message: string) {
-    this.chat.say(channel, message);
+    return this.chat.say(channel, message);
   }
 
-  addChatListener(listener: (message: PrivateMessage) => void) {
-    this.chat.on(Commands.PRIVATE_MESSAGE, listener);
+  on(event: 'message', listener: OnMessage);
+  on(event: 'connect', listener: () => void);
+  on(event: 'register', listener: () => void);
+  on(event: any, listener: any) {
+    this.chat.addListener(this.getEvent(event), listener);
   }
 
-  removeChatListener(listener: (message: PrivateMessage) => void) {
-    this.chat.off(Commands.PRIVATE_MESSAGE, listener);
+  off(event: 'message', listener: OnMessage);
+  off(event: 'connect', listener: () => void);
+  off(event: 'register', listener: () => void);
+  off(event: any, listener: any) {
+    this.chat.removeListener(this.getEvent(event), listener);
+  }
+
+  once(event: 'message', listener: OnMessage);
+  once(event: 'connect', listener: () => void);
+  once(event: 'register', listener: () => void);
+  once(event: any, listener: any) {
+    const fn = (...args: any) => {
+      this.chat.removeListener(this.getEvent(event), fn);
+      listener(args);
+    };
+    this.chat.addListener(this.getEvent(event), fn);
+  }
+
+  private getEvent(event: string): any {
+    const events = {
+      message: this.chat.onMessage,
+      connect: this.chat.onConnect,
+      register: this.chat.onRegister,
+    };
+    return events[event];
   }
 }
