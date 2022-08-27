@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { User } from './user.entity';
 
 const USER_CREDENTIALS_TABLE_NAME = 'hv_user_credentials';
@@ -7,8 +7,10 @@ const USER_CREDENTIALS_TABLE_NAME = 'hv_user_credentials';
 export class UserCredentials {
   static readonly tableName = USER_CREDENTIALS_TABLE_NAME;
 
+  @PrimaryColumn()
+  userId: number;
+
   @OneToOne(() => User, (user) => user.credentials, {
-    primary: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn()

@@ -170,7 +170,10 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
   ): Promise<ChatGoal> {
     const [canManage, chatGoal] = await Promise.all([
       this.canManage(goalId, initiatorId),
-      this.goalRepo.findOne(goalId, { relations: ['broadcaster'] }),
+      this.goalRepo.findOne({
+        where: { broadcasterId: goalId },
+        relations: { broadcaster: true },
+      }),
     ]);
 
     if (!canManage || !chatGoal) throw new ForbiddenException();
@@ -423,10 +426,10 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
   ): Promise<boolean> {
     if (broadcasterId === initiatorId) return true;
 
-    const options = { relations: ['credentials'] };
+    const relations = { credentials: true };
     const [broadcaster, initiator] = await Promise.all([
-      this.usersService.findOne(broadcasterId, options),
-      this.usersService.findOne(initiatorId, options),
+      this.usersService.findOne({ where: { id: broadcasterId }, relations }),
+      this.usersService.findOne({ where: { id: initiatorId }, relations }),
     ]);
 
     if (!broadcaster || !initiator) return false;

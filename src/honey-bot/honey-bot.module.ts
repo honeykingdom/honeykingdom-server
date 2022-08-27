@@ -26,7 +26,7 @@ import { HoneyBotService } from './honey-bot.service';
           infer: true,
         });
 
-        const chatOptions = await twitchChatOptionsRepo.findOne(clientId);
+        const chatOptions = await twitchChatOptionsRepo.findOneBy({ clientId });
 
         if (!chatOptions) {
           await twitchChatOptionsRepo.save({

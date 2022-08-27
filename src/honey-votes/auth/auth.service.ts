@@ -97,7 +97,9 @@ export class AuthService {
       throw new BadRequestException();
     }
 
-    const user = await this.usersService.findOne(refreshTokenPayload.sub);
+    const user = await this.usersService.findOneBy({
+      id: refreshTokenPayload.sub,
+    });
 
     if (!user) throw new BadRequestException();
 

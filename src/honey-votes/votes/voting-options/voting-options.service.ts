@@ -48,9 +48,13 @@ export class VotingOptionsService {
     if (!data[type]) throw new BadRequestException();
 
     const [author, voting] = await Promise.all([
-      this.usersService.findOne(userId, { relations: ['credentials'] }),
-      this.votingRepo.findOne(votingId, {
-        relations: ['broadcaster', 'broadcaster.credentials'],
+      this.usersService.findOne({
+        where: { id: userId },
+        relations: { credentials: true },
+      }),
+      this.votingRepo.findOne({
+        where: { id: votingId },
+        relations: { broadcaster: { credentials: true } },
       }),
     ]);
     const hasAccess = await this.canCreateVotingOption(author, voting, type);
@@ -109,9 +113,9 @@ export class VotingOptionsService {
     if (isEditor) return true;
 
     const [votingOptionsCount, votingOptionsByUserCount] = await Promise.all([
-      this.votingOptionRepo.count({ where: { voting: voting } }),
+      this.votingOptionRepo.count({ where: { voting: { id: voting.id } } }),
       this.votingOptionRepo.count({
-        where: { voting: voting, author: user },
+        where: { voting: { id: voting.id }, author: { id: user.id } },
       }),
     ]);
 
@@ -155,13 +159,13 @@ export class VotingOptionsService {
     votingOptionId: number,
   ): Promise<boolean> {
     const [user, votingOption] = await Promise.all([
-      this.usersService.findOne(userId, { relations: ['credentials'] }),
-      this.votingOptionRepo.findOne(votingOptionId, {
-        relations: [
-          'voting',
-          'voting.broadcaster',
-          'voting.broadcaster.credentials',
-        ],
+      this.usersService.findOne({
+        where: { id: userId },
+        relations: { credentials: true },
+      }),
+      this.votingOptionRepo.findOne({
+        where: { id: votingOptionId },
+        relations: { voting: { broadcaster: { credentials: true } } },
       }),
     ]);
 

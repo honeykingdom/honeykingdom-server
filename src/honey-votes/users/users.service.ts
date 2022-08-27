@@ -11,7 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { FindConditions, FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
 import { differenceInMinutes } from 'date-fns';
 import { Config } from '../../config/config.interface';
 import { TwitchApiService } from '../../twitch-api/twitch-api.service';
@@ -113,7 +113,7 @@ export class UsersService {
   }
 
   async findByLogin(login: string): Promise<User> {
-    const channel = await this.userRepo.findOne({ where: { login } });
+    const channel = await this.userRepo.findOneBy({ login });
 
     if (!channel) throw new NotFoundException();
 
@@ -121,33 +121,36 @@ export class UsersService {
   }
 
   async findById(id: string): Promise<User> {
-    const channel = await this.userRepo.findOne(id);
+    const channel = await this.userRepo.findOneBy({ id });
 
     if (!channel) throw new NotFoundException();
 
     return channel;
   }
 
-  async findOne(
-    userId: string,
-    options?: FindOneOptions<User>,
-  ): Promise<User | null> {
-    const user = await this.userRepo.findOne(userId, options);
+  async findOne(options: FindOneOptions<User>): Promise<User | null> {
+    const user = await this.userRepo.findOne(options);
 
     if (!user) return null;
 
     return user;
   }
 
-  async findOneOrFail(
-    userId: string,
-    options?: FindOneOptions<User>,
-  ): Promise<User> {
-    return this.userRepo.findOneOrFail(userId, options);
+  async findOneBy(
+    where: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+  ): Promise<User | null> {
+    const user = await this.userRepo.findOneBy(where);
+
+    if (!user) return null;
+
+    return user;
   }
 
   async store(user: StoreUserInput) {
-    const dbUser = await this.findOne(user.id, { relations: ['credentials'] });
+    const dbUser = await this.findOne({
+      where: { id: user.id },
+      relations: { credentials: true },
+    });
 
     if (dbUser?.credentials?.encryptedAccessToken) {
       const accessToken = this.decryptToken(
@@ -197,14 +200,14 @@ export class UsersService {
       throw new BadRequestException();
     }
 
-    const conditions: FindConditions<User> = {};
+    const where: FindOneOptions<User>['where'] = {};
 
-    if (channelId) conditions.id = channelId;
-    if (channelLogin) conditions.login = channelLogin;
+    if (channelId) where.id = channelId;
+    if (channelLogin) where.login = channelLogin;
 
     const [user, channel] = await Promise.all([
-      this.findOne(userId, { relations: ['credentials'] }),
-      this.userRepo.findOne(conditions, { relations: ['credentials'] }),
+      this.findOne({ where: { id: userId }, relations: { credentials: true } }),
+      this.userRepo.findOne({ where, relations: { credentials: true } }),
     ]);
 
     if (!user || !channel) throw new NotFoundException();

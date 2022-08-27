@@ -64,12 +64,12 @@ export class ChatVotesService implements OnModuleInit {
     let broadcaster: User;
 
     if (broadcasterId === initiatorId) {
-      broadcaster = await this.usersService.findOne(broadcasterId);
+      broadcaster = await this.usersService.findOneBy({ id: broadcasterId });
     } else {
-      const options = { relations: ['credentials'] };
+      const relations = { credentials: true };
       const [channel, initiator] = await Promise.all([
-        this.usersService.findOne(broadcasterId, options),
-        this.usersService.findOne(initiatorId, options),
+        this.usersService.findOne({ where: { id: broadcasterId }, relations }),
+        this.usersService.findOne({ where: { id: initiatorId }, relations }),
       ]);
 
       const hasAccess = await this.canCreateChatVoting(channel, initiator);
@@ -205,9 +205,13 @@ export class ChatVotesService implements OnModuleInit {
     chatVotingId: string,
   ): Promise<[hasAccess: boolean, initiator?: User, chatVoting?: ChatVoting]> {
     const [initiator, chatVoting] = await Promise.all([
-      this.usersService.findOne(initiatorId, { relations: ['credentials'] }),
-      this.chatVotingRepo.findOne(chatVotingId, {
-        relations: ['broadcaster', 'broadcaster.credentials'],
+      this.usersService.findOne({
+        where: { id: initiatorId },
+        relations: { credentials: true },
+      }),
+      this.chatVotingRepo.findOne({
+        where: { broadcasterId: chatVotingId },
+        relations: { broadcaster: { credentials: true } },
       }),
     ]);
 
@@ -229,8 +233,14 @@ export class ChatVotesService implements OnModuleInit {
     if (initiatorId === broadcasterId) return true;
 
     const [initiator, broadcaster] = await Promise.all([
-      this.usersService.findOne(initiatorId, { relations: ['credentials'] }),
-      this.usersService.findOne(broadcasterId, { relations: ['credentials'] }),
+      this.usersService.findOne({
+        where: { id: initiatorId },
+        relations: { credentials: true },
+      }),
+      this.usersService.findOne({
+        where: { id: broadcasterId },
+        relations: { credentials: true },
+      }),
     ]);
 
     return this.usersService.isEditor(broadcaster, initiator);

@@ -37,13 +37,13 @@ export class VotesService {
     { votingOptionId }: CreateVoteDto,
   ): Promise<void> {
     const [user, votingOption] = await Promise.all([
-      this.usersService.findOne(userId, { relations: ['credentials'] }),
-      this.votingOptionRepo.findOne(votingOptionId, {
-        relations: [
-          'voting',
-          'voting.broadcaster',
-          'voting.broadcaster.credentials',
-        ],
+      this.usersService.findOne({
+        where: { id: userId },
+        relations: { credentials: true },
+      }),
+      this.votingOptionRepo.findOne({
+        where: { id: votingOptionId },
+        relations: { voting: { broadcaster: { credentials: true } } },
       }),
     ]);
 
@@ -65,7 +65,7 @@ export class VotesService {
     { votingOptionId }: DeleteVoteDto,
   ): Promise<void> {
     const [user, vote] = await Promise.all([
-      this.usersService.findOne(userId),
+      this.usersService.findOneBy({ id: userId }),
       this.voteRepo.findOne({
         where: {
           author: { id: userId },

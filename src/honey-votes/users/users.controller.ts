@@ -49,7 +49,7 @@ export class UsersController {
   @ApiOkResponse({ description: 'OK', type: User })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   me(@PassportUser() user: JwtStrategyUser): Promise<User> {
-    return this.usersService.findOne(user.id);
+    return this.usersService.findOneBy({ id: user.id });
   }
 
   @Get('/users/me/roles')

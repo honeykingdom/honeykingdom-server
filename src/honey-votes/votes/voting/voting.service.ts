@@ -64,9 +64,13 @@ export class VotingService {
     data: UpdateVotingDto,
   ): Promise<Voting> {
     const [user, voting] = await Promise.all([
-      this.usersService.findOne(userId, { relations: ['credentials'] }),
-      this.votingRepo.findOne(votingId, {
-        relations: ['broadcaster', 'broadcaster.credentials'],
+      this.usersService.findOne({
+        where: { id: userId },
+        relations: { credentials: true },
+      }),
+      this.votingRepo.findOne({
+        where: { id: votingId },
+        relations: { broadcaster: { credentials: true } },
       }),
     ]);
     const hasAccess = await this.canUpdateOrDeleteVoting(user, voting);
@@ -78,9 +82,13 @@ export class VotingService {
 
   async deleteVoting(userId: string, votingId: number): Promise<void> {
     const [user, voting] = await Promise.all([
-      this.usersService.findOne(userId, { relations: ['credentials'] }),
-      this.votingRepo.findOne(votingId, {
-        relations: ['broadcaster', 'broadcaster.credentials'],
+      this.usersService.findOne({
+        where: { id: userId },
+        relations: { credentials: true },
+      }),
+      this.votingRepo.findOne({
+        where: { id: votingId },
+        relations: { broadcaster: { credentials: true } },
       }),
     ]);
     const hasAccess = await this.canUpdateOrDeleteVoting(user, voting);
@@ -95,16 +103,23 @@ export class VotingService {
     channelId: string,
   ): Promise<boolean> {
     if (userId === channelId) {
-      const user = await this.usersService.findOne(userId, {
-        relations: ['credentials'],
+      const user = await this.usersService.findOne({
+        where: { id: userId },
+        relations: { credentials: true },
       });
 
       return !!user;
     }
 
     const [user, channel] = await Promise.all([
-      this.usersService.findOne(userId, { relations: ['credentials'] }),
-      this.usersService.findOne(channelId, { relations: ['credentials'] }),
+      this.usersService.findOne({
+        where: { id: userId },
+        relations: { credentials: true },
+      }),
+      this.usersService.findOne({
+        where: { id: channelId },
+        relations: { credentials: true },
+      }),
     ]);
 
     if (!user || !channel) return false;

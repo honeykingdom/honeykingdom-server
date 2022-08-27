@@ -117,7 +117,7 @@ export class IgdbRequestService {
   }
 
   private async getOptions() {
-    let options: Options = await this.igdbApiOptionsRepo.findOne(1);
+    let options: Options = await this.igdbApiOptionsRepo.findOneBy({ id: 1 });
 
     if (!options) {
       options = { accessToken: '', expiresIn: 0 };
