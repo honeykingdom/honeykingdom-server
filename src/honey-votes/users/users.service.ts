@@ -283,7 +283,7 @@ export class UsersService {
         channel.credentials.encryptedAccessToken,
       );
 
-      for (const i of Array(2).keys()) {
+      for await (const i of Array(2).keys()) {
         if (!channelToken) break;
 
         try {
@@ -311,7 +311,7 @@ export class UsersService {
     if (user.areTokensValid) {
       let userToken = this.decryptToken(user.credentials.encryptedAccessToken);
 
-      for (const i of Array(2).keys()) {
+      for await (const i of Array(2).keys()) {
         if (!userToken) break;
 
         try {
@@ -517,7 +517,7 @@ export class UsersService {
       );
       const credentials = await this.refreshToken(refreshToken);
 
-      this.logger.log(`Success: ${user.login}`, 'refreshUserToken');
+      this.logger.log(`refreshUserToken success: ${user.login}`);
 
       this.store({
         ...user,
@@ -527,7 +527,7 @@ export class UsersService {
 
       return credentials.accessToken;
     } catch (e) {
-      this.logger.error(`Failed: ${user.login}`, e.stack, 'refreshUserToken');
+      this.logger.error(`refreshUserToken failed: ${user.login}`, e.stack);
 
       this.store({
         ...user,
