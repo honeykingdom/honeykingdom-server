@@ -49,20 +49,28 @@ export class TwitchChatService implements OnModuleInit {
 
     this.chat = new ChatClient({ authProvider });
 
-    this.chat.onAnyMessage((msg) => console.log((msg as any)._raw));
-
-    setTimeout(() => {
-      this.chat.reconnect();
-    }, 10000);
+    // this.chat.onAnyMessage((msg) => console.log((msg as any)._raw));
+    this.chat.onJoin((channel) => this.logger.log(`JOIN ${channel}`));
+    this.chat.onPart((channel) => this.logger.log(`PART ${channel}`));
 
     this.on('register', () => {
-      [...this.channels.keys()].forEach((channel) => this.chat.join(channel));
+      [...this.channels.keys()].forEach((channel) => {
+        try {
+          this.chat.join(channel);
+        } catch (e) {
+          console.error(e);
+        }
+      });
     });
   }
 
   async onModuleInit() {
-    await this.chat.connect();
-    this.logger.log('connected');
+    try {
+      await this.chat.connect();
+      this.logger.log('connected');
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   join(channel: string, moduleId: string) {
