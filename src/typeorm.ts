@@ -6,6 +6,7 @@ import { honeyVotesEntities } from './honey-votes/honey-votes.entities';
 import { IgdbApiOptions } from './igdb-api/entities/igdb-api-options.entity';
 import { Message } from './recent-messages/entities/message.entity';
 import { TelegramChannel } from './telegram-api/entities/telegram-channel.entity';
+import { TwitchChatOptions } from './twitch-chat/entities/twitch-chat-options.entity';
 
 export const typeOrmMongoDbModule = TypeOrmModule.forRootAsync({
   name: MONGODB_CONNECTION,
@@ -25,7 +26,12 @@ export const typeOrmPostgresModule = TypeOrmModule.forRootAsync({
   useFactory: (configService: ConfigService<Config>) => ({
     type: 'postgres',
     url: configService.get('POSTGRES_URL', { infer: true }),
-    entities: [...honeyVotesEntities, TelegramChannel, IgdbApiOptions],
+    entities: [
+      ...honeyVotesEntities,
+      TelegramChannel,
+      IgdbApiOptions,
+      TwitchChatOptions,
+    ],
     synchronize: false,
     dropSchema: configService.get('NODE_ENV', { infer: true }) === 'test',
     logging: configService.get('NODE_ENV', { infer: true }) === 'development',

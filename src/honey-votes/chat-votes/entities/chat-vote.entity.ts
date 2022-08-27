@@ -8,17 +8,19 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserStateTags } from 'twitch-js';
 import { ChatVoting } from './chat-voting.entity';
 import {
   CHAT_VOTE_CONTENT_MAX_LENGTH,
   CHAT_VOTE_TABLE_NAME,
 } from '../chat-votes.constants';
 
-type Tags = Pick<
-  UserStateTags,
-  'badgeInfo' | 'badges' | 'color' | 'displayName' | 'emotes'
->;
+type Tags = {
+  badgeInfo: Record<string, string>;
+  badges: Record<string, string>;
+  color?: string;
+  displayName?: string;
+  emoteOffsets: Record<string, string[]>;
+};
 
 @Entity(CHAT_VOTE_TABLE_NAME)
 export class ChatVote {

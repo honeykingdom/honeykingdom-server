@@ -9,10 +9,6 @@ import { HoneyBotModule } from './honey-bot/honey-bot.module';
 import { HoneyVotesModule } from './honey-votes/honey-votes.module';
 import { InstagramModule } from './instagram/instagram.module';
 import { typeOrmMongoDbModule, typeOrmPostgresModule } from './typeorm';
-import {
-  twitchChatAnonymousModule,
-  twitchChatHoneyKingdomModule,
-} from './twitch-chat';
 import { Formula1Module } from './formula1/formula1.module';
 
 @Module({
@@ -22,10 +18,8 @@ import { Formula1Module } from './formula1/formula1.module';
     ScheduleModule.forRoot(),
     typeOrmMongoDbModule,
     typeOrmPostgresModule,
-    twitchChatAnonymousModule,
-    // twitchChatHoneyKingdomModule,
     RecentMessagesModule,
-    // HoneyBotModule,
+    HoneyBotModule,
     HoneyVotesModule,
     InstagramModule,
     Formula1Module,

@@ -1,14 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
-import { PrivateMessage } from 'twitch-js';
-import { TWITCH_CHAT_HONEYKINGDOM } from '../app.constants';
 import { Config } from '../config/config.interface';
 import { LinkShortenerService } from '../link-shortener/link-shortener.service';
 import { TelegramPost } from '../telegram-api/telegram-api.interface';
 import { TelegramApiService } from '../telegram-api/telegram-api.service';
+import { OnMessage } from '../twitch-chat/twitch-chat.interface';
 import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
-import { InjectChat } from '../twitch-chat/twitch-chat.decorators';
 
 type QueuedMessage = {
   channel: string;
@@ -17,6 +15,7 @@ type QueuedMessage = {
 
 @Injectable()
 export class HoneyBotService {
+  private readonly logger = new Logger(HoneyBotService.name);
   private readonly channels: Set<string> = new Set();
   private readonly telegramChannels: Map<string, string[]> = new Map();
 
@@ -25,15 +24,19 @@ export class HoneyBotService {
 
   constructor(
     private readonly configService: ConfigService<Config>,
-    @InjectChat(TWITCH_CHAT_HONEYKINGDOM)
-    private readonly twitchChatService: TwitchChatService,
+    private readonly twitchChat: TwitchChatService,
     private readonly telegramApiService: TelegramApiService,
     private readonly linkShortenerService: LinkShortenerService,
   ) {
     this.configService
-      .get('HONEY_BOT_CHANNELS')
+      .get('HONEY_BOT_CHANNELS', { infer: true })
       .split(';')
-      .forEach((channel) => this.channels.add(channel));
+      .forEach((channel) => {
+        this.channels.add(channel);
+        this.twitchChat.join(channel, HoneyBotService.name);
+      });
+
+    this.logger.log(`[Options] channels: ${[...this.channels].join(', ')}`);
 
     // const telegramToChat = JSON.parse(
     //   this.configService.get('HONEY_BOT_TELEGRAM_TO_CHAT'),
@@ -43,47 +46,43 @@ export class HoneyBotService {
     //   this.telegramChannels.set(channel, telegramChannels),
     // );
 
-    this.channels.forEach((channel) => this.watchChannel(channel));
-
     setInterval(() => {
       this.sendMessageInQueue();
     }, this.sendMessageInterval);
 
-    this.twitchChatService.addChatListener((message) =>
-      this.handleMessage(message),
-    );
+    this.twitchChat.on('message', (...args) => this.handleMessage(...args));
   }
 
-  private watchChannel(channel: string) {
-    this.twitchChatService.joinChannel(channel, HoneyBotService.name);
+  // private watchChannel(channel: string) {
+  //   this.twitchChat.join(channel, HoneyBotService.name);
 
-    const telegramChannels = this.telegramChannels.get(channel) || [];
+  //   const telegramChannels = this.telegramChannels.get(channel) || [];
 
-    telegramChannels.forEach((telegramChannel) =>
-      this.telegramApiService.addChannel(telegramChannel),
-    );
+  //   telegramChannels.forEach((telegramChannel) =>
+  //     this.telegramApiService.addChannel(telegramChannel),
+  //   );
 
-    this.telegramApiService.on('post', async (post) => {
-      if (!telegramChannels.includes(post.channel.name)) return;
+  //   this.telegramApiService.on('post', async (post) => {
+  //     if (!telegramChannels.includes(post.channel.name)) return;
 
-      const message = await this.formatTelegramMessage(post);
+  //     const message = await this.formatTelegramMessage(post);
 
-      this.messagesQueue.push({ channel, message });
-    });
-  }
+  //     this.messagesQueue.push({ channel, message });
+  //   });
+  // }
 
-  private handleMessage({ channel: channelRaw, message }: PrivateMessage) {
+  private handleMessage: OnMessage = (channelRaw, user, message) => {
     const channel = channelRaw.slice(1);
 
     if (!this.channels.has(channel)) return;
 
     if (['!чат', '!chat'].includes(message.toLowerCase())) {
-      this.twitchChatService.say(
+      this.twitchChat.say(
         channel,
         `https://honeykingdom.github.io/chat/#${channel}`,
       );
     }
-  }
+  };
 
   private sendMessageInQueue() {
     const queuedMessage = this.messagesQueue.shift();
@@ -92,7 +91,7 @@ export class HoneyBotService {
 
     const { channel, message } = queuedMessage;
 
-    this.twitchChatService.say(channel, message);
+    this.twitchChat.say(channel, message);
   }
 
   private async formatTelegramMessage(post: TelegramPost) {

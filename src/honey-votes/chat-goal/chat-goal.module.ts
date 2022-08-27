@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TWITCH_CHAT_ANONYMOUS } from '../../app.constants';
 import { TwitchChatModule } from '../../twitch-chat/twitch-chat.module';
 import { UsersModule } from '../users/users.module';
 import { ChatGoalService } from './chat-goal.service';
@@ -14,7 +13,7 @@ import { ChatGoalData } from './entities/chat-goal-data.entity';
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([ChatGoal, ChatGoalEvent, ChatGoalData]),
-    TwitchChatModule.forFeature(TWITCH_CHAT_ANONYMOUS),
+    TwitchChatModule.register({}),
     UsersModule,
   ],
   providers: [ChatGoalService],

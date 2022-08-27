@@ -7,9 +7,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
+import { ChatUser } from '@twurple/chat/lib';
 import { TwitchChatService } from '../../twitch-chat/twitch-chat.service';
-import { InjectChat } from '../../twitch-chat/twitch-chat.decorators';
-import { TWITCH_CHAT_ANONYMOUS } from '../../app.constants';
 import { ChatGoal } from './entities/chat-goal.entity';
 import { ChatGoalData } from './entities/chat-goal-data.entity';
 import { UsersService } from '../users/users.service';
@@ -21,12 +20,12 @@ import {
   ChatGoalEventType,
   ChatGoalStatus,
 } from './chat-goal.interface';
-import { PrivateMessage } from 'twitch-js';
 import { ChatGoalEvent } from './entities/chat-goal-event.entity';
 import {
   CHAT_GOAL_OPTIONS_DEFAULT,
   CHAT_GOAL_STATE_DEFAULT,
 } from './chat-goal.constants';
+import { OnMessage } from '../../twitch-chat/twitch-chat.interface';
 
 type GoalState = {
   options: ChatGoalOptions;
@@ -38,8 +37,7 @@ type GoalState = {
 @Injectable()
 export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
   constructor(
-    @InjectChat(TWITCH_CHAT_ANONYMOUS)
-    private readonly twitchChatService: TwitchChatService,
+    private readonly twitchChat: TwitchChatService,
     @InjectRepository(ChatGoal)
     private readonly goalRepo: Repository<ChatGoal>,
     @InjectRepository(ChatGoalEvent)
@@ -105,16 +103,11 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
       this.goals.set(broadcaster.id, goalState);
 
       if (listening) {
-        this.twitchChatService.joinChannel(
-          broadcaster.login,
-          ChatGoalService.name,
-        );
+        this.twitchChat.join(broadcaster.login, ChatGoalService.name);
       }
     });
 
-    this.twitchChatService.addChatListener((message) =>
-      this.handleChatMessage(message),
-    );
+    this.twitchChat.on('message', (...args) => this.handleChatMessage(...args));
   }
 
   async onModuleDestroy() {
@@ -188,15 +181,9 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     if (data.listening !== undefined) {
       if (data.listening) {
-        this.twitchChatService.joinChannel(
-          chatGoal.broadcaster.login,
-          ChatGoalService.name,
-        );
+        this.twitchChat.join(chatGoal.broadcaster.login, ChatGoalService.name);
       } else {
-        this.twitchChatService.partChannel(
-          chatGoal.broadcaster.login,
-          ChatGoalService.name,
-        );
+        this.twitchChat.part(chatGoal.broadcaster.login, ChatGoalService.name);
       }
     }
 
@@ -385,14 +372,11 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     await this.goalRepo.update(goalId, { ...stateChanges, ...optionsChanges });
   }
 
-  private handleChatMessage(privateMessage: PrivateMessage) {
-    const {
-      message,
-      username,
-      tags: { displayName, roomId, userId },
-    } = privateMessage;
+  private handleChatMessage: OnMessage = (channel, username, message, msg) => {
+    const { displayName, userId } = msg.userInfo;
+    const { channelId } = msg;
 
-    const goal = this.goals.get(roomId);
+    const goal = this.goals.get(channelId);
 
     if (!goal || goal.state.status !== ChatGoalStatus.VotingRunning) return;
 
@@ -404,7 +388,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     if (!type) return;
 
-    if (!ChatGoalService.canVote(goal, privateMessage, type)) return;
+    if (!ChatGoalService.canVote(goal, msg.userInfo, type)) return;
 
     goal.votesCountByUser[userId] = (goal.votesCountByUser[userId] || 0) + 1;
 
@@ -422,8 +406,8 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     }
 
     Promise.all([
-      this.updateGoalState(roomId, changes),
-      this.sendVoteEvent(roomId, {
+      this.updateGoalState(channelId, changes),
+      this.sendVoteEvent(channelId, {
         type,
         userId,
         userLogin: username,
@@ -431,7 +415,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
         votesCount: goal.votesCountByUser[userId],
       }),
     ]);
-  }
+  };
 
   private async canManage(
     broadcasterId: string,
@@ -457,16 +441,17 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
       },
       votesCountByUser,
     }: GoalState,
-    { tags }: PrivateMessage,
+    chatUser: ChatUser,
     type: ChatGoalEventType,
   ): boolean {
-    const subscriberBadge = tags.badges.subscriber as number;
+    const subscriberBadgeText = chatUser.badges.get('subscriber');
+    const subscriberBadge = Number.parseInt(subscriberBadgeText, 10);
 
     const isSubTier1 = subscriberBadge >= 0 && subscriberBadge < 1000;
     const isSubTier2 = subscriberBadge >= 2000 && subscriberBadge < 3000;
     const isSubTier3 = subscriberBadge >= 3000;
-    const isVip = 'vip' in tags.badges;
-    const isMod = 'moderator' in tags.badges;
+    const isVip = chatUser.isVip;
+    const isMod = chatUser.isMod;
 
     if (
       type === ChatGoalEventType.Upvote &&
@@ -508,7 +493,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
       modCanVote && isMod ? mod.votesAmount : 0,
     );
 
-    const currentVotesCount = votesCountByUser[tags.userId] || 0;
+    const currentVotesCount = votesCountByUser[chatUser.userId] || 0;
 
     return currentVotesCount < maxVotesCount;
   }

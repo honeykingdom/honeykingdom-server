@@ -6,10 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PrivateMessage } from 'twitch-js';
 import { TwitchChatService } from '../../twitch-chat/twitch-chat.service';
-import { InjectChat } from '../../twitch-chat/twitch-chat.decorators';
-import { TWITCH_CHAT_ANONYMOUS } from '../../app.constants';
 import { ChatVote } from './entities/chat-vote.entity';
 import { ChatVoting } from './entities/chat-voting.entity';
 import { UpdateChatVotingDto } from './dto/update-chat-voting.dto';
@@ -24,14 +21,15 @@ import {
   CHAT_VOTING_COMMANDS_DEFAULT,
   CHAT_VOTING_PERMISSIONS_DEFAULT,
 } from './chat-votes.constants';
+import { OnMessage } from '../../twitch-chat/twitch-chat.interface';
+import { ChatUser } from '@twurple/chat/lib';
 
 @Injectable()
 export class ChatVotesService implements OnModuleInit {
   private readonly chatVotingList = new Map<string, ChatVoting>();
 
   constructor(
-    @InjectChat(TWITCH_CHAT_ANONYMOUS)
-    private readonly twitchChatService: TwitchChatService,
+    private readonly twitchChat: TwitchChatService,
     @InjectRepository(ChatVoting)
     private readonly chatVotingRepo: Repository<ChatVoting>,
     @InjectRepository(ChatVote)
@@ -48,16 +46,14 @@ export class ChatVotesService implements OnModuleInit {
       this.chatVotingList.set(chatVoting.broadcaster.id, chatVoting);
 
       if (chatVoting.listening) {
-        this.twitchChatService.joinChannel(
+        this.twitchChat.join(
           chatVoting.broadcaster.login,
           ChatVotesService.name,
         );
       }
     });
 
-    this.twitchChatService.addChatListener((message) =>
-      this.handleChatMessage(message),
-    );
+    this.twitchChat.on('message', (...args) => this.handleChatMessage(...args));
   }
 
   // TODO: refactor this
@@ -170,17 +166,11 @@ export class ChatVotesService implements OnModuleInit {
     { listening, permissions, commands }: UpdateChatVotingDto,
   ) {
     if (listening === true) {
-      this.twitchChatService.joinChannel(
-        broadcaster.login,
-        ChatVotesService.name,
-      );
+      this.twitchChat.join(broadcaster.login, ChatVotesService.name);
     }
 
     if (listening === false) {
-      this.twitchChatService.partChannel(
-        broadcaster.login,
-        ChatVotesService.name,
-      );
+      this.twitchChat.part(broadcaster.login, ChatVotesService.name);
     }
 
     if (permissions) {
@@ -246,21 +236,18 @@ export class ChatVotesService implements OnModuleInit {
     return this.usersService.isEditor(broadcaster, initiator);
   }
 
-  private handleChatMessage(privateMessage: PrivateMessage) {
-    const {
-      message,
-      username,
-      tags: { badgeInfo, badges, color, displayName, emotes, roomId, userId },
-    } = privateMessage;
+  private handleChatMessage: OnMessage = (channel, userName, message, msg) => {
+    const { badgeInfo, badges, color, displayName, userId } = msg.userInfo;
+    const { emoteOffsets, channelId } = msg;
 
-    const chatVoting = this.chatVotingList.get(roomId);
+    const chatVoting = this.chatVotingList.get(channelId);
 
     if (!chatVoting) return;
 
     if (message === chatVoting.commands.clearVotes) {
-      this.canClearVotes(userId, roomId).then(
+      this.canClearVotes(userId, channelId).then(
         (hasAccess) => {
-          if (hasAccess) this.deleteChatVotes(roomId);
+          if (hasAccess) this.deleteChatVotes(channelId);
         },
         () => {},
       );
@@ -274,24 +261,28 @@ export class ChatVotesService implements OnModuleInit {
 
     if (!vote) return;
 
-    if (
-      !ChatVotesService.isUserCanVote(privateMessage, chatVoting.permissions)
-    ) {
+    if (!ChatVotesService.isUserCanVote(msg.userInfo, chatVoting.permissions)) {
       return;
     }
 
-    // TODO: omit twitch voting badges
+    // TODO: omit twitch voting badges. Or do it on the frontend
     this.chatVoteRepo.save({
-      chatVotingId: roomId,
+      chatVotingId: channelId,
       content: message,
       userId,
-      userName: username,
-      tags: { badgeInfo, badges, color, displayName, emotes },
+      userName,
+      tags: {
+        badgeInfo: Object.fromEntries(badgeInfo),
+        badges: Object.fromEntries(badges),
+        color,
+        displayName,
+        emoteOffsets: Object.fromEntries(emoteOffsets),
+      },
     } as ChatVote);
-  }
+  };
 
   private static isUserCanVote(
-    message: PrivateMessage,
+    chatUser: ChatUser,
     {
       mod,
       vip,
@@ -304,38 +295,36 @@ export class ChatVotesService implements OnModuleInit {
     if (viewer) return true;
     if (
       sub &&
-      ChatVotesService.isSub(message, subMonthsRequired, subTierRequired)
+      ChatVotesService.isSub(chatUser, subMonthsRequired, subTierRequired)
     ) {
       return true;
     }
-    if (vip && 'vip' in message.tags.badges) return true;
-    if (mod && 'moderator' in message.tags.badges) return true;
+    if (vip && chatUser.isVip) return true;
+    if (mod && chatUser.isMod) return true;
 
     return false;
   }
 
   private static isSub(
-    message: PrivateMessage,
+    chatUser: ChatUser,
     subMonthsRequired = 0,
-    subTierRequired: SubTier,
+    subTierRequired = SubTier.Tier1,
   ) {
     if (subMonthsRequired > 0) {
-      const [, monthsText] = message.tags.badgeInfo.split('/');
-
-      if (!monthsText) return false;
-
-      const months = Number.parseInt(monthsText, 10);
-
-      if (months < subMonthsRequired) return false;
+      const subMonthsText = chatUser.badgeInfo.get('subscriber');
+      if (!subMonthsText) return false;
+      const subMonths = Number.parseInt(subMonthsText, 10);
+      if (subMonths < subMonthsRequired) return false;
     }
 
-    const subBadgeValue = message.tags.badges.subscriber as number;
+    const subBadgeValueText = chatUser.badges.get('subscriber');
+    if (!subBadgeValueText) return false;
+    const subBadgeValue = Number.parseInt(subBadgeValueText, 10);
 
     if (subTierRequired === SubTier.Tier1) return subBadgeValue >= 0;
     if (subTierRequired === SubTier.Tier2) return subBadgeValue >= 2000;
     if (subTierRequired === SubTier.Tier3) return subBadgeValue >= 3000;
 
-    // TODO: assert never
     return false;
   }
 

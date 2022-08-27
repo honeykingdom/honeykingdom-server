@@ -22,8 +22,8 @@ export const configSchema = z.object({
 
   TELEGRAM_API_CHECK_INTERVAL: z.string().default('2 min'),
 
-  HONEY_BOT_USERNAME: z.string(),
-  HONEY_BOT_TOKEN: z.string(),
+  HONEY_BOT_CLIENT_ID: z.string(),
+  HONEY_BOT_CLIENT_SECRET: z.string(),
   HONEY_BOT_CHANNELS: z.string(),
   HONEY_BOT_TELEGRAM_TO_CHAT: z.string(),
 

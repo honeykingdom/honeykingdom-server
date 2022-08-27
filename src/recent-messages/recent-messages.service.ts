@@ -1,17 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PrivateMessage } from 'twitch-js';
-import { MONGODB_CONNECTION, TWITCH_CHAT_ANONYMOUS } from '../app.constants';
+import { MONGODB_CONNECTION } from '../app.constants';
 import { Config } from '../config/config.interface';
-import { InjectChat } from '../twitch-chat/twitch-chat.decorators';
 import { TwitchChatService } from '../twitch-chat/twitch-chat.service';
 import { Message } from '../recent-messages/entities/message.entity';
 import { RecentMessagesResponse } from './recent-messages.interface';
+import { OnMessage } from '../twitch-chat/twitch-chat.interface';
 
 @Injectable()
 export class RecentMessagesService {
+  private readonly logger = new Logger(RecentMessagesService.name);
   private readonly messagesLimit: number;
   private readonly recentMessages: Map<string, string[]> = new Map();
 
@@ -19,8 +19,7 @@ export class RecentMessagesService {
 
   constructor(
     private readonly configService: ConfigService<Config>,
-    @InjectChat(TWITCH_CHAT_ANONYMOUS)
-    private readonly twitchChatService: TwitchChatService,
+    private readonly twitchChat: TwitchChatService,
     @InjectRepository(Message, MONGODB_CONNECTION)
     private readonly messageRepository: Repository<Message>,
   ) {
@@ -32,10 +31,14 @@ export class RecentMessagesService {
       .get<string>('RECENT_MESSAGES_CHANNELS')
       .split(';');
 
-    Promise.all(
-      this.channels.map((channel) =>
-        twitchChatService.joinChannel(channel, RecentMessagesService.name),
-      ),
+    this.logger.log(
+      `[Options] messagesLimit: ${
+        this.messagesLimit
+      }, channels: ${this.channels.join(', ')}`,
+    );
+
+    this.channels.map((channel) =>
+      twitchChat.join(channel, RecentMessagesService.name),
     );
 
     Promise.all(
@@ -55,33 +58,23 @@ export class RecentMessagesService {
       );
     });
 
-    this.twitchChatService.addChatListener((message) =>
-      this.handleChatMessage(message),
-    );
+    this.twitchChat.on('message', (...args) => this.handleMessage(...args));
   }
 
-  handleChatMessage(privateMessage: PrivateMessage) {
-    const {
-      _raw: raw,
-      channel: channelRaw,
-      message,
-      username,
-      timestamp,
-    } = privateMessage;
-
+  handleMessage: OnMessage = (channelRaw, username, message, msg) => {
     const channel = channelRaw.slice(1);
 
     if (!this.channels.includes(channel)) return;
-
-    if (!this.recentMessages.get(channel)) {
-      this.recentMessages.set(channel, []);
-    }
+    if (!this.recentMessages.get(channel)) this.recentMessages.set(channel, []);
 
     const channelRecentMessages = this.recentMessages.get(channel);
 
     if (channelRecentMessages.length >= this.messagesLimit) {
       channelRecentMessages.shift();
     }
+
+    const raw = (msg as any)._raw;
+    const timestamp = msg.date;
 
     channelRecentMessages.push(raw);
 
@@ -96,7 +89,7 @@ export class RecentMessagesService {
         })
         .catch((e) => console.log(e));
     }
-  }
+  };
 
   getRecentMessages(channel: string): RecentMessagesResponse {
     return {
