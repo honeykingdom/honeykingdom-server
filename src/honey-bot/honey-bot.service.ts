@@ -77,10 +77,7 @@ export class HoneyBotService {
     if (!this.channels.has(channel)) return;
 
     if (['!чат', '!chat'].includes(message.toLowerCase())) {
-      this.twitchChat.say(
-        channel,
-        `https://honeykingdom.github.io/chat/#${channel}`,
-      );
+      this.twitchChat.say(channel, `https://honey-chat.vercel.app/#${channel}`);
     }
   };
 
