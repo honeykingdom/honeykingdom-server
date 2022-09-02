@@ -10,14 +10,13 @@ async function bootstrap() {
   const configService: ConfigService<Config> = app.get(ConfigService);
   const port = Number.parseInt(configService.get<string>('PORT'));
 
-  app.enableCors({
-    origin: [
-      configService.get<string>('RECENT_MESSAGES_CORS_ORIGIN'),
-      configService.get<string>('HONEY_VOTES_FRONTEND_BASE_URL'),
-      configService.get<string>('F1_CORS_ORIGIN'),
-      'http://localhost:3001',
-    ],
-  });
+  const origin = configService.get<string>('APP_CORS_ORIGINS').split(';');
+  origin.push(configService.get<string>('HONEY_VOTES_FRONTEND_BASE_URL'));
+  if (configService.get('NODE_ENV', { infer: true }) !== 'production') {
+    origin.push('http://localhost:3001');
+  }
+
+  app.enableCors({ origin });
 
   app.use(cookieParser());
   // app.enableShutdownHooks();

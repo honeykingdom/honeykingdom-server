@@ -11,13 +11,13 @@ export const configSchema = z.object({
   ),
 
   APP_BASE_URL: z.string(),
+  APP_CORS_ORIGINS: z.string().default(''),
 
   RECENT_MESSAGES_CHANNELS: z.string(),
   RECENT_MESSAGES_LIMIT: z.preprocess(
     (v) => parseInt(v as string, 10),
     z.number().default(500),
   ),
-  RECENT_MESSAGES_CORS_ORIGIN: z.string(),
   RECENT_MESSAGES_REDIRECT_URL: z.string(),
 
   TELEGRAM_API_CHECK_INTERVAL: z.string().default('2 min'),
@@ -47,7 +47,6 @@ export const configSchema = z.object({
   INSTAGRAM_COOKIE: z.string(),
 
   F1_COOKIE: z.string(),
-  F1_CORS_ORIGIN: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;
