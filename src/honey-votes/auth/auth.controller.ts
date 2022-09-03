@@ -54,6 +54,7 @@ export class AuthController {
   }
 
   @Post('/auth/refresh-token')
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: 'OK', type: RefreshTokenResponse })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   refreshToken(
