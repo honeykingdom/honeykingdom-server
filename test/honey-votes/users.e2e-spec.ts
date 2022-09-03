@@ -102,9 +102,13 @@ const makeGetUserFollowsResponse = (
 describe('HoneyVotes - Users (e2e)', () => {
   const ctx = new HoneyVotesContext();
 
-  beforeAll(() => ctx.create());
+  beforeEach(() => ctx.create());
   afterEach(() => ctx.clearTables());
-  afterAll(() => ctx.destroy());
+  afterEach(async () => {
+    // prevent error "QueryFailedError: Connection terminated"
+    await new Promise((res) => setTimeout(res, 250));
+    await ctx.destroy();
+  });
 
   type UserType = 'editor' | 'mod' | 'sub' | 'follower';
 
@@ -230,7 +234,7 @@ describe('HoneyVotes - Users (e2e)', () => {
     // isFollower - doesn't matter but uses initiator credentials
     const userId =
       type === 'editor' || type === 'mod' ? broadcaster.id : initiator.id;
-    const user = await ctx.userRepo.find({
+    const user = await ctx.userRepo.findOne({
       where: { id: userId },
       relations: { credentials: true },
     });
@@ -328,7 +332,7 @@ describe('HoneyVotes - Users (e2e)', () => {
     it.todo('should handle if userId and channelId is the same');
 
     // TODO: i'm not sure is this test correct
-    it('should call twitch refreshToken api method only once if accessToken is expired', async () => {
+    it('should call refreshToken twice for channel and for user if their accessTokens are expired', async () => {
       const [broadcaster, initiator] = await ctx.createUsers();
       let requestsCount = 0;
       let refreshTokenRequestsCount = 0;
@@ -379,7 +383,7 @@ describe('HoneyVotes - Users (e2e)', () => {
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(HttpStatus.OK);
 
-      expect(refreshTokenRequestsCount).toBe(1);
+      expect(refreshTokenRequestsCount).toBe(2);
     });
   });
 
