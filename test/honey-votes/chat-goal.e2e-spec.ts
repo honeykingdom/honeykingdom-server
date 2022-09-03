@@ -429,8 +429,8 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
           listening: true,
         });
 
-        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledTimes(1);
-        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledWith(
+        expect(twitchChatServiceMock.join).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.join).toHaveBeenCalledWith(
           broadcaster.login,
           expect.any(String),
         );
@@ -439,7 +439,7 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
       it.skip('should not start listening to chat if listening=false', async () => {
         await testCreateChatGoal(HttpStatus.CREATED, { listening: false });
 
-        expect(twitchChatServiceMock.joinChannel).not.toHaveBeenCalled();
+        expect(twitchChatServiceMock.join).not.toHaveBeenCalled();
       });
     });
   });
@@ -495,8 +495,8 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
           listening: true,
         });
 
-        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledTimes(1);
-        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledWith(
+        expect(twitchChatServiceMock.join).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.join).toHaveBeenCalledWith(
           broadcaster.login,
           expect.any(String),
         );
@@ -510,8 +510,8 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
           listening: false,
         });
 
-        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledTimes(1);
-        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledWith(
+        expect(twitchChatServiceMock.part).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.part).toHaveBeenCalledWith(
           broadcaster.login,
           expect.any(String),
         );
@@ -521,8 +521,8 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
         const { broadcaster } = await testCreateChatGoal();
         await testUpdateChatGoal(HttpStatus.OK, broadcaster.id);
 
-        expect(twitchChatServiceMock.joinChannel).not.toHaveBeenCalled();
-        expect(twitchChatServiceMock.partChannel).not.toHaveBeenCalled();
+        expect(twitchChatServiceMock.join).not.toHaveBeenCalled();
+        expect(twitchChatServiceMock.part).not.toHaveBeenCalled();
       });
     });
   });
@@ -572,8 +572,8 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
         const { broadcaster } = await testCreateChatGoal();
         await testDeleteChatVoting(HttpStatus.OK, broadcaster.id);
 
-        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledTimes(1);
-        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledWith(
+        expect(twitchChatServiceMock.part).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.part).toHaveBeenCalledWith(
           broadcaster.login,
           expect.any(String),
         );

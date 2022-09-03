@@ -518,8 +518,8 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
           },
         });
 
-        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledTimes(1);
-        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledWith(
+        expect(twitchChatServiceMock.join).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.join).toHaveBeenCalledWith(
           broadcaster.login,
           expect.any(String),
         );
@@ -537,7 +537,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
           },
         });
 
-        expect(twitchChatServiceMock.joinChannel).not.toHaveBeenCalled();
+        expect(twitchChatServiceMock.join).not.toHaveBeenCalled();
       });
     });
   });
@@ -587,8 +587,8 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
           updateChatVotingDto: { listening: true },
         });
 
-        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledTimes(1);
-        expect(twitchChatServiceMock.joinChannel).toHaveBeenCalledWith(
+        expect(twitchChatServiceMock.join).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.join).toHaveBeenCalledWith(
           broadcaster.login,
           expect.any(String),
         );
@@ -604,8 +604,8 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
           updateChatVotingDto: { listening: false },
         });
 
-        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledTimes(1);
-        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledWith(
+        expect(twitchChatServiceMock.part).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.part).toHaveBeenCalledWith(
           broadcaster.login,
           expect.any(String),
         );
@@ -620,8 +620,8 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
           updateChatVotingDto: {},
         });
 
-        expect(twitchChatServiceMock.joinChannel).not.toHaveBeenCalled();
-        expect(twitchChatServiceMock.partChannel).not.toHaveBeenCalled();
+        expect(twitchChatServiceMock.join).not.toHaveBeenCalled();
+        expect(twitchChatServiceMock.part).not.toHaveBeenCalled();
       });
     });
   });
@@ -666,8 +666,8 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
           initiator: broadcaster,
         });
 
-        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledTimes(1);
-        expect(twitchChatServiceMock.partChannel).toHaveBeenCalledWith(
+        expect(twitchChatServiceMock.part).toHaveBeenCalledTimes(1);
+        expect(twitchChatServiceMock.part).toHaveBeenCalledWith(
           broadcaster.login,
           expect.any(String),
         );
