@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
+import { MONGODB_CONNECTION } from './app.constants';
+import { typeOrmMongoDbFactory, typeOrmPostgresFactory } from './typeorm';
 import { validate } from './config/config.interface';
 import { RecentMessagesModule } from './recent-messages/recent-messages.module';
 import { AppAwakeModule } from './app-awake/app-awake.module';
 import { HoneyBotModule } from './honey-bot/honey-bot.module';
 import { HoneyVotesModule } from './honey-votes/honey-votes.module';
 import { InstagramModule } from './instagram/instagram.module';
-import { typeOrmMongoDbModule, typeOrmPostgresModule } from './typeorm';
 import { Formula1Module } from './formula1/formula1.module';
 
 @Module({
@@ -16,8 +18,17 @@ import { Formula1Module } from './formula1/formula1.module';
     AppAwakeModule,
     ConfigModule.forRoot({ validate }),
     ScheduleModule.forRoot(),
-    typeOrmMongoDbModule,
-    typeOrmPostgresModule,
+    TypeOrmModule.forRootAsync({
+      name: MONGODB_CONNECTION,
+      imports: [ConfigModule],
+      useFactory: typeOrmMongoDbFactory,
+      inject: [ConfigService],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: typeOrmPostgresFactory,
+      inject: [ConfigService],
+    }),
     RecentMessagesModule,
     HoneyBotModule,
     HoneyVotesModule,
