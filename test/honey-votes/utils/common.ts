@@ -200,7 +200,7 @@ export const createTestCreateVoting =
       expectedStatusCode === HttpStatus.BAD_REQUEST ||
       expectedStatusCode === HttpStatus.FORBIDDEN
     ) {
-      expect(dbVoting).toBeUndefined();
+      expect(dbVoting).toBeNull();
     }
   };
 
@@ -310,7 +310,7 @@ export const createTestDeleteVoting =
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
-      expect(await ctx.votingRepo.findOneBy({ id: voting.id })).toBeUndefined();
+      expect(await ctx.votingRepo.findOneBy({ id: voting.id })).toBeNull();
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
@@ -419,7 +419,7 @@ export const createTestCreateVotingOption =
           await ctx.votingOptionRepo.findOne({
             where: { voting: { id: voting.id } },
           }),
-        ).toBeUndefined();
+        ).toBeNull();
       }
     }
 
@@ -435,7 +435,7 @@ export const createTestCreateVotingOption =
           await ctx.votingOptionRepo.findOne({
             where: { voting: { id: voting.id } },
           }),
-        ).toBeUndefined();
+        ).toBeNull();
       }
     }
 
@@ -506,7 +506,7 @@ export const createTestDeleteVotingOption =
       if (!skipDbCheck) {
         expect(
           await ctx.votingOptionRepo.findOneBy({ id: votingOption.id }),
-        ).toBeUndefined();
+        ).toBeNull();
       }
     }
 
@@ -615,7 +615,7 @@ export const createTestCreateVote =
           await ctx.voteRepo.findOne({
             where: { author: { id: initiator.id } },
           }),
-        ).toBeUndefined();
+        ).toBeNull();
       }
     }
 
@@ -631,7 +631,7 @@ export const createTestCreateVote =
           await ctx.voteRepo.findOne({
             where: { author: { id: initiator.id } },
           }),
-        ).toBeUndefined();
+        ).toBeNull();
       }
     }
 
@@ -717,7 +717,7 @@ export const createTestDeleteVote =
             voting: { id: vote.voting.id },
           },
         }),
-      ).toBeUndefined();
+      ).toBeNull();
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
