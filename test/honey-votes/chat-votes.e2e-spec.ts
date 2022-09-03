@@ -80,7 +80,9 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         }
       });
 
-    const chatVoting = await ctx.chatVotingRepo.findOne(broadcaster.id);
+    const chatVoting = await ctx.chatVotingRepo.findOneBy({
+      broadcasterId: broadcaster.id,
+    });
 
     if (expectedStatusCode === HttpStatus.CREATED) {
       expect(chatVoting).toEqual(expectedChatVoting);
@@ -141,7 +143,9 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         );
 
       expect(
-        await ctx.chatVotingRepo.findOne(chatVoting.broadcasterId),
+        await ctx.chatVotingRepo.findOneBy({
+          broadcasterId: chatVoting.broadcasterId,
+        }),
       ).toEqual(expectedChatVoting);
     }
 
@@ -160,7 +164,9 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         .expect(expectedStatusCode);
 
       expect(
-        await ctx.chatVotingRepo.findOne(chatVoting.broadcasterId),
+        await ctx.chatVotingRepo.findOneBy({
+          broadcasterId: chatVoting.broadcasterId,
+        }),
       ).toEqual(expectedChatVoting);
     }
   };
@@ -204,7 +210,9 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         .expect(expectedStatusCode);
 
       expect(
-        await ctx.chatVotingRepo.findOne(chatVoting.broadcasterId),
+        await ctx.chatVotingRepo.findOneBy({
+          broadcasterId: chatVoting.broadcasterId,
+        }),
       ).toBeUndefined();
     }
 
@@ -215,7 +223,9 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         .expect(expectedStatusCode);
 
       expect(
-        await ctx.chatVotingRepo.findOne(chatVoting.broadcasterId),
+        await ctx.chatVotingRepo.findOneBy({
+          broadcasterId: chatVoting.broadcasterId,
+        }),
       ).toEqual(expectedVoting);
     }
 
@@ -269,10 +279,22 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
       expect(
         await Promise.all([
-          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
-          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
-          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
-          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
+          ctx.chatVoteRepo.findOneBy({
+            chatVotingId,
+            userId: chatVote1.userId,
+          }),
+          ctx.chatVoteRepo.findOneBy({
+            chatVotingId,
+            userId: chatVote2.userId,
+          }),
+          ctx.chatVoteRepo.findOneBy({
+            chatVotingId,
+            userId: chatVote3.userId,
+          }),
+          ctx.chatVoteRepo.findOneBy({
+            chatVotingId,
+            userId: chatVote4.userId,
+          }),
         ]),
       ).toEqual(expect.arrayContaining([undefined]));
     }
@@ -285,10 +307,22 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
 
       expect(
         await Promise.all([
-          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote1.userId }),
-          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote2.userId }),
-          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote3.userId }),
-          ctx.chatVoteRepo.findOne({ chatVotingId, userId: chatVote4.userId }),
+          ctx.chatVoteRepo.findOneBy({
+            chatVotingId,
+            userId: chatVote1.userId,
+          }),
+          ctx.chatVoteRepo.findOneBy({
+            chatVotingId,
+            userId: chatVote2.userId,
+          }),
+          ctx.chatVoteRepo.findOneBy({
+            chatVotingId,
+            userId: chatVote3.userId,
+          }),
+          ctx.chatVoteRepo.findOneBy({
+            chatVotingId,
+            userId: chatVote4.userId,
+          }),
         ]),
       ).toEqual(expect.arrayContaining([expect.anything()]));
     }
@@ -659,19 +693,19 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
             return async () => {
               expect(
                 await Promise.all([
-                  ctx.chatVoteRepo.findOne({
+                  ctx.chatVoteRepo.findOneBy({
                     chatVotingId,
                     userId: chatVote1.userId,
                   }),
-                  ctx.chatVoteRepo.findOne({
+                  ctx.chatVoteRepo.findOneBy({
                     chatVotingId,
                     userId: chatVote2.userId,
                   }),
-                  ctx.chatVoteRepo.findOne({
+                  ctx.chatVoteRepo.findOneBy({
                     chatVotingId,
                     userId: chatVote3.userId,
                   }),
-                  ctx.chatVoteRepo.findOne({
+                  ctx.chatVoteRepo.findOneBy({
                     chatVotingId,
                     userId: chatVote4.userId,
                   }),

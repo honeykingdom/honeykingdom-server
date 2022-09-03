@@ -226,8 +226,9 @@ describe('HoneyVotes - Users (e2e)', () => {
     // isFollower - doesn't matter but uses initiator credentials
     const userId =
       type === 'editor' || type === 'mod' ? broadcaster.id : initiator.id;
-    const user = await ctx.userRepo.findOne(userId, {
-      relations: ['credentials'],
+    const user = await ctx.userRepo.find({
+      where: { id: userId },
+      relations: { credentials: true },
     });
 
     if (result === 'success') {

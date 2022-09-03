@@ -246,7 +246,9 @@ export const createTestUpdateVoting =
         .expect(expectedStatusCode)
         .expect((response) => expect(response.body).toEqual(expectedVoting));
 
-      expect(await ctx.votingRepo.findOne(voting.id)).toEqual(expectedVoting);
+      expect(await ctx.votingRepo.findOneBy({ id: voting.id })).toEqual(
+        expectedVoting,
+      );
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
@@ -263,7 +265,9 @@ export const createTestUpdateVoting =
         .send(updateVotingDto)
         .expect(expectedStatusCode);
 
-      expect(await ctx.votingRepo.findOne(voting.id)).toEqual(expectedVoting);
+      expect(await ctx.votingRepo.findOneBy({ id: voting.id })).toEqual(
+        expectedVoting,
+      );
     }
   };
 
@@ -306,7 +310,7 @@ export const createTestDeleteVoting =
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
-      expect(await ctx.votingRepo.findOne(voting.id)).toBeUndefined();
+      expect(await ctx.votingRepo.findOneBy({ id: voting.id })).toBeUndefined();
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
@@ -315,7 +319,9 @@ export const createTestDeleteVoting =
         .set(...ctx.getAuthorizationHeader(initiator))
         .expect(expectedStatusCode);
 
-      expect(await ctx.votingRepo.findOne(voting.id)).toEqual(expectedVoting);
+      expect(await ctx.votingRepo.findOneBy({ id: voting.id })).toEqual(
+        expectedVoting,
+      );
     }
 
     // @ts-expect-error
@@ -499,7 +505,7 @@ export const createTestDeleteVotingOption =
 
       if (!skipDbCheck) {
         expect(
-          await ctx.votingOptionRepo.findOne(votingOption.id),
+          await ctx.votingOptionRepo.findOneBy({ id: votingOption.id }),
         ).toBeUndefined();
       }
     }
@@ -511,9 +517,9 @@ export const createTestDeleteVotingOption =
         .expect(expectedStatusCode);
 
       if (!skipDbCheck) {
-        expect(await ctx.votingOptionRepo.findOne(votingOption.id)).toEqual(
-          expectedVotingOption,
-        );
+        expect(
+          await ctx.votingOptionRepo.findOneBy({ id: votingOption.id }),
+        ).toEqual(expectedVotingOption);
       }
     }
 
@@ -706,7 +712,10 @@ export const createTestDeleteVote =
 
       expect(
         await ctx.voteRepo.findOne({
-          where: { author: vote.author, voting: vote.voting },
+          where: {
+            author: { id: vote.author.id },
+            voting: { id: vote.voting.id },
+          },
         }),
       ).toBeUndefined();
     }
@@ -720,7 +729,10 @@ export const createTestDeleteVote =
 
       expect(
         await ctx.voteRepo.findOne({
-          where: { author: vote.author, voting: vote.voting },
+          where: {
+            author: { id: vote.author.id },
+            voting: { id: vote.voting.id },
+          },
         }),
       ).toEqual(expectedVote);
     }

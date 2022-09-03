@@ -83,7 +83,9 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
   ) => {
     const [broadcaster, editor, viewer] = await ctx.createUsers();
 
-    const chatGoal = await ctx.chatGoalRepo.findOne(goalId);
+    const chatGoal = await ctx.chatGoalRepo.findOneBy({
+      broadcasterId: goalId,
+    });
 
     const expectedResponse: ChatGoal = {
       ...chatGoal,
@@ -124,7 +126,9 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
   ) => {
     const [broadcaster, editor, viewer] = await ctx.createUsers();
 
-    const chatGoal = await ctx.chatGoalRepo.findOne(goalId);
+    const chatGoal = await ctx.chatGoalRepo.findOneBy({
+      broadcasterId: goalId,
+    });
 
     let initiator: User;
 
@@ -173,7 +177,9 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
       it('should create record in the db if success', async () => {
         const { broadcaster } = await testCreateChatGoal(HttpStatus.CREATED);
 
-        expect(await ctx.chatGoalRepo.findOne(broadcaster.id)).toBeDefined();
+        expect(
+          await ctx.chatGoalRepo.findOneBy({ broadcasterId: broadcaster.id }),
+        ).toBeDefined();
       });
 
       it("shouldn't create record in the db if failure", async () => {
@@ -183,7 +189,9 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
           TwitchUserType.Viewer,
         );
 
-        expect(await ctx.chatGoalRepo.findOne(broadcaster.id)).toBeUndefined();
+        expect(
+          await ctx.chatGoalRepo.findOneBy({ broadcasterId: broadcaster.id }),
+        ).toBeUndefined();
       });
     });
 
