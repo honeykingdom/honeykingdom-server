@@ -8,9 +8,10 @@ import {
   TypeOrmModule,
 } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
+import { TwitchChatService } from '../../../src/twitch-chat/twitch-chat.service';
+import { Config } from '../../../src/config/config.interface';
 import { honeyVotesEntities } from '../../../src/honey-votes/honey-votes.entities';
 import { HoneyVotesModule } from '../../../src/honey-votes/honey-votes.module';
-import { Config } from '../../../src/config/config.interface';
 import { ChatGoalData } from '../../../src/honey-votes/chat-goal/entities/chat-goal-data.entity';
 import { ChatGoalEvent } from '../../../src/honey-votes/chat-goal/entities/chat-goal-event.entity';
 import { ChatGoal } from '../../../src/honey-votes/chat-goal/entities/chat-goal.entity';
@@ -37,12 +38,16 @@ const CONFIG: Partial<Config> = {
   HONEY_VOTES_CRYPTO_SECRET: '00000000000000000000000000000000',
 };
 
-// TODO: get rid of this mock and maybe use fake twitch chat connection or the real one
-export const twitchChatServiceMock = {
-  addChatListener: jest.fn(),
-  joinChannel: jest.fn(),
-  partChannel: jest.fn(),
+export const twitchChatServiceMock: Partial<TwitchChatService> = {
+  join: jest.fn(),
+  part: jest.fn(),
+  say: jest.fn(),
+  on: jest.fn(),
+  off: jest.fn(),
+  once: jest.fn(),
 };
+
+jest.mock('../../../src/twitch-chat/twitch-chat.service.ts');
 
 class HoneyVotesContext {
   app: INestApplication;
@@ -70,16 +75,11 @@ class HoneyVotesContext {
           synchronize: true,
           dropSchema: true,
           // https://stackoverflow.com/questions/58220333
-          // keepConnectionAlive: true,
+          keepConnectionAlive: true,
         }),
         HoneyVotesModule,
       ],
     }).compile();
-
-    // .overrideProvider(TwitchChatModule)
-    // .useValue({})
-    // .overrideProvider('TwitchChatModuleAnonymous')
-    // .useValue(twitchChatServiceMock)
 
     this.app = moduleFixture.createNestApplication();
 
@@ -116,13 +116,12 @@ class HoneyVotesContext {
       ChatGoalData.tableName,
     ];
 
-    // return this.entityManager.query(
-    //   `TRUNCATE ${tableNames.join(',')} CASCADE;`,
-    // );
+    return this.entityManager.query(
+      `TRUNCATE ${tableNames.join(',')} CASCADE;`,
+    );
   }
 
   destroy() {
-    // return this.entityManager.connection.destroy();
     return this.app.close();
   }
 
