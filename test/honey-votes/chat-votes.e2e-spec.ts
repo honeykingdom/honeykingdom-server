@@ -16,17 +16,20 @@ import {
 } from '../../src/honey-votes/chat-votes/dto/create-chat-voting.dto';
 import { UpdateChatVotingDto } from '../../src/honey-votes/chat-votes/dto/update-chat-voting.dto';
 import {
-  getHoneyVotesTestContext,
-  twitchChatServiceMock,
-} from './utils/getHoneyVotesTestContext';
-import {
   CHAT_VOTING_COMMANDS_DEFAULT,
   CHAT_VOTING_COMMAND_MAX_LENGTH,
   CHAT_VOTING_PERMISSIONS_DEFAULT,
 } from '../../src/honey-votes/chat-votes/chat-votes.constants';
+import HoneyVotesContext, {
+  twitchChatServiceMock,
+} from './utils/honey-votes-context.class';
 
 describe('HoneyVotes - ChatVotes (e2e)', () => {
-  const ctx = getHoneyVotesTestContext();
+  const ctx = new HoneyVotesContext();
+
+  beforeAll(() => ctx.create());
+  afterEach(() => ctx.clearTables());
+  afterAll(() => ctx.destroy());
 
   const chatVotingPermissionsForbidden: ChatVotingPermissions = {
     [TwitchUserType.Viewer]: false,

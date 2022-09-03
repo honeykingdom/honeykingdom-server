@@ -32,8 +32,8 @@ import {
   mockGetModerators,
   mockGetUserFollows,
 } from './mock-requests';
-import { HoneyVotesTestContext } from './getHoneyVotesTestContext';
 import { DeleteVoteDto } from '../../../src/honey-votes/votes/dto/delete-vote.dto';
+import HoneyVotesContext from './honey-votes-context.class';
 
 const defaultVotingParams: Partial<Voting> = {
   id: expect.any(Number),
@@ -146,7 +146,7 @@ type OnAfterTest = () => Promise<void> | void;
 // Voting
 
 export const createTestCreateVoting =
-  (ctx: HoneyVotesTestContext) =>
+  (ctx: HoneyVotesContext) =>
   async (
     expectedStatusCode:
       | HttpStatus.CREATED
@@ -205,7 +205,7 @@ export const createTestCreateVoting =
   };
 
 export const createTestUpdateVoting =
-  (ctx: HoneyVotesTestContext) =>
+  (ctx: HoneyVotesContext) =>
   async (
     expectedStatusCode: HttpStatus.CREATED | HttpStatus.FORBIDDEN,
     {
@@ -272,7 +272,7 @@ export const createTestUpdateVoting =
   };
 
 export const createTestDeleteVoting =
-  (ctx: HoneyVotesTestContext) =>
+  (ctx: HoneyVotesContext) =>
   async (
     expectedStatusCode: HttpStatus.OK | HttpStatus.FORBIDDEN,
     {
@@ -331,7 +331,7 @@ export const createTestDeleteVoting =
 // VotingOption
 
 export const createTestCreateVotingOption =
-  (ctx: HoneyVotesTestContext) =>
+  (ctx: HoneyVotesContext) =>
   async (
     expectedStatusCode:
       | HttpStatus.CREATED
@@ -444,7 +444,7 @@ export const createTestCreateVotingOption =
   };
 
 export const createTestDeleteVotingOption =
-  (ctx: HoneyVotesTestContext) =>
+  (ctx: HoneyVotesContext) =>
   async (
     expectedStatusCode: HttpStatus.OK | HttpStatus.FORBIDDEN,
     {
@@ -530,7 +530,7 @@ export const createTestDeleteVotingOption =
 // Vote
 
 export const createTestCreateVote =
-  (ctx: HoneyVotesTestContext) =>
+  (ctx: HoneyVotesContext) =>
   async (
     expectedStatusCode:
       | HttpStatus.CREATED
@@ -640,7 +640,7 @@ export const createTestCreateVote =
   };
 
 export const createTestDeleteVote =
-  (ctx: HoneyVotesTestContext) =>
+  (ctx: HoneyVotesContext) =>
   async (
     expectedStatusCode: HttpStatus.OK | HttpStatus.FORBIDDEN,
     {

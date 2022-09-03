@@ -21,7 +21,7 @@ import {
 } from '../../src/twitch-api/twitch-api.interface';
 import { CreateVotingOptionDto } from '../../src/honey-votes/votes/dto/create-voting-option.dto';
 import { votingPermissionsForbidden } from './utils/common';
-import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
+import HoneyVotesContext from './utils/honey-votes-context.class';
 
 const response400 = {
   error: 'Bad Request',
@@ -100,7 +100,11 @@ const makeGetUserFollowsResponse = (
 });
 
 describe('HoneyVotes - Users (e2e)', () => {
-  const ctx = getHoneyVotesTestContext();
+  const ctx = new HoneyVotesContext();
+
+  beforeAll(() => ctx.create());
+  afterEach(() => ctx.clearTables());
+  afterAll(() => ctx.destroy());
 
   type UserType = 'editor' | 'mod' | 'sub' | 'follower';
 

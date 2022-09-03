@@ -18,11 +18,15 @@ import {
   createTestDeleteVoting,
   createTestUpdateVoting,
 } from './utils/common';
-import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 import { POSTGRES_MAX_INTEGER } from '../constants';
+import HoneyVotesContext from './utils/honey-votes-context.class';
 
 describe('HoneyVotes - Votes - Voting (e2e)', () => {
-  const ctx = getHoneyVotesTestContext();
+  const ctx = new HoneyVotesContext();
+
+  beforeAll(() => ctx.create());
+  afterEach(() => ctx.clearTables());
+  afterAll(() => ctx.destroy());
 
   const testCreateVoting = createTestCreateVoting(ctx);
   const testUpdateVoting = createTestUpdateVoting(ctx);

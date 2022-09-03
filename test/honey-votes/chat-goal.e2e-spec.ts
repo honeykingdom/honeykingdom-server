@@ -1,10 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { mockGetChannelEditors } from './utils/mock-requests';
-import {
-  getHoneyVotesTestContext,
-  twitchChatServiceMock,
-} from './utils/getHoneyVotesTestContext';
 import { User } from '../../src/honey-votes/users/entities/user.entity';
 import { ChatGoal } from '../../src/honey-votes/chat-goal/entities/chat-goal.entity';
 import { CreateChatGoalDto } from '../../src/honey-votes/chat-goal/dto/create-chat-goal.dto';
@@ -18,9 +14,16 @@ import {
   CHAT_GOAL_TITLE_MAX_LENGTH,
   CHAT_GOAL_VOTE_COMMAND_MAX_LENGTH,
 } from '../../src/honey-votes/chat-goal/chat-goal.constants';
+import HoneyVotesContext, {
+  twitchChatServiceMock,
+} from './utils/honey-votes-context.class';
 
 describe('HoneyVotes - ChatGoal (e2e)', () => {
-  const ctx = getHoneyVotesTestContext();
+  const ctx = new HoneyVotesContext();
+
+  beforeAll(() => ctx.create());
+  afterEach(() => ctx.clearTables());
+  afterAll(() => ctx.destroy());
 
   type Role =
     | TwitchUserType.Broadcaster

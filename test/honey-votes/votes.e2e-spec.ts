@@ -6,11 +6,15 @@ import {
 } from '../../src/honey-votes/honey-votes.constants';
 import { VotingOptionType } from '../../src/honey-votes/honey-votes.constants';
 import { createTestCreateVote, createTestDeleteVote } from './utils/common';
-import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
 import { POSTGRES_MAX_INTEGER } from '../constants';
+import HoneyVotesContext from './utils/honey-votes-context.class';
 
 describe('HoneyVotes - Votes - Votes (e2e)', () => {
-  const ctx = getHoneyVotesTestContext();
+  const ctx = new HoneyVotesContext();
+
+  beforeAll(() => ctx.create());
+  afterEach(() => ctx.clearTables());
+  afterAll(() => ctx.destroy());
 
   const testCreateVote = createTestCreateVote(ctx);
   const testDeleteVote = createTestDeleteVote(ctx);

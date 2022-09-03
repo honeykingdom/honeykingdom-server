@@ -5,10 +5,14 @@ import { API_BASE } from '../../src/honey-votes/honey-votes.constants';
 import { RefreshTokenDto } from '../../src/honey-votes/auth/dto/refresh-token.dto';
 import { JwtPayload } from '../../src/honey-votes/auth/auth.interface';
 import { signRefreshToken } from './utils/auth';
-import { getHoneyVotesTestContext } from './utils/getHoneyVotesTestContext';
+import HoneyVotesContext from './utils/honey-votes-context.class';
 
 describe('HoneyVotes - Auth (e2e)', () => {
-  const ctx = getHoneyVotesTestContext();
+  const ctx = new HoneyVotesContext();
+
+  beforeAll(() => ctx.create());
+  afterEach(() => ctx.clearTables());
+  afterAll(() => ctx.destroy());
 
   describe('/auth/refresh-token (POST)', () => {
     it('should refresh a valid token', async () => {
