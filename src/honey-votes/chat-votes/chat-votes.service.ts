@@ -195,7 +195,11 @@ export class ChatVotesService implements OnModuleInit {
   ): Promise<boolean> {
     if (!broadcaster || !initiator) return false;
 
-    const isEditor = await this.usersService.isEditor(broadcaster, initiator);
+    const isEditor = await this.usersService.isHasPermissions(
+      broadcaster,
+      initiator,
+      { editor: true },
+    );
 
     return isEditor;
   }
@@ -221,9 +225,10 @@ export class ChatVotesService implements OnModuleInit {
 
     if (isOwner) return [true, initiator, chatVoting];
 
-    const isEditor = await this.usersService.isEditor(
+    const isEditor = await this.usersService.isHasPermissions(
       chatVoting.broadcaster,
       initiator,
+      { editor: true },
     );
 
     return [isEditor, initiator, chatVoting];
@@ -243,7 +248,9 @@ export class ChatVotesService implements OnModuleInit {
       }),
     ]);
 
-    return this.usersService.isEditor(broadcaster, initiator);
+    return this.usersService.isHasPermissions(broadcaster, initiator, {
+      editor: true,
+    });
   }
 
   private handleChatMessage: OnMessage = (channel, userName, message, msg) => {

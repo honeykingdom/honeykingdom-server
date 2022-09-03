@@ -108,7 +108,11 @@ export class VotingOptionsService {
 
     if (isOwner) return true;
 
-    const isEditor = await this.usersService.isEditor(voting.broadcaster, user);
+    const isEditor = await this.usersService.isHasPermissions(
+      voting.broadcaster,
+      user,
+      { editor: true },
+    );
 
     if (isEditor) return true;
 
@@ -176,7 +180,11 @@ export class VotingOptionsService {
     if (isOwner) return true;
 
     const [isEditor, votesCount] = await Promise.all([
-      this.usersService.isEditor(votingOption.voting.broadcaster, user),
+      this.usersService.isHasPermissions(
+        votingOption.voting.broadcaster,
+        user,
+        { editor: true },
+      ),
       this.voteRepo.count({ where: { votingOption: { id: votingOptionId } } }),
     ]);
 

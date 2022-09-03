@@ -434,7 +434,9 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
 
     if (!broadcaster || !initiator) return false;
 
-    return this.usersService.isEditor(broadcaster, initiator);
+    return this.usersService.isHasPermissions(broadcaster, initiator, {
+      editor: true,
+    });
   }
 
   private static canVote(

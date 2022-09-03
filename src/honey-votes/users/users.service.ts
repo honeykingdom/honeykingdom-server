@@ -291,9 +291,9 @@ export class UsersService {
             getChannelTokenPromises(claims, channelToken),
           );
 
-          roles.editor = editors.has(user.id);
-          roles.mod = mods.has(user.id);
-          roles.vip = vips.has(user.id);
+          roles.editor = editors ? editors.has(user.id) : null;
+          roles.mod = mods ? mods.has(user.id) : null;
+          roles.vip = vips ? vips.has(user.id) : null;
 
           break;
         } catch (e) {
@@ -315,13 +315,21 @@ export class UsersService {
         if (!userToken) break;
 
         try {
-          const [[isSub, subTier], [isFollower, minutesFollowed]] =
-            await Promise.all(getUserTokenPromises(claims, userToken));
+          const [isSubResponse, isFollowerResponse] = await Promise.all(
+            getUserTokenPromises(claims, userToken),
+          );
 
-          roles.sub = isSub;
-          roles.subTier = subTier;
-          roles.follower = isFollower;
-          roles.minutesFollowed = minutesFollowed;
+          if (isSubResponse) {
+            const [isSub, subTier] = isSubResponse;
+            roles.sub = isSub;
+            roles.subTier = subTier;
+          }
+
+          if (isFollowerResponse) {
+            const [isFollower, minutesFollowed] = isFollowerResponse;
+            roles.follower = isFollower;
+            roles.minutesFollowed = minutesFollowed;
+          }
 
           break;
         } catch (e) {
@@ -339,7 +347,7 @@ export class UsersService {
     return roles;
   }
 
-  async isSub(
+  private async isSub(
     channelId: string,
     userId: string,
     userAccessToken: string,
@@ -371,7 +379,7 @@ export class UsersService {
     return isSub;
   }
 
-  async isFollower(
+  private async isFollower(
     channelId: string,
     userId: string,
     userAccessToken: string,
@@ -402,24 +410,6 @@ export class UsersService {
 
     this.cache.set(key, isFollower);
     return isFollower;
-  }
-
-  async isEditor(channel: User, user: User) {
-    const token = this.decryptToken(channel.credentials.encryptedAccessToken);
-    const editors = await this.getChannelEditors(channel.id, token);
-    return editors.has(user.id);
-  }
-
-  async isMod(channel: User, user: User) {
-    const token = this.decryptToken(channel.credentials.encryptedAccessToken);
-    const mods = await this.getChannelMods(channel.id, token);
-    return mods.has(user.id);
-  }
-
-  async isVip(channel: User, user: User) {
-    const token = this.decryptToken(channel.credentials.encryptedAccessToken);
-    const vips = await this.getChannelVips(channel.id, token);
-    return vips.has(user.id);
   }
 
   private async getChannelEditors(
@@ -527,9 +517,9 @@ export class UsersService {
 
       return credentials.accessToken;
     } catch (e) {
-      this.logger.error(`refreshUserToken failed: ${user.login}`, e.stack);
+      this.logger.error(`refreshUserToken failed: ${user.login} ${e}`);
 
-      this.store({
+      await this.store({
         ...user,
         credentials: {
           accessToken: EMPTY_TOKEN,

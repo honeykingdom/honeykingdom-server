@@ -124,7 +124,9 @@ export class VotingService {
 
     if (!user || !channel) return false;
 
-    const isEditor = await this.usersService.isEditor(channel, user);
+    const isEditor = await this.usersService.isHasPermissions(channel, user, {
+      editor: true,
+    });
 
     if (!isEditor) {
       throw new ForbiddenException(HoneyError.VotingCreateNoPermission);
@@ -143,7 +145,11 @@ export class VotingService {
 
     if (isOwner) return true;
 
-    const isEditor = await this.usersService.isEditor(voting.broadcaster, user);
+    const isEditor = await this.usersService.isHasPermissions(
+      voting.broadcaster,
+      user,
+      { editor: true },
+    );
 
     if (!isEditor) {
       throw new ForbiddenException(HoneyError.VotingCreateNoPermission);
