@@ -95,7 +95,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       expectedStatusCode === HttpStatus.BAD_REQUEST ||
       expectedStatusCode === HttpStatus.FORBIDDEN
     ) {
-      expect(chatVoting).toBeUndefined();
+      expect(chatVoting).toBeNull();
     }
   };
 
@@ -216,7 +216,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         await ctx.chatVotingRepo.findOneBy({
           broadcasterId: chatVoting.broadcasterId,
         }),
-      ).toBeUndefined();
+      ).toBeNull();
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {

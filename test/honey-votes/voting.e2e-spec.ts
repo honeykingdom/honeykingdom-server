@@ -595,10 +595,10 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
             return async () => {
               expect(
                 await ctx.votingOptionRepo.findOneBy({ id: votingOption1.id }),
-              ).toBeUndefined();
+              ).toBeNull();
               expect(
                 await ctx.votingOptionRepo.findOneBy({ id: votingOption2.id }),
-              ).toBeUndefined();
+              ).toBeNull();
 
               expect(
                 await ctx.voteRepo.findOne({
@@ -607,7 +607,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
                     voting: { id: vote1.voting.id },
                   },
                 }),
-              ).toBeUndefined();
+              ).toBeNull();
               expect(
                 await ctx.voteRepo.findOne({
                   where: {
@@ -615,7 +615,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
                     voting: { id: vote2.voting.id },
                   },
                 }),
-              ).toBeUndefined();
+              ).toBeNull();
               expect(
                 await ctx.voteRepo.findOne({
                   where: {
@@ -623,7 +623,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
                     voting: { id: vote3.voting.id },
                   },
                 }),
-              ).toBeUndefined();
+              ).toBeNull();
             };
           },
         });

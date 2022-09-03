@@ -194,7 +194,7 @@ describe('HoneyVotes - ChatGoal (e2e)', () => {
 
         expect(
           await ctx.chatGoalRepo.findOneBy({ broadcasterId: broadcaster.id }),
-        ).toBeUndefined();
+        ).toBeNull();
       });
     });
 

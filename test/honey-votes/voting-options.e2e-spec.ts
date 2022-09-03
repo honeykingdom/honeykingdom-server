@@ -844,7 +844,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
                 author: { id: vote.author.id },
                 voting: { id: vote.voting.id },
               }),
-            ).toBeUndefined();
+            ).toBeNull();
           };
         },
       });
