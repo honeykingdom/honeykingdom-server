@@ -20,17 +20,19 @@ import {
 } from './utils/common';
 import { POSTGRES_MAX_INTEGER } from '../constants';
 import HoneyVotesContext from './utils/honey-votes-context.class';
+import MockRequests from './utils/mock-requests.class';
 
 describe('HoneyVotes - Votes - Voting (e2e)', () => {
   const ctx = new HoneyVotesContext();
+  const mr = new MockRequests();
 
-  beforeAll(() => ctx.create());
-  afterEach(() => ctx.clearTables());
-  afterAll(() => ctx.destroy());
+  beforeAll(() => Promise.all([ctx.create(), mr.listen()]));
+  afterEach(() => Promise.all([ctx.clearTables(), mr.resetHandlers()]));
+  afterAll(() => Promise.all([ctx.destroy(), mr.close()]));
 
-  const testCreateVoting = createTestCreateVoting(ctx);
-  const testUpdateVoting = createTestUpdateVoting(ctx);
-  const testDeleteVoting = createTestDeleteVoting(ctx);
+  const testCreateVoting = createTestCreateVoting(ctx, mr);
+  const testUpdateVoting = createTestUpdateVoting(ctx, mr);
+  const testDeleteVoting = createTestDeleteVoting(ctx, mr);
 
   describe('/voting (POST)', () => {
     describe('permissions', () => {
@@ -49,7 +51,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testCreateVoting(201, {
           broadcaster: user,
           initiator: editor,
-          initiatorTypes: { isEditor: true },
+          initiatorRoles: { editor: true },
         });
       });
 
@@ -447,7 +449,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testUpdateVoting(200, {
           broadcaster: user,
           initiator: editor,
-          initiatorTypes: { isEditor: true },
+          initiatorRoles: { editor: true },
         });
       });
 
@@ -507,7 +509,7 @@ describe('HoneyVotes - Votes - Voting (e2e)', () => {
         await testDeleteVoting(200, {
           broadcaster: user,
           initiator: editor,
-          initiatorTypes: { isEditor: true },
+          initiatorRoles: { editor: true },
         });
       });
 

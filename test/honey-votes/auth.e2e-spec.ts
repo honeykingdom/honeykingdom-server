@@ -1,6 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
-import { User } from '../../src/honey-votes/users/entities/user.entity';
 import { API_BASE } from '../../src/honey-votes/honey-votes.constants';
 import { RefreshTokenDto } from '../../src/honey-votes/auth/dto/refresh-token.dto';
 import { JwtPayload } from '../../src/honey-votes/auth/auth.interface';
@@ -29,7 +28,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
         .post(`${API_BASE}/auth/refresh-token`)
         .set(...ctx.getAuthorizationHeader(user))
         .send(refreshTokenDto)
-        .expect(201)
+        .expect(HttpStatus.CREATED)
         .expect((response) => {
           const { accessToken, refreshToken } = response.body;
 
@@ -65,7 +64,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
         .post(`${API_BASE}/auth/refresh-token`)
         .set('Authorization', 'Bearer not-valid-access-token')
         .send(refreshTokenDto)
-        .expect(401);
+        .expect(HttpStatus.UNAUTHORIZED);
     });
 
     it('should return 400 if refresh token is invalid', async () => {
@@ -78,7 +77,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
         .post(`${API_BASE}/auth/refresh-token`)
         .set(...ctx.getAuthorizationHeader(user))
         .send(refreshTokenDto)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('should return 400 if refresh token is expired', async () => {
@@ -96,7 +95,7 @@ describe('HoneyVotes - Auth (e2e)', () => {
         .post(`${API_BASE}/auth/refresh-token`)
         .set(...ctx.getAuthorizationHeader(user))
         .send(refreshTokenDto)
-        .expect(400);
+        .expect(HttpStatus.BAD_REQUEST);
     });
   });
 });

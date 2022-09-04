@@ -8,16 +8,18 @@ import { VotingOptionType } from '../../src/honey-votes/honey-votes.constants';
 import { createTestCreateVote, createTestDeleteVote } from './utils/common';
 import { POSTGRES_MAX_INTEGER } from '../constants';
 import HoneyVotesContext from './utils/honey-votes-context.class';
+import MockRequests from './utils/mock-requests.class';
 
 describe('HoneyVotes - Votes - Votes (e2e)', () => {
   const ctx = new HoneyVotesContext();
+  const mr = new MockRequests();
 
-  beforeAll(() => ctx.create());
-  afterEach(() => ctx.clearTables());
-  afterAll(() => ctx.destroy());
+  beforeAll(() => Promise.all([ctx.create(), mr.listen()]));
+  afterEach(() => Promise.all([ctx.clearTables(), mr.resetHandlers()]));
+  afterAll(() => Promise.all([ctx.destroy(), mr.close()]));
 
-  const testCreateVote = createTestCreateVote(ctx);
-  const testDeleteVote = createTestDeleteVote(ctx);
+  const testCreateVote = createTestCreateVote(ctx, mr);
+  const testDeleteVote = createTestDeleteVote(ctx, mr);
 
   describe('/votes (POST)', () => {
     describe('permissions', () => {
@@ -38,7 +40,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: editor,
-          initiatorTypes: { isEditor: true },
+          initiatorRoles: { editor: true },
         });
       });
 
@@ -49,7 +51,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: moderator,
-          initiatorTypes: { isMod: true },
+          initiatorRoles: { mod: true },
           votingParams: {
             permissions: { [TwitchUserType.Mod]: { canVote: true } },
           },
@@ -63,7 +65,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: moderator,
-          initiatorTypes: { isMod: true },
+          initiatorRoles: { mod: true },
         });
       });
 
@@ -78,7 +80,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier1,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier1 },
           votingParams: {
             permissions: {
               [TwitchUserType.Sub]: {
@@ -97,7 +99,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier1,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier1 },
         });
       });
 
@@ -108,7 +110,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier2,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier2 },
           votingParams: {
             permissions: {
               [TwitchUserType.Sub]: {
@@ -127,7 +129,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier2,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier2 },
         });
       });
 
@@ -138,7 +140,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier3,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier3 },
           votingParams: {
             permissions: {
               [TwitchUserType.Sub]: {
@@ -157,7 +159,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: subTier3,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier3 },
         });
       });
 
@@ -168,7 +170,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: follower,
-          initiatorTypes: { isFollower: true },
+          initiatorRoles: { follower: true },
           votingParams: {
             permissions: { [TwitchUserType.Follower]: { canVote: true } },
           },
@@ -182,7 +184,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: follower,
-          initiatorTypes: { isFollower: true },
+          initiatorRoles: { follower: true },
         });
       });
 
@@ -193,7 +195,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: follower,
-          initiatorTypes: { isFollower: true, followedMinutes: 120 },
+          initiatorRoles: { follower: true, minutesFollowed: 120 },
           votingParams: {
             permissions: {
               [TwitchUserType.Follower]: {
@@ -212,7 +214,7 @@ describe('HoneyVotes - Votes - Votes (e2e)', () => {
           broadcaster: user,
           votingOptionAuthor: user,
           initiator: follower,
-          initiatorTypes: { isFollower: true, followedMinutes: 10 },
+          initiatorRoles: { follower: true, minutesFollowed: 10 },
           votingParams: {
             permissions: {
               [TwitchUserType.Follower]: {

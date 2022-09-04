@@ -1,6 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
-import { mockGetChannelEditors } from './utils/mock-requests';
 import { OnBeforeTest } from './utils/common';
 import { User } from '../../src/honey-votes/users/entities/user.entity';
 import {
@@ -23,13 +22,16 @@ import {
 import HoneyVotesContext, {
   twitchChatServiceMock,
 } from './utils/honey-votes-context.class';
+import MockRequests from './utils/mock-requests.class';
+import MakeResponse from './utils/make-response.class';
 
 describe('HoneyVotes - ChatVotes (e2e)', () => {
   const ctx = new HoneyVotesContext();
+  const mr = new MockRequests();
 
-  beforeAll(() => ctx.create());
-  afterEach(() => ctx.clearTables());
-  afterAll(() => ctx.destroy());
+  beforeAll(() => Promise.all([ctx.create(), mr.listen()]));
+  afterEach(() => Promise.all([ctx.clearTables(), mr.resetHandlers()]));
+  afterAll(() => Promise.all([ctx.destroy(), mr.close()]));
 
   const chatVotingPermissionsForbidden: ChatVotingPermissions = {
     [TwitchUserType.Viewer]: false,
@@ -70,7 +72,12 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       ...createChatVotingDto,
     };
 
-    mockGetChannelEditors(isEditor ? [initiator] : []);
+    mr.mockTwitchGetChannelEditors({
+      status: 200,
+      response: MakeResponse.twitchGetChannelEditors(
+        isEditor ? [initiator] : [],
+      ),
+    });
 
     await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/chat-votes`)
@@ -122,7 +129,12 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       ...chatVotingParams,
     } as ChatVoting);
 
-    mockGetChannelEditors(isEditor ? [initiator] : []);
+    mr.mockTwitchGetChannelEditors({
+      status: 200,
+      response: MakeResponse.twitchGetChannelEditors(
+        isEditor ? [initiator] : [],
+      ),
+    });
 
     const finalUrl =
       url || `${API_BASE}/chat-votes/${chatVoting.broadcasterId}`;
@@ -200,7 +212,12 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
       broadcasterId: broadcaster.id,
     };
 
-    mockGetChannelEditors(isEditor ? [initiator] : []);
+    mr.mockTwitchGetChannelEditors({
+      status: 200,
+      response: MakeResponse.twitchGetChannelEditors(
+        isEditor ? [initiator] : [],
+      ),
+    });
 
     const onAfterTest = await onBeforeTest({ chatVoting });
 
@@ -268,7 +285,12 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
         })) as ChatVote[],
       );
 
-    mockGetChannelEditors(isEditor ? [initiator] : []);
+    mr.mockTwitchGetChannelEditors({
+      status: 200,
+      response: MakeResponse.twitchGetChannelEditors(
+        isEditor ? [initiator] : [],
+      ),
+    });
 
     const onAfterTest = await onBeforeTest({ chatVoting });
 

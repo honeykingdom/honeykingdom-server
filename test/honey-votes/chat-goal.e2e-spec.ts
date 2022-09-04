@@ -1,6 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
-import { mockGetChannelEditors } from './utils/mock-requests';
 import { User } from '../../src/honey-votes/users/entities/user.entity';
 import { ChatGoal } from '../../src/honey-votes/chat-goal/entities/chat-goal.entity';
 import { CreateChatGoalDto } from '../../src/honey-votes/chat-goal/dto/create-chat-goal.dto';
@@ -17,13 +16,15 @@ import {
 import HoneyVotesContext, {
   twitchChatServiceMock,
 } from './utils/honey-votes-context.class';
+import MockRequests from './utils/mock-requests.class';
 
 describe.skip('HoneyVotes - ChatGoal (e2e)', () => {
   const ctx = new HoneyVotesContext();
+  const mr = new MockRequests();
 
-  beforeAll(() => ctx.create());
-  afterEach(() => ctx.clearTables());
-  afterAll(() => ctx.destroy());
+  beforeAll(() => Promise.all([ctx.create(), mr.listen()]));
+  afterEach(() => Promise.all([ctx.clearTables(), mr.resetHandlers()]));
+  afterAll(() => Promise.all([ctx.destroy(), mr.close()]));
 
   type Role =
     | TwitchUserType.Broadcaster
@@ -62,7 +63,7 @@ describe.skip('HoneyVotes - ChatGoal (e2e)', () => {
     if (role === TwitchUserType.Editor) initiator = editor;
     if (role === TwitchUserType.Viewer) initiator = viewer;
 
-    mockGetChannelEditors([editor]);
+    mr.mockTwitchGetChannelEditors({ status: 200, response: [editor] });
 
     await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/chat-goal`)
@@ -106,7 +107,7 @@ describe.skip('HoneyVotes - ChatGoal (e2e)', () => {
     if (role === TwitchUserType.Editor) initiator = editor;
     if (role === TwitchUserType.Viewer) initiator = viewer;
 
-    mockGetChannelEditors([editor]);
+    mr.mockTwitchGetChannelEditors({ status: 200, response: [editor] });
 
     await request(ctx.app.getHttpServer())
       .put(`${API_BASE}/chat-goal/${goalId}`)
@@ -139,7 +140,7 @@ describe.skip('HoneyVotes - ChatGoal (e2e)', () => {
     if (role === TwitchUserType.Editor) initiator = editor;
     if (role === TwitchUserType.Viewer) initiator = viewer;
 
-    mockGetChannelEditors([editor]);
+    mr.mockTwitchGetChannelEditors({ status: 200, response: [editor] });
 
     await request(ctx.app.getHttpServer())
       .delete(`${API_BASE}/chat-goal/${goalId}`)

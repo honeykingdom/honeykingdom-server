@@ -11,7 +11,6 @@ import {
   VOTING_OPTION_CARD_DESCRIPTION_MAX_LENGTH,
   VOTING_OPTION_CARD_TITLE_MAX_LENGTH,
 } from '../../src/honey-votes/votes/votes.constants';
-import { mockGetFilmData, mockIgdbGames } from './utils/mock-requests';
 import { movie371 } from '../kinopoisk-api.mock';
 import { game379 } from '../igdb-api.mock';
 import {
@@ -20,16 +19,18 @@ import {
 } from './utils/common';
 import { POSTGRES_MAX_INTEGER } from '../constants';
 import HoneyVotesContext from './utils/honey-votes-context.class';
+import MockRequests from './utils/mock-requests.class';
 
 describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
   const ctx = new HoneyVotesContext();
+  const mr = new MockRequests();
 
-  beforeAll(() => ctx.create());
-  afterEach(() => ctx.clearTables());
-  afterAll(() => ctx.destroy());
+  beforeAll(() => Promise.all([ctx.create(), mr.listen()]));
+  afterEach(() => Promise.all([ctx.clearTables(), mr.resetHandlers()]));
+  afterAll(() => Promise.all([ctx.destroy(), mr.close()]));
 
-  const testCreateVotingOption = createTestCreateVotingOption(ctx);
-  const testDeleteVotingOption = createTestDeleteVotingOption(ctx);
+  const testCreateVotingOption = createTestCreateVotingOption(ctx, mr);
+  const testDeleteVotingOption = createTestDeleteVotingOption(ctx, mr);
 
   describe('/voting-options (POST)', () => {
     describe('permissions', () => {
@@ -48,7 +49,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: editor,
-          initiatorTypes: { isEditor: true },
+          initiatorRoles: { editor: true },
         });
       });
 
@@ -58,7 +59,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: moderator,
-          initiatorTypes: { isMod: true },
+          initiatorRoles: { mod: true },
           votingParams: {
             permissions: {
               [TwitchUserType.Mod]: { canAddOptions: true },
@@ -73,7 +74,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: moderator,
-          initiatorTypes: { isMod: true },
+          initiatorRoles: { mod: true },
         });
       });
 
@@ -87,7 +88,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: subTier1,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier1 },
           votingParams: {
             permissions: {
               [TwitchUserType.Sub]: {
@@ -105,7 +106,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: subTier1,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier1 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier1 },
         });
       });
 
@@ -115,7 +116,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: subTier2,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier2 },
           votingParams: {
             permissions: {
               [TwitchUserType.Sub]: {
@@ -133,7 +134,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: subTier2,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier2 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier2 },
         });
       });
 
@@ -143,7 +144,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: subTier3,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier3 },
           votingParams: {
             permissions: {
               [TwitchUserType.Sub]: {
@@ -161,7 +162,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: subTier3,
-          initiatorTypes: { isSub: true, tier: SubTier.Tier3 },
+          initiatorRoles: { sub: true, subTier: SubTier.Tier3 },
         });
       });
 
@@ -171,7 +172,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: follower,
-          initiatorTypes: { isFollower: true },
+          initiatorRoles: { follower: true },
           votingParams: {
             permissions: {
               [TwitchUserType.Follower]: { canAddOptions: true },
@@ -186,7 +187,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: follower,
-          initiatorTypes: { isFollower: true },
+          initiatorRoles: { follower: true },
         });
       });
 
@@ -196,7 +197,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(201, {
           broadcaster: user,
           initiator: follower,
-          initiatorTypes: { isFollower: true, followedMinutes: 120 },
+          initiatorRoles: { follower: true, minutesFollowed: 120 },
           votingParams: {
             permissions: {
               [TwitchUserType.Follower]: {
@@ -214,7 +215,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         await testCreateVotingOption(403, {
           broadcaster: user,
           initiator: follower,
-          initiatorTypes: { isFollower: true, followedMinutes: 10 },
+          initiatorRoles: { follower: true, minutesFollowed: 10 },
           votingParams: {
             permissions: {
               [TwitchUserType.Follower]: {
@@ -281,7 +282,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const movieId = 371;
 
-          mockGetFilmData(movieId, movie371);
+          mr.mockKinopoiskGetFilmData({ status: 200, response: movie371 });
 
           await testCreateVotingOption(201, {
             broadcaster: user,
@@ -305,7 +306,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const movieId = 371;
 
-          mockGetFilmData(movieId, movie371);
+          mr.mockKinopoiskGetFilmData({ status: 200, response: movie371 });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -318,7 +319,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const movieId = 371;
 
-          mockGetFilmData(movieId, movie371);
+          mr.mockKinopoiskGetFilmData({ status: 200, response: movie371 });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -334,7 +335,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const movieId = 371;
 
-          mockGetFilmData(movieId, movie371);
+          mr.mockKinopoiskGetFilmData({ status: 200, response: movie371 });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -350,7 +351,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const movieId = 1;
 
-          mockGetFilmData(movieId, '', { statusCode: 404 });
+          mr.mockKinopoiskGetFilmData({ status: 404 });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -368,7 +369,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const movieId = 371;
 
-          mockGetFilmData(movieId, movie371);
+          mr.mockKinopoiskGetFilmData({ status: 200, response: movie371 });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -402,7 +403,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const gameSlug = 'metal-gear-solid-3-snake-eater';
 
-          mockIgdbGames([game379]);
+          mr.mockIgdbGames({ status: 200, response: [game379] });
+          mr.mockTwitchOAuthToken({ status: 200 });
 
           await testCreateVotingOption(201, {
             broadcaster: user,
@@ -425,7 +427,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         it('without required fields', async () => {
           const [user] = await ctx.createUsers();
 
-          mockIgdbGames([game379]);
+          mr.mockIgdbGames({ status: 200, response: [game379] });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -437,7 +439,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         it('id: invalid type', async () => {
           const [user] = await ctx.createUsers();
 
-          mockIgdbGames([game379]);
+          mr.mockIgdbGames({ status: 200, response: [game379] });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -452,7 +454,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
         it('id: empty', async () => {
           const [user] = await ctx.createUsers();
 
-          mockIgdbGames([game379]);
+          mr.mockIgdbGames({ status: 200, response: [game379] });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -468,7 +470,8 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const gameSlug = 'non-existing-game';
 
-          mockIgdbGames([]);
+          mr.mockIgdbGames({ status: 200, response: [] });
+          mr.mockTwitchOAuthToken({ status: 200 });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -486,7 +489,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           const [user] = await ctx.createUsers();
           const gameSlug = 'metal-gear-solid-3-snake-eater';
 
-          mockIgdbGames([game379]);
+          mr.mockIgdbGames({ status: 200, response: [game379] });
 
           await testCreateVotingOption(400, {
             broadcaster: user,
@@ -743,7 +746,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           broadcaster: user,
           author: viewer,
           initiator: editor,
-          initiatorTypes: { isEditor: true },
+          initiatorRoles: { editor: true },
         });
       });
 
@@ -754,7 +757,7 @@ describe('HoneyVotes - Votes - VotingOption (e2e)', () => {
           broadcaster: user,
           author: viewer,
           initiator: editor,
-          initiatorTypes: { isEditor: true },
+          initiatorRoles: { editor: true },
           votingParams: { canManageVotingOptions: false },
         });
       });
