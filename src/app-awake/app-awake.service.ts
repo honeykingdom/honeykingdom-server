@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -8,6 +8,7 @@ import { Config } from '../config/config.interface';
 // https://render.com/docs/free#free-web-services
 @Injectable()
 export class AppAwakeService {
+  private readonly logger = new Logger(AppAwakeService.name);
   private readonly url: string;
 
   constructor(
@@ -21,6 +22,7 @@ export class AppAwakeService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   private handleCron() {
+    this.logger.log('ping');
     lastValueFrom(this.httpService.get(this.url));
   }
 }
