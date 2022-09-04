@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: bahmutov/npm-install@v1
       - run: yarn test --ci --coverage
-      - run: yarn test:e2e --ci --coverage --maxWorkers=1
+      - run: yarn test:e2e --ci --coverage
 
   # deploy:
   #   name: Deploy to Render
