@@ -18,7 +18,7 @@ import HoneyVotesContext, {
   twitchChatServiceMock,
 } from './utils/honey-votes-context.class';
 
-describe('HoneyVotes - ChatGoal (e2e)', () => {
+describe.skip('HoneyVotes - ChatGoal (e2e)', () => {
   const ctx = new HoneyVotesContext();
 
   beforeAll(() => ctx.create());

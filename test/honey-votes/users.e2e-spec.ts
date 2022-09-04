@@ -102,13 +102,9 @@ const makeGetUserFollowsResponse = (
 describe('HoneyVotes - Users (e2e)', () => {
   const ctx = new HoneyVotesContext();
 
-  beforeEach(() => ctx.create());
+  beforeAll(() => ctx.create());
   afterEach(() => ctx.clearTables());
-  afterEach(async () => {
-    // prevent error "QueryFailedError: Connection terminated"
-    await new Promise((res) => setTimeout(res, 250));
-    await ctx.destroy();
-  });
+  afterAll(() => ctx.destroy());
 
   type UserType = 'editor' | 'mod' | 'sub' | 'follower';
 

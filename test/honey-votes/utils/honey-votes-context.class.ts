@@ -7,6 +7,7 @@ import {
   getRepositoryToken,
   TypeOrmModule,
 } from '@nestjs/typeorm';
+import cacheManager from 'cache-manager';
 import { EntityManager, Repository } from 'typeorm';
 import { TwitchChatService } from '../../../src/twitch-chat/twitch-chat.service';
 import { Config } from '../../../src/config/config.interface';
@@ -50,6 +51,15 @@ export const twitchChatServiceMock: Partial<TwitchChatService> = {
 
 jest.mock('../../../src/twitch-chat/twitch-chat.service.ts', () => ({
   TwitchChatService: jest.fn().mockImplementation(() => twitchChatServiceMock),
+}));
+
+jest.spyOn(cacheManager, 'caching').mockImplementation(() => ({
+  set: jest.fn(),
+  wrap: jest.fn(),
+  get: jest.fn(),
+  del: jest.fn(),
+  reset: jest.fn(),
+  store: null,
 }));
 
 class HoneyVotesContext {
