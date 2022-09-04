@@ -48,9 +48,7 @@ export type GetVipsResponse = {
     user_name: string;
     user_login: string;
   }[];
-  pagination: {
-    cursor: string;
-  };
+  pagination: { cursor?: string };
 };
 
 // GetModerators
