@@ -10,6 +10,7 @@ import {
 import { EntityManager, Repository } from 'typeorm';
 import { TwitchChatService } from '../../../src/twitch-chat/twitch-chat.service';
 import { Config } from '../../../src/config/config.interface';
+import { IgdbApiOptions } from '../../../src/igdb-api/entities/igdb-api-options.entity';
 import { honeyVotesEntities } from '../../../src/honey-votes/honey-votes.entities';
 import { HoneyVotesModule } from '../../../src/honey-votes/honey-votes.module';
 import { ChatGoalData } from '../../../src/honey-votes/chat-goal/entities/chat-goal-data.entity';
@@ -73,7 +74,7 @@ class HoneyVotesContext {
         TypeOrmModule.forRoot({
           type: 'postgres',
           url: 'postgresql://postgres:postgres@localhost:5432/postgres',
-          entities: honeyVotesEntities,
+          entities: [...honeyVotesEntities, IgdbApiOptions],
           synchronize: true,
           dropSchema: true,
           // https://stackoverflow.com/questions/58220333
