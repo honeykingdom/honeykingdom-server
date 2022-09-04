@@ -251,7 +251,8 @@ export class VotingOptionsService {
     try {
       response = await this.kinopoiskApiService.getFilmData(movieId);
     } catch (e) {
-      if (e.response.status === 404) {
+      console.log(e);
+      if (e.response?.status === 404) {
         throw new BadRequestException(
           HoneyError.VotingOptionCreateKinopoiskMovieNotFound,
         );
