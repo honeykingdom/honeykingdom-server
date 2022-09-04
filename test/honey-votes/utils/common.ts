@@ -26,14 +26,9 @@ import {
   VOTING_PERMISSIONS_DEFAULT,
   VOTING_SHOW_VALUES_DEFAULT,
 } from '../../../src/honey-votes/votes/votes.constants';
-import {
-  mockCheckUserSubscription,
-  mockGetChannelEditors,
-  mockGetModerators,
-  mockGetUserFollows,
-} from './mock-requests';
 import { DeleteVoteDto } from '../../../src/honey-votes/votes/dto/delete-vote.dto';
 import HoneyVotesContext from './honey-votes-context.class';
+import MockRequests, { MockUserRoles } from './mock-requests.class';
 
 const defaultVotingParams: Partial<Voting> = {
   id: expect.any(Number),
@@ -101,43 +96,6 @@ export const votingPermissionsForbidden: VotingPermissions = {
   [TwitchUserType.Viewer]: { canVote: false, canAddOptions: false },
 };
 
-type UserTypes = {
-  isEditor?: boolean;
-  isMod?: boolean;
-  isVip?: boolean;
-  isSub?: boolean;
-  tier?: SubTier;
-  isFollower?: boolean;
-  followedMinutes?: number;
-};
-
-const mockUserTypes = (
-  broadcaster: User,
-  user: User,
-  {
-    isEditor,
-    isMod,
-    isVip,
-    isSub,
-    tier,
-    isFollower,
-    followedMinutes,
-  }: UserTypes = {},
-) => {
-  // TODO: test is axios called with correct arguments
-
-  mockGetChannelEditors(isEditor ? [user] : []);
-  mockGetModerators(isMod ? [user] : []);
-  mockCheckUserSubscription(
-    ...((isSub ? [broadcaster, tier] : []) as [User?, SubTier?]),
-  );
-  mockGetUserFollows(
-    ...((isFollower
-      ? [broadcaster, user, sub(new Date(), { minutes: followedMinutes })]
-      : []) as [User?, User?, Date?]),
-  );
-};
-
 export type OnBeforeTest<T> = (
   ctx: T,
 ) => Promise<void | OnAfterTest> | void | OnAfterTest;
@@ -146,7 +104,7 @@ type OnAfterTest = () => Promise<void> | void;
 // Voting
 
 export const createTestCreateVoting =
-  (ctx: HoneyVotesContext) =>
+  (ctx: HoneyVotesContext, mr: MockRequests) =>
   async (
     expectedStatusCode:
       | HttpStatus.CREATED
@@ -155,12 +113,12 @@ export const createTestCreateVoting =
     {
       broadcaster,
       initiator,
-      initiatorTypes,
+      initiatorRoles,
       createVotingDto,
     }: {
       broadcaster: User;
       initiator: User;
-      initiatorTypes?: UserTypes;
+      initiatorRoles?: MockUserRoles;
       createVotingDto?: CreateVotingDto;
     },
   ) => {
@@ -175,7 +133,7 @@ export const createTestCreateVoting =
       ...createVotingDto,
     };
 
-    mockUserTypes(broadcaster, initiator, initiatorTypes);
+    mr.mockTwitchUserRoles(broadcaster, initiator, initiatorRoles);
 
     await request(ctx.app.getHttpServer())
       .post(`${API_BASE}/voting`)
@@ -205,19 +163,19 @@ export const createTestCreateVoting =
   };
 
 export const createTestUpdateVoting =
-  (ctx: HoneyVotesContext) =>
+  (ctx: HoneyVotesContext, mr: MockRequests) =>
   async (
     expectedStatusCode: HttpStatus.CREATED | HttpStatus.FORBIDDEN,
     {
       broadcaster,
       initiator,
-      initiatorTypes,
+      initiatorRoles,
       // updateVotingDto,
       url,
     }: {
       broadcaster: User;
       initiator: User;
-      initiatorTypes?: UserTypes;
+      initiatorRoles?: MockUserRoles;
       // updateVotingDto: UpdateVotingDto;
       url?: string;
     },
@@ -227,7 +185,7 @@ export const createTestUpdateVoting =
       title: 'Test Voting',
     } as Voting);
 
-    mockUserTypes(broadcaster, initiator, initiatorTypes);
+    mr.mockTwitchUserRoles(broadcaster, initiator, initiatorRoles);
 
     const finalUrl = url || `${API_BASE}/voting/${voting.id}`;
 
@@ -272,19 +230,19 @@ export const createTestUpdateVoting =
   };
 
 export const createTestDeleteVoting =
-  (ctx: HoneyVotesContext) =>
+  (ctx: HoneyVotesContext, mr: MockRequests) =>
   async (
     expectedStatusCode: HttpStatus.OK | HttpStatus.FORBIDDEN,
     {
       broadcaster,
       initiator,
-      initiatorTypes,
+      initiatorRoles,
       url,
       onBeforeTest = () => {},
     }: {
       broadcaster: User;
       initiator: User;
-      initiatorTypes?: UserTypes;
+      initiatorRoles?: MockUserRoles;
       url?: string;
       onBeforeTest?: OnBeforeTest<{ voting: Voting }>;
     },
@@ -298,7 +256,7 @@ export const createTestDeleteVoting =
       title: 'Test Voting',
     };
 
-    mockUserTypes(broadcaster, initiator, initiatorTypes);
+    mr.mockTwitchUserRoles(broadcaster, initiator, initiatorRoles);
 
     const onAfterTest = await onBeforeTest({ voting });
 
@@ -331,7 +289,7 @@ export const createTestDeleteVoting =
 // VotingOption
 
 export const createTestCreateVotingOption =
-  (ctx: HoneyVotesContext) =>
+  (ctx: HoneyVotesContext, mr: MockRequests) =>
   async (
     expectedStatusCode:
       | HttpStatus.CREATED
@@ -340,7 +298,7 @@ export const createTestCreateVotingOption =
     {
       broadcaster,
       initiator,
-      initiatorTypes,
+      initiatorRoles,
       votingParams = {},
       createVotingOptionDto = {},
       expectedVotingOptionParams = {},
@@ -349,7 +307,7 @@ export const createTestCreateVotingOption =
     }: {
       broadcaster: User;
       initiator: User;
-      initiatorTypes?: UserTypes;
+      initiatorRoles?: MockUserRoles;
       votingParams?: Partial<Omit<Voting, 'permissions'>> & {
         permissions?: DeepPartial<VotingPermissions>;
       };
@@ -382,7 +340,7 @@ export const createTestCreateVotingOption =
       ...expectedVotingOptionParams,
     };
 
-    mockUserTypes(broadcaster, initiator, initiatorTypes);
+    mr.mockTwitchUserRoles(broadcaster, initiator, initiatorRoles);
 
     const onAfterTest = await onBeforeTest({ voting });
 
@@ -444,14 +402,14 @@ export const createTestCreateVotingOption =
   };
 
 export const createTestDeleteVotingOption =
-  (ctx: HoneyVotesContext) =>
+  (ctx: HoneyVotesContext, mr: MockRequests) =>
   async (
     expectedStatusCode: HttpStatus.OK | HttpStatus.FORBIDDEN,
     {
       broadcaster,
       author,
       initiator,
-      initiatorTypes,
+      initiatorRoles,
       votingParams = {},
       url,
       skipDbCheck,
@@ -460,7 +418,7 @@ export const createTestDeleteVotingOption =
       broadcaster: User;
       author: User;
       initiator: User;
-      initiatorTypes?: UserTypes;
+      initiatorRoles?: MockUserRoles;
       votingParams?: Partial<Voting>;
       url?: string;
       skipDbCheck?: boolean;
@@ -491,7 +449,7 @@ export const createTestDeleteVotingOption =
       cardTitle: 'Test VotingOption',
     };
 
-    mockUserTypes(broadcaster, initiator, initiatorTypes);
+    mr.mockTwitchUserRoles(broadcaster, initiator, initiatorRoles);
 
     const onAfterTest = await onBeforeTest({ voting, votingOption });
 
@@ -530,7 +488,7 @@ export const createTestDeleteVotingOption =
 // Vote
 
 export const createTestCreateVote =
-  (ctx: HoneyVotesContext) =>
+  (ctx: HoneyVotesContext, mr: MockRequests) =>
   async (
     expectedStatusCode:
       | HttpStatus.CREATED
@@ -540,7 +498,7 @@ export const createTestCreateVote =
       broadcaster,
       votingOptionAuthor,
       initiator,
-      initiatorTypes,
+      initiatorRoles,
       votingParams = {},
       createVoteDto,
       skipDbCheck,
@@ -549,7 +507,7 @@ export const createTestCreateVote =
       broadcaster: User;
       votingOptionAuthor: User;
       initiator: User;
-      initiatorTypes?: UserTypes;
+      initiatorRoles?: MockUserRoles;
       votingParams?: Partial<Omit<Voting, 'permissions'>> & {
         permissions?: DeepPartial<VotingPermissions>;
       };
@@ -585,7 +543,7 @@ export const createTestCreateVote =
       votingOptionId: votingOption.id,
     };
 
-    mockUserTypes(broadcaster, initiator, initiatorTypes);
+    mr.mockTwitchUserRoles(broadcaster, initiator, initiatorRoles);
 
     const onAfterTest = await onBeforeTest({ voting, votingOption });
 
@@ -640,7 +598,7 @@ export const createTestCreateVote =
   };
 
 export const createTestDeleteVote =
-  (ctx: HoneyVotesContext) =>
+  (ctx: HoneyVotesContext, mr: MockRequests) =>
   async (
     expectedStatusCode: HttpStatus.OK | HttpStatus.FORBIDDEN,
     {
@@ -648,7 +606,7 @@ export const createTestDeleteVote =
       votingOptionAuthor,
       voteAuthor,
       initiator,
-      initiatorTypes,
+      initiatorRoles,
       votingParams = {},
       votingOptionId,
       onBeforeTest = () => {},
@@ -657,7 +615,7 @@ export const createTestDeleteVote =
       votingOptionAuthor: User;
       voteAuthor: User;
       initiator: User;
-      initiatorTypes?: UserTypes;
+      initiatorRoles?: MockUserRoles;
       votingParams?: Partial<Omit<Voting, 'permissions'>> & {
         permissions?: DeepPartial<VotingPermissions>;
       };
@@ -697,7 +655,7 @@ export const createTestDeleteVote =
       votingOptionId: votingOption.id,
     };
 
-    mockUserTypes(broadcaster, initiator, initiatorTypes);
+    mr.mockTwitchUserRoles(broadcaster, initiator, initiatorRoles);
 
     const onAfterTest = await onBeforeTest({ voting, votingOption, vote });
 
