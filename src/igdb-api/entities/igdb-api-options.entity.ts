@@ -8,6 +8,8 @@ import {
 
 const IGDB_API_OPTIONS_TABLE_NAME = 'igdb_api_options';
 
+// TODO: use clientId as a primary column
+
 @Entity(IGDB_API_OPTIONS_TABLE_NAME)
 export class IgdbApiOptions {
   static readonly tableName = IGDB_API_OPTIONS_TABLE_NAME;

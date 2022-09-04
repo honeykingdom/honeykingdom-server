@@ -43,20 +43,26 @@ export class IgdbRequestService {
   async post<T>(url: string, data: string): Promise<AxiosResponse<T>> {
     await this.mutex.waitForUnlock();
 
-    const response = await this.simplePost<T>(url, data);
+    let response: AxiosResponse<T>;
 
-    if (response.status === HttpStatus.UNAUTHORIZED) {
-      this.logger.log('IGDB access token is expired');
+    try {
+      response = await this.simplePost<T>(url, data);
+    } catch (e) {
+      if (e.response.status === HttpStatus.UNAUTHORIZED) {
+        this.logger.log('IGDB access token is expired');
 
-      const release = await this.mutex.acquire();
+        const release = await this.mutex.acquire();
 
-      try {
-        await this.authenticate();
-      } finally {
-        release();
+        try {
+          await this.authenticate();
+        } finally {
+          release();
+        }
+
+        return this.simplePost<T>(url, data);
+      } else {
+        throw e;
       }
-
-      return this.simplePost<T>(url, data);
     }
 
     return response;
