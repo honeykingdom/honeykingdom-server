@@ -11,7 +11,7 @@ import { AppAwakeModule } from './app-awake/app-awake.module';
 import { HoneyBotModule } from './honey-bot/honey-bot.module';
 import { HoneyVotesModule } from './honey-votes/honey-votes.module';
 import { InstagramModule } from './instagram/instagram.module';
-import { Formula1Module } from './formula1/formula1.module';
+// import { Formula1Module } from './formula1/formula1.module';
 
 @Module({
   imports: [
@@ -33,7 +33,7 @@ import { Formula1Module } from './formula1/formula1.module';
     HoneyBotModule,
     HoneyVotesModule,
     InstagramModule,
-    Formula1Module,
+    // Formula1Module,
   ],
   providers: [],
   controllers: [AppController],
