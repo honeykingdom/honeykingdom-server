@@ -93,7 +93,7 @@ export class VotesService {
       votingOption.voting.id,
     );
 
-    if (this.cache.get<boolean>(key)) {
+    if (await this.cache.get<boolean>(key)) {
       throw new ForbiddenException(HoneyError.VoteCreateTooQuickly);
     }
 
@@ -134,7 +134,7 @@ export class VotesService {
 
     const key = VotesService.CACHE_KEY.voteLimit(user.id, vote.voting.id);
 
-    if (this.cache.get(key)) {
+    if (await this.cache.get(key)) {
       throw new ForbiddenException(HoneyError.VoteDeleteTooQuickly);
     }
 
