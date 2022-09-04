@@ -11,6 +11,7 @@ import { CHAT_GOAL_EVENT_TABLE_NAME } from '../chat-goal.constants';
 import { ChatGoalEventType } from '../chat-goal.interface';
 import { ChatGoal } from './chat-goal.entity';
 
+/** @deprecated */
 @Entity(CHAT_GOAL_EVENT_TABLE_NAME)
 export class ChatGoalEvent {
   static readonly tableName = CHAT_GOAL_EVENT_TABLE_NAME;

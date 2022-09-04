@@ -40,6 +40,7 @@ export class ChatGoalService implements OnModuleInit, OnModuleDestroy {
     private readonly twitchChat: TwitchChatService,
     @InjectRepository(ChatGoal)
     private readonly goalRepo: Repository<ChatGoal>,
+    /** @deprecated */
     @InjectRepository(ChatGoalEvent)
     private readonly goalEventRepo: Repository<ChatGoalEvent>,
     @InjectRepository(ChatGoalData)
