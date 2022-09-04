@@ -13,6 +13,9 @@ export const configSchema = z.object({
   APP_BASE_URL: z.string(),
   APP_CORS_ORIGINS: z.string().default(''),
 
+  POSTGRES_URL: z.string(),
+  MONGODB_URI: z.string(),
+
   RECENT_MESSAGES_CHANNELS: z.string(),
   RECENT_MESSAGES_LIMIT: z.preprocess(
     (v) => parseInt(v as string, 10),
@@ -20,17 +23,10 @@ export const configSchema = z.object({
   ),
   RECENT_MESSAGES_REDIRECT_URL: z.string(),
 
-  TELEGRAM_API_CHECK_INTERVAL: z.string().default('2 min'),
-
   HONEY_BOT_CLIENT_ID: z.string(),
   HONEY_BOT_CLIENT_SECRET: z.string(),
   HONEY_BOT_CHANNELS: z.string(),
   HONEY_BOT_TELEGRAM_TO_CHAT: z.string(),
-
-  LINK_SHORTENER_ACCESS_TOKEN: z.string(),
-
-  POSTGRES_URL: z.string(),
-  MONGODB_URI: z.string(),
 
   HONEY_VOTES_BASE_URL: z.string(),
   HONEY_VOTES_FRONTEND_BASE_URL: z.string(),
@@ -42,7 +38,14 @@ export const configSchema = z.object({
   HONEY_VOTES_TWITCH_CLIENT_SECRET: z.string(),
   HONEY_VOTES_CRYPTO_SECRET: z.string().length(32),
 
+  IGDB_CLIENT_ID: z.string(),
+  IGDB_CLIENT_SECRET: z.string(),
+
   KINOPOISK_API_KEY: z.string(),
+
+  LINK_SHORTENER_ACCESS_TOKEN: z.string(),
+
+  TELEGRAM_API_CHECK_INTERVAL: z.string().default('2 min'),
 
   INSTAGRAM_COOKIE: z.string(),
 
