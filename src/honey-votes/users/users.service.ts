@@ -509,7 +509,7 @@ export class UsersService {
 
       this.logger.log(`refreshUserToken success: ${user.login}`);
 
-      this.store({
+      await this.store({
         ...user,
         credentials,
         areTokensValid: true,
