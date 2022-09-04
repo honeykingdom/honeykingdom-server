@@ -6,7 +6,7 @@ on:
       - 'README.md'
       - '.gitignore'
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 jobs:
