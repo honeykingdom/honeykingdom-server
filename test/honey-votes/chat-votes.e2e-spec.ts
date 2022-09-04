@@ -299,7 +299,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
             userId: chatVote4.userId,
           }),
         ]),
-      ).toEqual(expect.arrayContaining([undefined]));
+      ).toEqual(expect.arrayContaining([null]));
     }
 
     if (expectedStatusCode === HttpStatus.FORBIDDEN) {
@@ -713,7 +713,7 @@ describe('HoneyVotes - ChatVotes (e2e)', () => {
                     userId: chatVote4.userId,
                   }),
                 ]),
-              ).toEqual(expect.arrayContaining([undefined]));
+              ).toEqual(expect.arrayContaining([null]));
             };
           },
         });

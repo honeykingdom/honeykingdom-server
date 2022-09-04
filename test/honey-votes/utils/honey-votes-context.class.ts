@@ -47,7 +47,9 @@ export const twitchChatServiceMock: Partial<TwitchChatService> = {
   once: jest.fn(),
 };
 
-jest.mock('../../../src/twitch-chat/twitch-chat.service.ts');
+jest.mock('../../../src/twitch-chat/twitch-chat.service.ts', () => ({
+  TwitchChatService: jest.fn().mockImplementation(() => twitchChatServiceMock),
+}));
 
 class HoneyVotesContext {
   app: INestApplication;
