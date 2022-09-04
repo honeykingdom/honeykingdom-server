@@ -28,7 +28,6 @@ export const configSchema = z.object({
   HONEY_BOT_CHANNELS: z.string(),
   HONEY_BOT_TELEGRAM_TO_CHAT: z.string(),
 
-  HONEY_VOTES_BASE_URL: z.string(),
   HONEY_VOTES_FRONTEND_BASE_URL: z.string(),
   HONEY_VOTES_ACCESS_TOKEN_SECRET: z.string(),
   HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: z.string(),

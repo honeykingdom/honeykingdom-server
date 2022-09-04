@@ -15,7 +15,7 @@ export const scope = [
 @Injectable()
 export class TwitchStrategy extends PassportStrategy(Strategy, 'twitch') {
   constructor(configService: ConfigService<Config>) {
-    const baseUrl = configService.get<string>('HONEY_VOTES_BASE_URL');
+    const baseUrl = configService.get<string>('APP_BASE_URL');
 
     super({
       clientID: configService.get<string>('HONEY_VOTES_TWITCH_CLIENT_ID'),

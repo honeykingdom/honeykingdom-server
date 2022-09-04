@@ -278,6 +278,7 @@ export class UsersService {
       subTier: null,
     };
 
+    // TODO: make these request in parallel
     if (channel.areTokensValid) {
       let channelToken = this.decryptToken(
         channel.credentials.encryptedAccessToken,

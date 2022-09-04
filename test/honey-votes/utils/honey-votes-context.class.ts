@@ -29,7 +29,7 @@ import { transformMockUserToDbUser } from './transformMockUserToDbUser';
 import { MockUser, users } from './users';
 
 const CONFIG: Partial<Config> = {
-  HONEY_VOTES_BASE_URL: 'http://localhost:3000',
+  APP_BASE_URL: 'http://localhost:3000',
   HONEY_VOTES_FRONTEND_BASE_URL: 'http://localhost:3001',
   HONEY_VOTES_ACCESS_TOKEN_SECRET: '00000000000000000000000000000000',
   HONEY_VOTES_ACCESS_TOKEN_EXPIRE_TIME: '30 days',
