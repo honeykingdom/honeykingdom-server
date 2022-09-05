@@ -19,7 +19,7 @@ export class AppAwakeService {
     this.url = `${baseUrl}/api/ping`;
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   private handleCron() {
     lastValueFrom(this.httpService.get(this.url));
   }
