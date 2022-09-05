@@ -9,6 +9,8 @@ import { Config } from '../config/config.interface';
 export default class LogsService {
   private readonly axiom: AxiomClient;
 
+  private readonly isProduction: boolean;
+
   private readonly dataset: string;
 
   private readonly mutex = new Mutex();
@@ -19,11 +21,15 @@ export default class LogsService {
     const axiomToken = configService.get('AXIOM_TOKEN', { infer: true });
     const axiomOrgId = configService.get('AXIOM_ORG_ID', { infer: true });
     this.dataset = configService.get('AXIOM_DATASET', { infer: true });
+    this.isProduction =
+      configService.get('NODE_ENV', { infer: true }) === 'production';
     this.axiom = new AxiomClient(undefined, axiomToken, axiomOrgId);
   }
 
   async createLog(msg: { level: LogLevel; context: string; message: string }) {
-    this.queue.push(msg);
+    if (this.isProduction) {
+      this.queue.push(msg);
+    }
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
