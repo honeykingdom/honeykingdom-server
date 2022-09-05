@@ -4,9 +4,14 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { Config } from './config/config.interface';
+import CustomLogger from './custom-logger/custom-logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    autoFlushLogs: true,
+    bufferLogs: true,
+  });
+  app.useLogger(app.get(CustomLogger));
   const configService: ConfigService<Config> = app.get(ConfigService);
   const port = Number.parseInt(configService.get<string>('PORT'));
 

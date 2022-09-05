@@ -40,6 +40,10 @@ export const configSchema = z.object({
   IGDB_CLIENT_ID: z.string(),
   IGDB_CLIENT_SECRET: z.string(),
 
+  AXIOM_TOKEN: z.string(),
+  AXIOM_ORG_ID: z.string(),
+  AXIOM_DATASET: z.string(),
+
   KINOPOISK_API_KEY: z.string(),
 
   LINK_SHORTENER_ACCESS_TOKEN: z.string(),
