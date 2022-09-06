@@ -165,10 +165,11 @@ describe('HoneyVotes - Users (e2e)', () => {
     };
 
     const testRefreshTokenCalls = async (
+      broadcaster: User,
+      initiator: User,
       channelResult: MockRequestsType,
       userResult: MockRequestsType,
     ) => {
-      const [broadcaster, initiator] = await ctx.createUsers();
       let refreshTokenRequestsCount = 0;
 
       mr.server.use(
@@ -270,15 +271,51 @@ describe('HoneyVotes - Users (e2e)', () => {
 
     describe('twitch api returned 401', () => {
       it('should call refreshToken only once if user accessToken is expired', async () => {
-        expect(await testRefreshTokenCalls('success', 'fail-once')).toBe(1);
+        const [broadcaster, initiator] = await ctx.createUsers();
+        expect(
+          await testRefreshTokenCalls(
+            broadcaster,
+            initiator,
+            'success',
+            'fail-once',
+          ),
+        ).toBe(1);
       });
 
       it('should call refreshToken only once if channel accessToken is expired', async () => {
-        expect(await testRefreshTokenCalls('fail-once', 'success')).toBe(1);
+        const [broadcaster, initiator] = await ctx.createUsers();
+        expect(
+          await testRefreshTokenCalls(
+            broadcaster,
+            initiator,
+            'fail-once',
+            'success',
+          ),
+        ).toBe(1);
       });
 
       it("should call refreshToken twice if user's and channel's accessTokens are expired", async () => {
-        expect(await testRefreshTokenCalls('fail-once', 'fail-once')).toBe(2);
+        const [broadcaster, initiator] = await ctx.createUsers();
+        expect(
+          await testRefreshTokenCalls(
+            broadcaster,
+            initiator,
+            'fail-once',
+            'fail-once',
+          ),
+        ).toBe(2);
+      });
+
+      it('should call refreshToken only once if user === channel and accessToken is expired', async () => {
+        const [broadcaster] = await ctx.createUsers();
+        expect(
+          await testRefreshTokenCalls(
+            broadcaster,
+            broadcaster,
+            'fail-once',
+            'fail-once',
+          ),
+        ).toBe(1);
       });
 
       it('should refresh and store channel accessToken: success', async () => {
