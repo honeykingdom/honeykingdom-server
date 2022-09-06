@@ -96,6 +96,8 @@ export class UsersService {
   private readonly clientSecret: string;
   private readonly cryptoSecret: string;
 
+  private readonly refreshingTokens = new Map<string, Promise<string>>();
+
   constructor(
     private readonly configService: ConfigService<Config>,
     @InjectRepository(User)
@@ -267,7 +269,7 @@ export class UsersService {
         follower ? this.isFollower(channel.id, user.id, userToken) : null,
       ] as const;
 
-    const roles: UserRoles = {
+    const userRoles: UserRoles = {
       broadcaster: channel.id === user.id,
       editor: null,
       mod: null,
@@ -278,74 +280,84 @@ export class UsersService {
       subTier: null,
     };
 
-    // TODO: make these request in parallel
-    if (channel.areTokensValid) {
-      let channelToken = this.decryptToken(
-        channel.credentials.encryptedAccessToken,
-      );
+    const makeRequestsWithChannelAccessToken = async (roles: UserRoles) => {
+      if (channel.areTokensValid) {
+        let channelToken = this.decryptToken(
+          channel.credentials.encryptedAccessToken,
+        );
 
-      for await (const i of Array(2).keys()) {
-        if (!channelToken) break;
+        for await (const i of Array(2).keys()) {
+          if (!channelToken) break;
 
-        try {
-          const [editors, mods, vips] = await Promise.all(
-            getChannelTokenPromises(claims, channelToken),
-          );
+          try {
+            const [editors, mods, vips] = await Promise.all(
+              getChannelTokenPromises(claims, channelToken),
+            );
 
-          roles.editor = editors ? editors.has(user.id) : null;
-          roles.mod = mods ? mods.has(user.id) : null;
-          roles.vip = vips ? vips.has(user.id) : null;
+            roles.editor = editors ? editors.has(user.id) : null;
+            roles.mod = mods ? mods.has(user.id) : null;
+            roles.vip = vips ? vips.has(user.id) : null;
 
-          break;
-        } catch (e) {
-          if (e instanceof UnauthorizedException) {
-            channelToken = await this.refreshAndStoreUserToken(channel);
-          } else {
-            channelToken = EMPTY_TOKEN;
+            break;
+          } catch (e) {
+            if (e instanceof UnauthorizedException) {
+              channelToken = await this.refreshAndStoreUserToken(channel);
+            } else {
+              channelToken = EMPTY_TOKEN;
+            }
           }
         }
+      } else {
+        this.logger.log(`Invalid tokens: ${channel.login}`);
       }
-    } else {
-      this.logger.log(`Invalid tokens: ${channel.login}`);
-    }
+    };
 
-    if (user.areTokensValid) {
-      let userToken = this.decryptToken(user.credentials.encryptedAccessToken);
+    const makeRequestsWithUserAccessToken = async (roles: UserRoles) => {
+      if (user.areTokensValid) {
+        let userToken = this.decryptToken(
+          user.credentials.encryptedAccessToken,
+        );
 
-      for await (const i of Array(2).keys()) {
-        if (!userToken) break;
+        for await (const i of Array(2).keys()) {
+          if (!userToken) break;
 
-        try {
-          const [isSubResponse, isFollowerResponse] = await Promise.all(
-            getUserTokenPromises(claims, userToken),
-          );
+          try {
+            const [isSubResponse, isFollowerResponse] = await Promise.all(
+              getUserTokenPromises(claims, userToken),
+            );
 
-          if (isSubResponse) {
-            const [isSub, subTier] = isSubResponse;
-            roles.sub = isSub;
-            roles.subTier = subTier;
-          }
+            if (isSubResponse) {
+              const [isSub, subTier] = isSubResponse;
+              roles.sub = isSub;
+              roles.subTier = subTier;
+            }
 
-          if (isFollowerResponse) {
-            const [isFollower, minutesFollowed] = isFollowerResponse;
-            roles.follower = isFollower;
-            roles.minutesFollowed = minutesFollowed;
-          }
+            if (isFollowerResponse) {
+              const [isFollower, minutesFollowed] = isFollowerResponse;
+              roles.follower = isFollower;
+              roles.minutesFollowed = minutesFollowed;
+            }
 
-          break;
-        } catch (e) {
-          if (e instanceof UnauthorizedException) {
-            userToken = await this.refreshAndStoreUserToken(user);
-          } else {
-            userToken = EMPTY_TOKEN;
+            break;
+          } catch (e) {
+            if (e instanceof UnauthorizedException) {
+              userToken = await this.refreshAndStoreUserToken(user);
+            } else {
+              userToken = EMPTY_TOKEN;
+            }
           }
         }
+      } else {
+        this.logger.log(`Invalid tokens: ${user.login}`);
       }
-    } else {
-      this.logger.log(`Invalid tokens: ${user.login}`);
-    }
+    };
 
-    return roles;
+    await Promise.all([
+      makeRequestsWithChannelAccessToken(userRoles),
+      makeRequestsWithUserAccessToken(userRoles),
+    ]);
+
+    return userRoles;
   }
 
   private async isSub(
@@ -502,36 +514,48 @@ export class UsersService {
   }
 
   private async refreshAndStoreUserToken(user: User): Promise<string> {
-    try {
-      const refreshToken = this.decryptToken(
-        user.credentials.encryptedRefreshToken,
-      );
-      const credentials = await this.refreshToken(refreshToken);
+    let refreshingTokenPromise = this.refreshingTokens.get(user.id);
 
-      this.logger.log(`refreshUserToken success: ${user.login}`);
+    if (refreshingTokenPromise) return refreshingTokenPromise;
 
-      await this.store({
-        ...user,
-        credentials,
-        areTokensValid: true,
-      });
+    refreshingTokenPromise = (async () => {
+      try {
+        const refreshToken = this.decryptToken(
+          user.credentials.encryptedRefreshToken,
+        );
+        const credentials = await this.refreshToken(refreshToken);
 
-      return credentials.accessToken;
-    } catch (e) {
-      this.logger.error(`refreshUserToken failed: ${user.login} ${e}`);
+        this.logger.log(`refreshUserToken success: ${user.login}`);
 
-      await this.store({
-        ...user,
-        credentials: {
-          accessToken: EMPTY_TOKEN,
-          refreshToken: EMPTY_TOKEN,
-          scope: [],
-        },
-        areTokensValid: false,
-      });
+        await this.store({
+          ...user,
+          credentials,
+          areTokensValid: true,
+        });
 
-      return EMPTY_TOKEN;
-    }
+        return credentials.accessToken;
+      } catch (e) {
+        this.logger.error(`refreshUserToken failed: ${user.login} ${e}`);
+
+        await this.store({
+          ...user,
+          credentials: {
+            accessToken: EMPTY_TOKEN,
+            refreshToken: EMPTY_TOKEN,
+            scope: [],
+          },
+          areTokensValid: false,
+        });
+
+        return EMPTY_TOKEN;
+      }
+    })();
+
+    this.refreshingTokens.set(user.id, refreshingTokenPromise);
+    const newToken = await refreshingTokenPromise;
+    this.refreshingTokens.delete(user.id);
+
+    return newToken;
   }
 
   private async refreshToken(
