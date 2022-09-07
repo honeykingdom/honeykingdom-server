@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   Logger,
+  OnApplicationShutdown,
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
@@ -20,7 +21,9 @@ type AppInstances = {
 
 // https://render.com/docs/free#free-web-services
 @Injectable()
-export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
+export class AppAwakeService
+  implements OnModuleInit, OnModuleDestroy, OnApplicationShutdown
+{
   private readonly logger = new Logger(AppAwakeService.name);
 
   private readonly url: string;
@@ -64,6 +67,10 @@ export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
     //   await this.writeInstances(instances);
     //   this.logger.log(`Remove itself from instances: ${this.appInstanceId}`);
     // }
+  }
+
+  onApplicationShutdown(signal?: string) {
+    this.logger.log(`Application shutdown: ${this.appInstanceId} ${signal}`);
   }
 
   // @Cron(CronExpression.EVERY_10_SECONDS)

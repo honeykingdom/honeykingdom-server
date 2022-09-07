@@ -5,6 +5,13 @@ import AxiomClient from '@axiomhq/axiom-node';
 import { Mutex } from 'async-mutex';
 import { Config } from '../config/config.interface';
 
+type LogMessage = {
+  level: LogLevel;
+  context: string;
+  message: string;
+  _id?: number;
+};
+
 @Injectable()
 export default class LogsService {
   private readonly axiom: AxiomClient;
@@ -14,6 +21,8 @@ export default class LogsService {
   private readonly dataset: string;
 
   private readonly mutex = new Mutex();
+
+  private readonly _id = Date.now();
 
   private queue: any[] = [];
 
@@ -26,13 +35,13 @@ export default class LogsService {
     this.axiom = new AxiomClient(undefined, axiomToken, axiomOrgId);
   }
 
-  async createLog(msg: { level: LogLevel; context: string; message: string }) {
+  async createLog(msg: LogMessage) {
     if (this.isProduction) {
-      this.queue.push(msg);
+      this.queue.push({ _id: this._id, ...msg });
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_SECOND)
   private async sendLogs() {
     if (this.queue.length === 0 || this.mutex.isLocked()) return;
 
