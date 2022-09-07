@@ -24,7 +24,7 @@ async function bootstrap() {
   app.enableCors({ origin });
 
   app.use(cookieParser());
-  // app.enableShutdownHooks();
+  app.enableShutdownHooks();
 
   const config = new DocumentBuilder()
     .setTitle('HoneyKingdom')
