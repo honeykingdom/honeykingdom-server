@@ -19,7 +19,7 @@ export default class LogsService {
 
   private readonly isProduction: boolean;
 
-  private readonly dataset: string;
+  private readonly axiomDataset: string;
 
   private readonly mutex = new Mutex();
 
@@ -30,7 +30,7 @@ export default class LogsService {
   constructor(private readonly configService: ConfigService<Config>) {
     const axiomToken = configService.get('AXIOM_TOKEN', { infer: true });
     const axiomOrgId = configService.get('AXIOM_ORG_ID', { infer: true });
-    this.dataset = configService.get('AXIOM_DATASET', { infer: true });
+    this.axiomDataset = configService.get('AXIOM_DATASET', { infer: true });
     this.isProduction =
       configService.get('NODE_ENV', { infer: true }) === 'production';
     this.axiom = new AxiomClient(undefined, axiomToken, axiomOrgId);
@@ -52,7 +52,7 @@ export default class LogsService {
     this.queue = [];
 
     try {
-      await this.axiom.datasets.ingestEvents(this.dataset, logs);
+      await this.axiom.datasets.ingestEvents(this.axiomDataset, logs);
     } catch (e) {
     } finally {
       release();
