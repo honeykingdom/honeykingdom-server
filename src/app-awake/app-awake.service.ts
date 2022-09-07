@@ -41,43 +41,45 @@ export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
     this.appInstanceId = Date.now();
     this.isProd =
       this.configService.get('NODE_ENV', { infer: true }) === 'production';
+
+    this.logger.log(`App instance ID: ${this.appInstanceId}`);
   }
 
   async onModuleInit() {
     if (!this.isProd) return;
-    const instances = await this.readInstances();
-    instances.current = this.appInstanceId;
-    instances.ids.push(this.appInstanceId);
-    await this.cache.set('app.instances', instances);
-    this.logger.log(
-      `Registering a new current instance: ${this.appInstanceId}`,
-    );
+    // const instances = await this.readInstances();
+    // instances.current = this.appInstanceId;
+    // instances.ids.push(this.appInstanceId);
+    // await this.cache.set('app.instances', instances);
+    // this.logger.log(
+    //   `Registering a new current instance: ${this.appInstanceId}`,
+    // );
   }
 
   async onModuleDestroy() {
-    const instances = await this.readInstances();
-    if (instances.current === this.appInstanceId) {
-      instances.current = 0;
-      instances.ids = instances.ids.filter((id) => id !== this.appInstanceId);
-      await this.writeInstances(instances);
-      this.logger.log(`Remove itself from instances: ${this.appInstanceId}`);
-    }
+    // const instances = await this.readInstances();
+    // if (instances.current === this.appInstanceId) {
+    //   instances.current = 0;
+    //   instances.ids = instances.ids.filter((id) => id !== this.appInstanceId);
+    //   await this.writeInstances(instances);
+    //   this.logger.log(`Remove itself from instances: ${this.appInstanceId}`);
+    // }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  async handleInstances() {
-    if (!this.isProd || this.isTerminating) return;
-    const instances = await this.readInstances();
-    if (instances.current !== this.appInstanceId) {
-      instances.ids = instances.ids.filter((id) => id !== this.appInstanceId);
-      await this.writeInstances(instances);
-      this.logger.warn(
-        `Not a current instance: ${this.appInstanceId}. Terminating the process.`,
-      );
-      this.isTerminating = true;
-      this.shutdownListener$.next();
-    }
-  }
+  // @Cron(CronExpression.EVERY_10_SECONDS)
+  // async handleInstances() {
+  //   if (!this.isProd || this.isTerminating) return;
+  //   const instances = await this.readInstances();
+  //   if (instances.current !== this.appInstanceId) {
+  //     instances.ids = instances.ids.filter((id) => id !== this.appInstanceId);
+  //     await this.writeInstances(instances);
+  //     this.logger.warn(
+  //       `Not a current instance: ${this.appInstanceId}. Terminating the process.`,
+  //     );
+  //     this.isTerminating = true;
+  //     this.shutdownListener$.next();
+  //   }
+  // }
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   handleAwake() {
