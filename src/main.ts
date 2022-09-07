@@ -15,7 +15,7 @@ async function bootstrap() {
   app.useLogger(app.get(CustomLogger));
   app.get(AppAwakeService).subscribeToShutdown(async () => {
     await app.close();
-    process.exit();
+    process.kill(process.pid, 'SIGTERM');
   });
   const configService: ConfigService<Config> = app.get(ConfigService);
   const port = Number.parseInt(configService.get<string>('PORT'));
