@@ -48,7 +48,9 @@ export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
     instances.current = this.appInstanceId;
     instances.ids.push(this.appInstanceId);
     await this.cache.set('app.instances', instances);
-    this.logger.log(`Register new a current instance: ${this.appInstanceId}`);
+    this.logger.log(
+      `Registering a new current instance: ${this.appInstanceId}`,
+    );
   }
 
   async onModuleDestroy() {

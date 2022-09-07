@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthProvider, RefreshingAuthProvider } from '@twurple/auth';
 import { ChatClient } from '@twurple/chat';
@@ -9,7 +15,7 @@ import { OnMessage } from './twitch-chat.interface';
 import { TWITCH_CHAT_OPTIONS_TOKEN } from './twitch-chat.module-definition';
 
 @Injectable()
-export class TwitchChatService implements OnModuleInit {
+export class TwitchChatService implements OnModuleInit, OnModuleDestroy {
   private readonly logger: Logger;
 
   private readonly channels = new Map<string, Set<string>>();
@@ -62,6 +68,10 @@ export class TwitchChatService implements OnModuleInit {
   async onModuleInit() {
     await this.chat.connect().catch((e) => this.logger.error(e));
     this.logger.log('connected');
+  }
+
+  onModuleDestroy() {
+    return this.chat.quit();
   }
 
   join(channel: string, moduleId: string) {
