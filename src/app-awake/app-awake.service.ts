@@ -26,6 +26,7 @@ export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
   private readonly url: string;
   private readonly isProd: boolean;
   private readonly appInstanceId: number;
+  private isTerminating = false;
 
   private shutdownListener$: Subject<void> = new Subject();
 
@@ -65,7 +66,7 @@ export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleInstances() {
-    if (!this.isProd) return;
+    if (!this.isProd || this.isTerminating) return;
     const instances = await this.readInstances();
     if (instances.current !== this.appInstanceId) {
       instances.ids = instances.ids.filter((id) => id !== this.appInstanceId);
@@ -73,6 +74,7 @@ export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
       this.logger.warn(
         `Not a current instance: ${this.appInstanceId}. Terminating the process.`,
       );
+      this.isTerminating = true;
       this.shutdownListener$.next();
     }
   }
