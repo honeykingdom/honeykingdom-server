@@ -1,1 +1,1 @@
-export const MONGODB_CONNECTION = 'MongoDb';
+export const MYSQL_CONNECTION = 'MYSQL';

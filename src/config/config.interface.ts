@@ -14,7 +14,7 @@ export const configSchema = z.object({
   APP_CORS_ORIGINS: z.string().default(''),
 
   POSTGRES_URL: z.string(),
-  MONGODB_URI: z.string(),
+  MYSQL_URL: z.string(),
   REDIS_URL: z.string(),
 
   RECENT_MESSAGES_CHANNELS: z.string(),

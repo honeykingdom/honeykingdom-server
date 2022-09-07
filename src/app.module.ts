@@ -3,11 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
-import { MONGODB_CONNECTION } from './app.constants';
+import { MYSQL_CONNECTION } from './app.constants';
 import { validate } from './config/config.interface';
 import LogsMiddleware from './custom-logger/middlewares/log.middleware';
 import { CustomLoggerModule } from './custom-logger/custom-logger.module';
-import { typeOrmMongoDbFactory, typeOrmPostgresFactory } from './typeorm';
+import { typeOrmMySqlFactory, typeOrmPostgresFactory } from './typeorm';
 import { RecentMessagesModule } from './recent-messages/recent-messages.module';
 import { AppAwakeModule } from './app-awake/app-awake.module';
 import { HoneyBotModule } from './honey-bot/honey-bot.module';
@@ -22,9 +22,9 @@ import { InstagramModule } from './instagram/instagram.module';
     ConfigModule.forRoot({ validate }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      name: MONGODB_CONNECTION,
+      name: MYSQL_CONNECTION,
       imports: [ConfigModule],
-      useFactory: typeOrmMongoDbFactory,
+      useFactory: typeOrmMySqlFactory,
       inject: [ConfigService],
     }),
     TypeOrmModule.forRootAsync({
