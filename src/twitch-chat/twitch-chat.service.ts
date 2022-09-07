@@ -7,11 +7,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthProvider, RefreshingAuthProvider } from '@twurple/auth';
-import { ChatClient } from '@twurple/chat';
+import { ChatClient, UserNotice } from '@twurple/chat';
 import { Repository } from 'typeorm';
 import { TwitchChatOptions } from './entities/twitch-chat-options.entity';
 import { TwitchChatModuleOptions } from './twitch-chat-options.interface';
-import { OnMessage } from './twitch-chat.interface';
+import { OnAction, OnMessage } from './twitch-chat.interface';
 import { TWITCH_CHAT_OPTIONS_TOKEN } from './twitch-chat.module-definition';
 
 @Injectable()
@@ -112,23 +112,29 @@ export class TwitchChatService implements OnModuleInit, OnModuleDestroy {
       .catch((e) => this.logger.error(`SAY ${channel} ${e}`));
   }
 
-  on(event: 'message', listener: OnMessage);
   on(event: 'connect', listener: () => void);
   on(event: 'register', listener: () => void);
+  on(event: 'message', listener: OnMessage);
+  on(event: 'action', listener: OnAction);
+  on(event: 'userNotice', listener: (msg: UserNotice) => void);
   on(event: any, listener: any) {
     this.chat.addListener(this.getEvent(event), listener);
   }
 
-  off(event: 'message', listener: OnMessage);
   off(event: 'connect', listener: () => void);
   off(event: 'register', listener: () => void);
+  off(event: 'message', listener: OnMessage);
+  off(event: 'action', listener: OnAction);
+  off(event: 'userNotice', listener: (msg: UserNotice) => void);
   off(event: any, listener: any) {
     this.chat.removeListener(this.getEvent(event), listener);
   }
 
-  once(event: 'message', listener: OnMessage);
   once(event: 'connect', listener: () => void);
   once(event: 'register', listener: () => void);
+  once(event: 'message', listener: OnMessage);
+  once(event: 'action', listener: OnAction);
+  once(event: 'userNotice', listener: (msg: UserNotice) => void);
   once(event: any, listener: any) {
     const fn = (...args: any) => {
       this.chat.removeListener(this.getEvent(event), fn);
@@ -139,9 +145,11 @@ export class TwitchChatService implements OnModuleInit, OnModuleDestroy {
 
   private getEvent(event: string): any {
     const events = {
-      message: this.chat.onMessage,
       connect: this.chat.onConnect,
       register: this.chat.onRegister,
+      message: this.chat.onMessage,
+      action: this.chat.onAction,
+      userNotice: UserNotice,
     };
     return events[event];
   }
