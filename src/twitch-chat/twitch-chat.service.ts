@@ -52,22 +52,34 @@ export class TwitchChatService implements OnModuleInit, OnModuleDestroy {
 
     this.chat = new ChatClient({ authProvider });
 
+    this.chat.onConnect(() => this.logger.log('Connected'));
+    this.chat.onDisconnect((manually, reason) =>
+      this.logger.warn(
+        `Disconnected${manually ? ' manually' : ''}. Reason: ${reason}`,
+      ),
+    );
+
     // this.chat.onAnyMessage((msg) => console.log((msg as any)._raw));
     this.chat.onJoin((channel) => this.logger.log(`JOIN ${channel}`));
     this.chat.onPart((channel) => this.logger.log(`PART ${channel}`));
 
     this.on('register', () => {
-      [...this.channels.keys()].forEach((channel) => {
-        this.chat
-          .join(channel)
-          .catch((e) => this.logger.error(`JOIN ${channel} ${e}`));
+      [...this.channels.keys()].forEach(async (channel) => {
+        try {
+          await this.chat.join(channel);
+        } catch (e) {
+          this.logger.error(`JOIN ${channel} ${e}`);
+        }
       });
     });
   }
 
   async onModuleInit() {
-    await this.chat.connect().catch((e) => this.logger.error(e));
-    this.logger.log('connected');
+    try {
+      await this.chat.connect();
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   onModuleDestroy() {
