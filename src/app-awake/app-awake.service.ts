@@ -44,8 +44,9 @@ export class AppAwakeService
     this.appInstanceId = Date.now();
     this.isProd =
       this.configService.get('NODE_ENV', { infer: true }) === 'production';
+    const port = this.configService.get('PORT', { infer: true });
 
-    this.logger.log(`App instance ID: ${this.appInstanceId}`);
+    this.logger.log(`App instance ID: ${this.appInstanceId}. Port: ${port}`);
   }
 
   async onModuleInit() {
