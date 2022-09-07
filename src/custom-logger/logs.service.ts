@@ -2,6 +2,7 @@ import { Injectable, LogLevel } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import AxiomClient from '@axiomhq/axiom-node';
+import { randomBytes } from 'crypto';
 import { Mutex } from 'async-mutex';
 import { Config } from '../config/config.interface';
 
@@ -9,7 +10,7 @@ type LogMessage = {
   level: LogLevel;
   context: string;
   message: string;
-  _id?: number;
+  _id?: string;
 };
 
 @Injectable()
@@ -22,7 +23,7 @@ export default class LogsService {
 
   private readonly mutex = new Mutex();
 
-  private readonly _id = Date.now();
+  private readonly _id = randomBytes(4).toString('hex');
 
   private queue: any[] = [];
 
