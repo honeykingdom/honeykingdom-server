@@ -15,6 +15,7 @@ export const configSchema = z.object({
 
   POSTGRES_URL: z.string(),
   MONGODB_URI: z.string(),
+  REDIS_URL: z.string(),
 
   RECENT_MESSAGES_CHANNELS: z.string(),
   RECENT_MESSAGES_LIMIT: z.preprocess(
