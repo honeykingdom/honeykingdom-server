@@ -2,6 +2,7 @@ import {
   CACHE_MANAGER,
   Inject,
   Injectable,
+  Logger,
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
@@ -20,6 +21,8 @@ type AppInstances = {
 // https://render.com/docs/free#free-web-services
 @Injectable()
 export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(AppAwakeService.name);
+
   private readonly url: string;
   private readonly isProd: boolean;
   private readonly appInstanceId: number;
@@ -39,26 +42,25 @@ export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
       this.configService.get('NODE_ENV', { infer: true }) === 'production';
   }
 
-  /** Set this app instance as a current */
   async onModuleInit() {
     if (!this.isProd) return;
     const instances = await this.readInstances();
     instances.current = this.appInstanceId;
     instances.ids.push(this.appInstanceId);
     await this.cache.set('app.instances', instances);
+    this.logger.log(`Register new a current instance: ${this.appInstanceId}`);
   }
 
-  /** If it's a current instance, remove itself */
   async onModuleDestroy() {
     const instances = await this.readInstances();
     if (instances.current === this.appInstanceId) {
       instances.current = 0;
       instances.ids = instances.ids.filter((id) => id !== this.appInstanceId);
       await this.writeInstances(instances);
+      this.logger.log(`Remove itself from instances: ${this.appInstanceId}`);
     }
   }
 
-  /** If this app instance is not current, terminate the process */
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleInstances() {
     if (!this.isProd) return;
@@ -66,6 +68,9 @@ export class AppAwakeService implements OnModuleInit, OnModuleDestroy {
     if (instances.current !== this.appInstanceId) {
       instances.ids = instances.ids.filter((id) => id !== this.appInstanceId);
       await this.writeInstances(instances);
+      this.logger.warn(
+        `Not a current instance: ${this.appInstanceId}. Terminating the process.`,
+      );
       this.shutdownListener$.next();
     }
   }
