@@ -136,7 +136,7 @@ export class RecentMessagesService {
       this.queue = [];
       await this.chatMessageRepo.insert(messages);
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(e.code);
     }
 
     this.isPending = false;
