@@ -1,6 +1,6 @@
 import {
-  CACHE_MANAGER,
-  Inject,
+  // CACHE_MANAGER,
+  // Inject,
   Injectable,
   Logger,
   OnApplicationShutdown,
@@ -10,14 +10,14 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Cache } from 'cache-manager';
+// import { Cache } from 'cache-manager';
 import { lastValueFrom, Subject } from 'rxjs';
 import { Config } from '../config/config.interface';
 
-type AppInstances = {
-  ids: number[];
-  current: number;
-};
+// type AppInstances = {
+//   ids: number[];
+//   current: number;
+// };
 
 // https://render.com/docs/free#free-web-services
 @Injectable()
@@ -35,8 +35,7 @@ export class AppAwakeService
 
   constructor(
     private readonly configService: ConfigService<Config>,
-    private readonly httpService: HttpService,
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    private readonly httpService: HttpService, // @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {
     const baseUrl = this.configService.get('APP_BASE_URL', { infer: true });
 
@@ -94,20 +93,20 @@ export class AppAwakeService
     lastValueFrom(this.httpService.get(this.url));
   }
 
-  private async readInstances() {
-    let instances = await this.cache.get<AppInstances>('app.instances');
-    if (!instances) {
-      instances = {
-        ids: [],
-        current: 0,
-      };
-    }
-    return instances;
-  }
+  // private async readInstances() {
+  //   let instances = await this.cache.get<AppInstances>('app.instances');
+  //   if (!instances) {
+  //     instances = {
+  //       ids: [],
+  //       current: 0,
+  //     };
+  //   }
+  //   return instances;
+  // }
 
-  private writeInstances(instances: AppInstances) {
-    return this.cache.set<AppInstances>('app.instances', instances);
-  }
+  // private writeInstances(instances: AppInstances) {
+  //   return this.cache.set<AppInstances>('app.instances', instances);
+  // }
 
   // https://stackoverflow.com/a/57151478/4687416
   subscribeToShutdown(shutdownFn: () => void): void {
