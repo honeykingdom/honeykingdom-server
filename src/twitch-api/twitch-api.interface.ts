@@ -1,3 +1,5 @@
+import { components, operations } from './twitch-api.generated';
+
 export type TwitchCredentials = {
   clientId?: string;
   accessToken?: string;
@@ -33,68 +35,24 @@ export type RefreshTokenError400 = {
 };
 
 // GetChannelEditors
-export type GetChannelEditorsResponse = {
-  data: {
-    user_id: string;
-    user_name: string;
-    created_at: string;
-  }[];
-};
+export type GetChannelEditorsResponse =
+  components['schemas']['GetChannelEditorsResponse'];
 
 // GetVips
-export type GetVipsResponse = {
-  data: {
-    user_id: string;
-    user_name: string;
-    user_login: string;
-  }[];
-  pagination: { cursor?: string };
-};
+export type GetVipsResponse = components['schemas']['GetVIPsResponse'];
 
 // GetModerators
-export type GetModeratorsResponse = {
-  data: {
-    user_id: string;
-    user_login: string;
-    user_name: string;
-  }[];
-  pagination: { cursor?: string };
-};
+export type GetModeratorsResponse =
+  components['schemas']['GetModeratorsResponse'];
 
 // CheckUserSubscription
-export type CheckUserSubscriptionParams = {
-  broadcaster_id: string;
-  user_id: string;
-};
-export type CheckUserSubscriptionResponse = {
-  data: {
-    broadcaster_id: string;
-    broadcaster_login: string;
-    broadcaster_name: string;
-    gifter_id?: string;
-    gifter_login?: string;
-    gifter_name?: string;
-    is_gift: boolean;
-    tier: '1000' | '2000' | '3000';
-  }[];
-};
+export type CheckUserSubscriptionParams =
+  operations['check-user-subscription']['parameters']['query'];
+export type CheckUserSubscriptionResponse =
+  components['schemas']['CheckUserSubscriptionResponse'];
 
 // GetUserFollows
-export type GetUserFollowsParams = {
-  from_id?: string;
-  to_id?: string;
-  after?: string;
-  first?: string;
-};
-export type GetUserFollowsResponse = {
-  total: number;
-  data: {
-    from_id: string;
-    from_login: string;
-    from_name: string;
-    to_id: string;
-    to_name: string;
-    followed_at: string;
-  }[];
-  pagination: { cursor?: string };
-};
+export type GetUserFollowsParams =
+  operations['get-users-follows']['parameters']['query'];
+export type GetUserFollowsResponse =
+  components['schemas']['GetUsersFollowsResponse'];

@@ -142,7 +142,7 @@ export class TwitchApiService {
     params: GetUserFollowsParams,
     credentials: TwitchCredentials = {},
   ): AxiosPromise<GetUserFollowsResponse> {
-    const urlParams = new URLSearchParams(params);
+    const urlParams = new URLSearchParams(params as any);
     const url = `https://api.twitch.tv/helix/users/follows?${urlParams}`;
     const config = { headers: this.getHeaders(credentials) };
 
