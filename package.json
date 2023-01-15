@@ -26,7 +26,8 @@
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "migration:run": "yarn typeorm migration:run -- -d ./typeOrm.config.ts",
     "migration:generate": "yarn typeorm -- -d ./typeOrm.config.ts migration:generate",
-    "generate:kinopoisk-types": "npx openapi-typescript https://kinopoiskapiunofficial.tech/documentation/api/openapi.json --output src/kinopoisk-api/kinopoisk-api.generated.ts"
+    "generate:twitch": "npx openapi-typescript https://twitch-api-swagger.surge.sh/openapi.json -o src/twitch-api/twitch-api.generated.ts",
+    "generate:kinopoisk": "npx openapi-typescript https://kinopoiskapiunofficial.tech/documentation/api/openapi.json -o src/kinopoisk-api/kinopoisk-api.generated.ts"
   },
   "dependencies": {
     "@axiomhq/axiom-node": "^0.5.0",
