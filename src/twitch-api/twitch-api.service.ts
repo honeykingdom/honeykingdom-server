@@ -8,8 +8,8 @@ import {
   GetChannelEditorsResponse,
   GetVipsResponse,
   GetModeratorsResponse,
-  GetUserFollowsParams,
-  GetUserFollowsResponse,
+  GetChannelFollowersParams,
+  GetChannelFollowersResponse,
   RefreshTokenParams,
   RefreshTokenResponse,
   RevokeTokenParams,
@@ -136,18 +136,18 @@ export class TwitchApiService {
    * * 400 - Bad Request
    * * 401 - Unauthorized
    *
-   * https://dev.twitch.tv/docs/api/reference#get-users-follows
+   * https://dev.twitch.tv/docs/api/reference#get-channel-followers
    */
-  getUserFollows(
-    params: GetUserFollowsParams,
+  getChannelFollowers(
+    params: GetChannelFollowersParams,
     credentials: TwitchCredentials = {},
-  ): AxiosPromise<GetUserFollowsResponse> {
+  ): AxiosPromise<GetChannelFollowersResponse> {
     const urlParams = new URLSearchParams(params as any);
-    const url = `https://api.twitch.tv/helix/users/follows?${urlParams}`;
+    const url = `https://api.twitch.tv/helix/channels/followers?${urlParams}`;
     const config = { headers: this.getHeaders(credentials) };
 
     return lastValueFrom(
-      this.httpService.get<GetUserFollowsResponse>(url, config),
+      this.httpService.get<GetChannelFollowersResponse>(url, config),
     );
   }
 

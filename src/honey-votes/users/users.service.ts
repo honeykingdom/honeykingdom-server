@@ -402,8 +402,8 @@ export class UsersService {
     if (isFollower) return isFollower;
 
     try {
-      const response = await this.twitchApi.getUserFollows(
-        { from_id: userId, to_id: channelId },
+      const response = await this.twitchApi.getChannelFollowers(
+        { user_id: userId, broadcaster_id: channelId },
         { clientId: this.clientId, accessToken: userAccessToken },
       );
 

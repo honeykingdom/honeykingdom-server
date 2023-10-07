@@ -52,7 +52,7 @@ export type CheckUserSubscriptionResponse =
   components['schemas']['CheckUserSubscriptionResponse'];
 
 // GetUserFollows
-export type GetUserFollowsParams =
-  operations['get-users-follows']['parameters']['query'];
-export type GetUserFollowsResponse =
-  components['schemas']['GetUsersFollowsResponse'];
+export type GetChannelFollowersParams =
+  operations['get-channel-followers']['parameters']['query'];
+export type GetChannelFollowersResponse =
+  components['schemas']['GetChannelFollowersResponse'];
