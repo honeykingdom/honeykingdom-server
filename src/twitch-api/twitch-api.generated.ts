@@ -2596,20 +2596,20 @@ export interface components {
        */
       follower_mode_duration: number | null;
       /** @description The moderator’s ID. The response includes this field only if the request specifies a user access token that includes the **moderator:read:chat\_settings** scope. */
-      moderator_id: string;
+      moderator_id?: string;
       /**
        * @description A Boolean value that determines whether the broadcaster adds a short delay before chat messages appear in the chat room. This gives chat moderators and bots a chance to remove them before viewers can see the message. See the `non_moderator_chat_delay_duration` field for the length of the delay. Is **true** if the broadcaster applies a delay; otherwise, **false**.
        *
        * The response includes this field only if the request specifies a user access token that includes the **moderator:read:chat\_settings** scope and the user in the _moderator\_id_ query parameter is one of the broadcaster’s moderators.
        */
-      non_moderator_chat_delay: boolean;
+      non_moderator_chat_delay?: boolean;
       /**
        * Format: int32
        * @description The amount of time, in seconds, that messages are delayed before appearing in chat. Is **null** if `non_moderator_chat_delay` is **false**.
        *
        * The response includes this field only if the request specifies a user access token that includes the **moderator:read:chat\_settings** scope and the user in the _moderator\_id_ query parameter is one of the broadcaster’s moderators.
        */
-      non_moderator_chat_delay_duration: number | null;
+      non_moderator_chat_delay_duration?: number | null;
       /**
        * @description A Boolean value that determines whether the broadcaster limits how often users in the chat room are allowed to send messages.
        *
@@ -2725,7 +2725,7 @@ export interface components {
        */
       follower_mode_duration: number | null;
       /** @description The moderator’s ID. The response includes this field only if the request specifies a user access token that includes the **moderator:read:chat\_settings** scope. */
-      moderator_id: string;
+      moderator_id?: string;
       /** @description A Boolean value that determines whether the broadcaster adds a short delay before chat messages appear in the chat room. This gives chat moderators and bots a chance to remove them before viewers can see the message. See the `non_moderator_chat_delay_duration` field for the length of the delay. Is **true** if the broadcaster applies a delay; otherwise, **false**. */
       non_moderator_chat_delay: boolean;
       /**
@@ -4775,11 +4775,11 @@ export interface components {
       /** @description The broadcaster’s display name. */
       broadcaster_name: string;
       /** @description The ID of the user that gifted the subscription. The object includes this field only if `is_gift` is **true**. */
-      gifter_id: string;
+      gifter_id?: string;
       /** @description The gifter’s login name. The object includes this field only if `is_gift` is **true**. */
-      gifter_login: string;
+      gifter_login?: string;
       /** @description The gifter’s display name. The object includes this field only if `is_gift` is **true**. */
-      gifter_name: string;
+      gifter_name?: string;
       /** @description A Boolean value that determines whether the subscription is a gift subscription. Is **true** if the subscription was gifted. */
       is_gift: boolean;
       /**
@@ -4944,7 +4944,7 @@ export interface components {
        *
        * If the request contains more than one user, only the user associated with the access token that provided consent will include an email address — the email address for all other users will be empty.
        */
-      email: string;
+      email?: string;
       /**
        * Format: date-time
        * @description The UTC date and time that the user’s account was created. The timestamp is in RFC3339 format.
