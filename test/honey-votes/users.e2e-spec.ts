@@ -141,7 +141,7 @@ describe('HoneyVotes - Users (e2e)', () => {
       };
       const followerSuccess = {
         status: 200,
-        response: MakeResponse.twitchGetUserFollows(broadcaster),
+        response: MakeResponse.twitchGetChannelFollowers(),
       };
 
       const subResult: MockRequestConfig = [];

@@ -107,8 +107,7 @@ class MockRequests {
     });
     this.mockTwitchGetUserFollows({
       status: 200,
-      response: MakeResponse.twitchGetUserFollows(
-        broadcaster,
+      response: MakeResponse.twitchGetChannelFollowers(
         roles.follower ? [initiator] : [],
         roles.minutesFollowed
           ? sub(new Date(), { minutes: roles.minutesFollowed }).toISOString()

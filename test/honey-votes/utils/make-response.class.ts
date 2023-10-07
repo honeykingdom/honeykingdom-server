@@ -4,7 +4,7 @@ import type {
   CheckUserSubscriptionResponse,
   GetChannelEditorsResponse,
   GetModeratorsResponse,
-  GetUserFollowsResponse,
+  GetChannelFollowersResponse,
   GetVipsResponse,
   RefreshTokenResponse,
   UnauthorizedResponse,
@@ -96,19 +96,16 @@ class MakeResponse {
       ],
     };
   }
-  static twitchGetUserFollows(
-    broadcaster: User,
-    follows: User[] = [],
+  static twitchGetChannelFollowers(
+    followers: User[] = [],
     followedAt = new Date().toISOString(),
-  ): GetUserFollowsResponse {
+  ): GetChannelFollowersResponse {
     return {
-      total: follows.length,
-      data: follows.map(({ id, login, displayName }) => ({
-        from_id: id,
-        from_login: login,
-        from_name: displayName,
-        to_id: broadcaster.id,
-        to_name: broadcaster.displayName,
+      total: followers.length,
+      data: followers.map(({ id, login, displayName }) => ({
+        user_id: id,
+        user_login: login,
+        user_name: displayName,
         followed_at: followedAt,
       })),
       pagination: {},
