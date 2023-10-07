@@ -29,7 +29,7 @@ const PATHS = {
   twitchGetModerators: 'https://api.twitch.tv/helix/moderation/moderators',
   twitchGetVips: 'https://api.twitch.tv/helix/channels/vips',
   twitchCheckUserSubscription: 'https://api.twitch.tv/helix/subscriptions/user',
-  twitchGetUserFollows: 'https://api.twitch.tv/helix/users/follows',
+  twitchGetChannelFollowers: 'https://api.twitch.tv/helix/channels/followers',
 
   kinopoiskGetFilmData:
     'https://kinopoiskapiunofficial.tech/api/v2.2/films/:id',
@@ -105,7 +105,7 @@ class MockRequests {
         ? MakeResponse.twitchCheckUserSubscription(broadcaster, roles.subTier)
         : undefined,
     });
-    this.mockTwitchGetUserFollows({
+    this.mockTwitchGetChannelFollowers({
       status: 200,
       response: MakeResponse.twitchGetChannelFollowers(
         roles.follower ? [initiator] : [],
@@ -135,8 +135,8 @@ class MockRequests {
   mockTwitchCheckUserSubscription(config: MockRequestConfig) {
     return this.mockRequest(PATHS.twitchCheckUserSubscription, 'get', config);
   }
-  mockTwitchGetUserFollows(config: MockRequestConfig) {
-    return this.mockRequest(PATHS.twitchGetUserFollows, 'get', config);
+  mockTwitchGetChannelFollowers(config: MockRequestConfig) {
+    return this.mockRequest(PATHS.twitchGetChannelFollowers, 'get', config);
   }
 
   mockKinopoiskGetFilmData(config: MockRequestConfig) {

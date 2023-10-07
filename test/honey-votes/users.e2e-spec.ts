@@ -161,7 +161,7 @@ describe('HoneyVotes - Users (e2e)', () => {
       }
 
       mr.mockTwitchCheckUserSubscription(subResult);
-      mr.mockTwitchGetUserFollows(followerResult);
+      mr.mockTwitchGetChannelFollowers(followerResult);
     };
 
     const testRefreshTokenCalls = async (
