@@ -54,6 +54,10 @@ export const configSchema = z.object({
   INSTAGRAM_COOKIE: z.string(),
 
   F1_COOKIE: z.string(),
+
+  TG_BOT_TOKEN: z.string(),
+  TG_BOT_TWITCH_CLIENT_ID: z.string(),
+  TG_BOT_TWITCH_CLIENT_SECRET: z.string(),
 });
 
 export type Config = z.infer<typeof configSchema>;
