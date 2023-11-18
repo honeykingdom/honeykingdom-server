@@ -97,7 +97,9 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
     }
     const clip = res.data.data[0];
     if (!clip) {
-      throw new Error(`Cannot find a clip: ${slug}\nResponse:\n${res.data}`);
+      throw new Error(
+        `Cannot find a clip: ${slug}\nResponse:\n${JSON.stringify(res.data)}`,
+      );
     }
     return clip;
   }
