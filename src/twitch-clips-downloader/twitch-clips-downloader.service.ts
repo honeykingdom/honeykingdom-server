@@ -133,7 +133,11 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
     const title = escapers.MarkdownV2(clip?.title);
     const channel = escapers.MarkdownV2(clip?.broadcaster_name);
     const author = escapers.MarkdownV2(clip?.creator_name);
-    const caption = `${title}\n\n*Channel*: _${channel}_ \\| *Created by*: _${author}_ \\| *Views*: _${clip?.view_count}_`;
+    const caption = [
+      `${title}\n\n*Channel*:&nbsp;_${channel}_`,
+      `*Created&nbsp;by*:&nbsp;_${author}_`,
+      `*Views*:&nbsp;_${clip?.view_count}_`,
+    ].join(' \\| ');
     const size = await this.getUrlContentLength(downloadLink);
     if (!size) return null;
     if (size > SIZE_20_MB) {
