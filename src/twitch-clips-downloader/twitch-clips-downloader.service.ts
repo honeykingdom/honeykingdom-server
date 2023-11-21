@@ -24,6 +24,7 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
   constructor(private readonly httpService: HttpService) {}
 
   async onModuleDestroy() {
+    this.logger.log(`Revoking access token: ${this.accessToken}`);
     if (this.accessToken) this.revokeAccessToken();
   }
 
