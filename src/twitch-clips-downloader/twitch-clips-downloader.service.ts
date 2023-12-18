@@ -130,7 +130,7 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
       return null;
     }
     if (!THUMBNAIL_REGEX.test(clip?.thumbnail_url || '')) return null;
-    const downloadLink = clip.thumbnail_url.replace(THUMBNAIL_REGEX, '.mp4');
+    let downloadLink = clip.thumbnail_url.replace(THUMBNAIL_REGEX, '.mp4');
     const title = escapers.MarkdownV2(clip?.title);
     const channel = escapers.MarkdownV2(clip?.broadcaster_name);
     const author = escapers.MarkdownV2(clip?.creator_name);
@@ -139,9 +139,21 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
       `*Created by*: _${author}_`,
       `*Views*: _${clip?.view_count}_`,
     ].join(' \\| ');
-    const size = await this.getUrlContentLength(downloadLink);
+    let size = await this.getUrlContentLength(downloadLink);
     if (!size) return null;
     if (size > SIZE_20_MB) {
+      for (const quality of ['720', '480']) {
+        const suffix = `-${quality}.mp4`;
+        downloadLink = clip.thumbnail_url.replace(THUMBNAIL_REGEX, suffix);
+        size = await this.getUrlContentLength(downloadLink);
+        if (size !== null && size < SIZE_20_MB) {
+          return {
+            type: 'video',
+            url: downloadLink,
+            caption: `${caption}\n\n⚠️ _This video is ${quality}p\\. [Download original quality](${downloadLink})\\._`,
+          };
+        }
+      }
       return {
         type: 'photo',
         url: clip.thumbnail_url,
