@@ -130,7 +130,7 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
       return null;
     }
     if (!THUMBNAIL_REGEX.test(clip?.thumbnail_url || '')) return null;
-    let downloadLink = clip.thumbnail_url.replace(THUMBNAIL_REGEX, '.mp4');
+    const mp4Link = clip.thumbnail_url.replace(THUMBNAIL_REGEX, '.mp4');
     const title = escapers.MarkdownV2(clip?.title);
     const channel = escapers.MarkdownV2(clip?.broadcaster_name);
     const author = escapers.MarkdownV2(clip?.creator_name);
@@ -139,30 +139,32 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
       `*Created by*: _${author}_`,
       `*Views*: _${clip?.view_count}_`,
     ].join(' \\| ');
-    let size = await this.getUrlContentLength(downloadLink);
+    let size = await this.getUrlContentLength(mp4Link);
     if (!size) return null;
     if (size > SIZE_20_MB) {
       for (const quality of ['720', '480']) {
-        const suffix = `-${quality}.mp4`;
-        downloadLink = clip.thumbnail_url.replace(THUMBNAIL_REGEX, suffix);
-        size = await this.getUrlContentLength(downloadLink);
+        const mp4LinkLowRes = clip.thumbnail_url.replace(
+          THUMBNAIL_REGEX,
+          `-${quality}.mp4`,
+        );
+        size = await this.getUrlContentLength(mp4LinkLowRes);
         if (size !== null && size < SIZE_20_MB) {
           return {
             type: 'video',
-            url: downloadLink,
-            caption: `${caption}\n\n⚠️ _This video is ${quality}p\\. [Download original quality](${downloadLink})\\._`,
+            url: mp4LinkLowRes,
+            caption: `${caption}\n\n⚠️ _This video is ${quality}p\\. [Download original quality](${mp4Link})\\._`,
           };
         }
       }
       return {
         type: 'photo',
         url: clip.thumbnail_url,
-        caption: `${caption}\n\n⚠️ _Can't upload more than 20MB, please use [this link](${downloadLink}) to download\\._`,
+        caption: `${caption}\n\n⚠️ _Can't upload more than 20MB, please use [this link](${mp4Link}) to download\\._`,
       };
     }
     return {
       type: 'video',
-      url: downloadLink,
+      url: mp4Link,
       caption: caption,
     };
   }
