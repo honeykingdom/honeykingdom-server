@@ -22,7 +22,7 @@ export class TwitchClipsDownloaderUpdate {
   @On('text')
   async onMessage(
     @Ctx() ctx: Context,
-    @Message('id') messageId: number,
+    @Message('message_id') messageId: number,
     @Message('text') text: string,
   ) {
     const slug = this.twitchClipsDownloaderService.getSlug(text);
