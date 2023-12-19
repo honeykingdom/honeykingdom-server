@@ -9,7 +9,7 @@ import {
   TWITCH_CLIP_REGEX,
 } from './twitch-clips-downloader.constants';
 import {
-  Clip,
+  ClipError,
   ClipInfo,
   GetClipsResponse,
   TwitchTokenResponse,
@@ -19,7 +19,7 @@ import {
 export class TwitchClipsDownloaderService implements OnModuleDestroy {
   private accessToken = '';
 
-  private readonly logger = new Logger(TwitchClipsDownloaderService.name);
+  readonly logger = new Logger(TwitchClipsDownloaderService.name);
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -96,13 +96,7 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
         res = await this.fetchClip(slug);
       }
     }
-    const clip = res.data.data[0];
-    if (!clip) {
-      throw new Error(
-        `Cannot find a clip: ${slug}\nResponse:\n${JSON.stringify(res.data)}`,
-      );
-    }
-    return clip;
+    return res.data;
   }
 
   private async getUrlContentLength(url: string): Promise<number | null> {
@@ -117,21 +111,34 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
     return Number.parseInt(contentLengthText);
   }
 
-  async getClipInfo(url: string): Promise<ClipInfo | null> {
+  private getMp4Link(thumbnailUrl: string, quality: '480' | '720' | 'best') {
+    return quality === 'best'
+      ? thumbnailUrl.replace(THUMBNAIL_REGEX, '.mp4')
+      : thumbnailUrl.replace(THUMBNAIL_REGEX, `-${quality}.mp4`);
+  }
+
+  getSlug(url: string) {
     const m = TWITCH_CLIP_REGEX.exec(url);
     if (!m) return null;
-    this.logger.log(url);
-    const slug = m[1];
-    let clip: Clip | undefined;
+    return m[1];
+  }
+
+  async getClipInfo(slug: string): Promise<ClipInfo | ClipError> {
+    let clipResponse: GetClipsResponse;
     try {
-      clip = await this.getClip(slug);
+      clipResponse = await this.getClip(slug);
     } catch (e) {
-      this.logger.error(e.message, e.stack);
-      return null;
+      return {
+        type: 'error',
+        description: 'Something went wrong. Please try again later.',
+      };
     }
-    if (!clip) return null;
-    if (!THUMBNAIL_REGEX.test(clip.thumbnail_url || '')) return null;
-    const mp4Link = clip.thumbnail_url.replace(THUMBNAIL_REGEX, '.mp4');
+    const clip = clipResponse.data?.[0];
+    if (!clip) return { type: 'error', description: 'Cannot find this clip.' };
+    if (!THUMBNAIL_REGEX.test(clip.thumbnail_url || '')) {
+      return { type: 'error', description: 'Cannot get download link.' };
+    }
+    const mp4Link = this.getMp4Link(clip.thumbnail_url, 'best');
     const title = escapers.MarkdownV2(clip.title);
     const channel = escapers.MarkdownV2(clip.broadcaster_name);
     const channelLink = `[${channel}](https://www.twitch.tv/${clip.broadcaster_name})`;
@@ -143,34 +150,36 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
     ]
       .filter(Boolean)
       .join(' \\| ');
-    const caption = `${title}\n\n${infoLine}`;
     let size = await this.getUrlContentLength(mp4Link);
-    if (!size) return null;
+    if (!size)
+      return {
+        type: 'error',
+        description: 'Something went wrong. Please try again later.',
+      };
     if (size > SIZE_20_MB) {
-      for (const quality of ['720', '480']) {
-        const mp4LinkLowRes = clip.thumbnail_url.replace(
-          THUMBNAIL_REGEX,
-          `-${quality}.mp4`,
-        );
+      for (const quality of ['720', '480'] as const) {
+        const mp4LinkLowRes = this.getMp4Link(clip.thumbnail_url, quality);
         size = await this.getUrlContentLength(mp4LinkLowRes);
         if (size !== null && size < SIZE_20_MB) {
+          const warningLine = `⚠️ _This video is ${quality}p\\. [Download original quality](${mp4Link})\\._`;
           return {
             type: 'video',
             url: mp4LinkLowRes,
-            caption: `${caption}\n\n⚠️ _This video is ${quality}p\\. [Download original quality](${mp4Link})\\._`,
+            caption: `${title}\n\n${infoLine}\n\n${warningLine}`,
           };
         }
       }
+      const warningLine = `⚠️ _Can't upload more than 20MB, please use [this link](${mp4Link}) to download\\._`;
       return {
         type: 'photo',
         url: clip.thumbnail_url,
-        caption: `${caption}\n\n⚠️ _Can't upload more than 20MB, please use [this link](${mp4Link}) to download\\._`,
+        caption: `${title}\n\n${infoLine}\n\n${warningLine}`,
       };
     }
     return {
       type: 'video',
       url: mp4Link,
-      caption,
+      caption: `${title}\n\n${infoLine}`,
     };
   }
 }

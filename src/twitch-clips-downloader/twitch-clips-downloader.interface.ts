@@ -18,3 +18,8 @@ export type ClipInfo = {
   url: string;
   caption: string;
 };
+
+export type ClipError = {
+  type: 'error';
+  description: string;
+};

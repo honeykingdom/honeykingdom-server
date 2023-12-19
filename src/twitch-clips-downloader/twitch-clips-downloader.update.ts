@@ -21,9 +21,20 @@ export class TwitchClipsDownloaderUpdate {
 
   @On('text')
   async onMessage(@Ctx() ctx: Context, @Message('text') text: string) {
-    const clipInfo = await this.twitchClipsDownloaderService.getClipInfo(text);
-    if (!clipInfo) return;
-    const { type, url, caption } = clipInfo;
+    this.twitchClipsDownloaderService.logger.log(text);
+    const slug = this.twitchClipsDownloaderService.getSlug(text);
+    if (!slug) {
+      ctx.sendMessage('Error: Wrong link');
+      return;
+    }
+    ctx.sendChatAction('upload_video');
+    const response = await this.twitchClipsDownloaderService.getClipInfo(slug);
+    if (response.type === 'error') {
+      this.twitchClipsDownloaderService.logger.error(response.description);
+      ctx.sendMessage(`Error: ${response.description}`);
+      return;
+    }
+    const { type, url, caption } = response;
     if (type === 'photo') {
       await ctx.replyWithPhoto(url, { caption, parse_mode: 'MarkdownV2' });
     }
