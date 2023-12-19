@@ -20,11 +20,7 @@ export class TwitchClipsDownloaderUpdate {
   }
 
   @On('text')
-  async onMessage(
-    @Ctx() ctx: Context,
-    @Message('message_id') messageId: number,
-    @Message('text') text: string,
-  ) {
+  async onMessage(@Ctx() ctx: Context, @Message('text') text: string) {
     const slug = this.twitchClipsDownloaderService.getSlug(text);
     if (!slug) return;
     this.twitchClipsDownloaderService.logger.log(text);
@@ -33,7 +29,8 @@ export class TwitchClipsDownloaderUpdate {
     if (response.type === 'error') {
       this.twitchClipsDownloaderService.logger.error(response.description);
       ctx.sendMessage(`Error: ${response.description}`, {
-        reply_to_message_id: messageId,
+        reply_to_message_id: ctx.message.message_id,
+        disable_notification: true,
       });
       return;
     }
@@ -42,14 +39,14 @@ export class TwitchClipsDownloaderUpdate {
       await ctx.replyWithPhoto(url, {
         caption,
         parse_mode: 'MarkdownV2',
-        reply_to_message_id: messageId,
+        reply_to_message_id: ctx.message.message_id,
       });
     }
     if (type === 'video') {
       await ctx.replyWithVideo(url, {
         caption,
         parse_mode: 'MarkdownV2',
-        reply_to_message_id: messageId,
+        reply_to_message_id: ctx.message.message_id,
       });
     }
   }
