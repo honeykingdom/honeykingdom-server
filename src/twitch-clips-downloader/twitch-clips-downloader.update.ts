@@ -28,10 +28,12 @@ export class TwitchClipsDownloaderUpdate {
     const response = await this.twitchClipsDownloaderService.getClipInfo(slug);
     if (response.type === 'error') {
       this.twitchClipsDownloaderService.logger.error(response.description);
-      ctx.sendMessage(`Error: ${response.description}`, {
-        reply_to_message_id: ctx.message.message_id,
-        disable_notification: true,
-      });
+      if (ctx.message.chat.type === 'private') {
+        ctx.sendMessage(`Error: ${response.description}`, {
+          reply_to_message_id: ctx.message.message_id,
+          disable_notification: true,
+        });
+      }
       return;
     }
     const { type, url, caption } = response;
