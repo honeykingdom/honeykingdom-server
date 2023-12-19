@@ -20,26 +20,37 @@ export class TwitchClipsDownloaderUpdate {
   }
 
   @On('text')
-  async onMessage(@Ctx() ctx: Context, @Message('text') text: string) {
-    this.twitchClipsDownloaderService.logger.log(text);
+  async onMessage(
+    @Ctx() ctx: Context,
+    @Message('id') messageId: number,
+    @Message('text') text: string,
+  ) {
     const slug = this.twitchClipsDownloaderService.getSlug(text);
-    if (!slug) {
-      if (text.includes('twitch.tv')) ctx.sendMessage('Error: Wrong link');
-      return;
-    }
+    if (!slug) return;
+    this.twitchClipsDownloaderService.logger.log(text);
     ctx.sendChatAction('upload_video');
     const response = await this.twitchClipsDownloaderService.getClipInfo(slug);
     if (response.type === 'error') {
       this.twitchClipsDownloaderService.logger.error(response.description);
-      ctx.sendMessage(`Error: ${response.description}`);
+      ctx.sendMessage(`Error: ${response.description}`, {
+        reply_to_message_id: messageId,
+      });
       return;
     }
     const { type, url, caption } = response;
     if (type === 'photo') {
-      await ctx.replyWithPhoto(url, { caption, parse_mode: 'MarkdownV2' });
+      await ctx.replyWithPhoto(url, {
+        caption,
+        parse_mode: 'MarkdownV2',
+        reply_to_message_id: messageId,
+      });
     }
     if (type === 'video') {
-      await ctx.replyWithVideo(url, { caption, parse_mode: 'MarkdownV2' });
+      await ctx.replyWithVideo(url, {
+        caption,
+        parse_mode: 'MarkdownV2',
+        reply_to_message_id: messageId,
+      });
     }
   }
 }
