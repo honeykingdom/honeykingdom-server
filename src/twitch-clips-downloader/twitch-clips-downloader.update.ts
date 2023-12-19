@@ -24,7 +24,7 @@ export class TwitchClipsDownloaderUpdate {
     this.twitchClipsDownloaderService.logger.log(text);
     const slug = this.twitchClipsDownloaderService.getSlug(text);
     if (!slug) {
-      ctx.sendMessage('Error: Wrong link');
+      if (text.includes('twitch.tv')) ctx.sendMessage('Error: Wrong link');
       return;
     }
     ctx.sendChatAction('upload_video');

@@ -112,9 +112,10 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
   }
 
   private getMp4Link(thumbnailUrl: string, quality: '480' | '720' | 'best') {
-    return quality === 'best'
-      ? thumbnailUrl.replace(THUMBNAIL_REGEX, '.mp4')
-      : thumbnailUrl.replace(THUMBNAIL_REGEX, `-${quality}.mp4`);
+    return thumbnailUrl.replace(
+      THUMBNAIL_REGEX,
+      quality === 'best' ? '.mp4' : `-${quality}.mp4`,
+    );
   }
 
   getSlug(url: string) {
