@@ -118,6 +118,12 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
     );
   }
 
+  // For some clips lower quality links require 'AT-cm%7C' prefix after last '/'
+  private getMp4LinkV2(mp4: string) {
+    const i = mp4.lastIndexOf('/');
+    return mp4.slice(0, i) + '/AT-cm%7C' + mp4.slice(i + 1);
+  }
+
   getSlug(url: string) {
     const m = TWITCH_CLIP_REGEX.exec(url);
     if (!m) return null;
@@ -159,16 +165,19 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
       };
     if (size > SIZE_20_MB) {
       for (const quality of ['720', '480'] as const) {
-        const mp4LinkLowRes = this.getMp4Link(clip.thumbnail_url, quality);
+        let mp4LinkLowRes = this.getMp4Link(clip.thumbnail_url, quality);
         size = await this.getUrlContentLength(mp4LinkLowRes);
-        if (size !== null && size < SIZE_20_MB) {
-          const warningLine = `⚠️ _This video is ${quality}p\\. [Download original quality](${mp4Link})\\._`;
-          return {
-            type: 'video',
-            url: mp4LinkLowRes,
-            caption: `${title}\n\n${infoLine}\n\n${warningLine}`,
-          };
+        if (size === null) {
+          mp4LinkLowRes = this.getMp4LinkV2(mp4LinkLowRes);
+          size = await this.getUrlContentLength(mp4LinkLowRes);
         }
+        if (size === null || size > SIZE_20_MB) continue;
+        const warningLine = `⚠️ _This video is ${quality}p\\. [Download original quality](${mp4Link})\\._`;
+        return {
+          type: 'video',
+          url: mp4LinkLowRes,
+          caption: `${title}\n\n${infoLine}\n\n${warningLine}`,
+        };
       }
       const warningLine = `⚠️ _Can't upload more than 20MB, please use [this link](${mp4Link}) to download\\._`;
       return {
