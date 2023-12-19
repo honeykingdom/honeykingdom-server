@@ -158,38 +158,39 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
       .filter(Boolean)
       .join(' \\| ');
     let size = await this.getUrlContentLength(mp4Link);
-    if (!size)
+    if (size === null) {
       return {
         type: 'error',
         description: 'Something went wrong. Please try again later.',
       };
-    if (size > SIZE_20_MB) {
-      for (const quality of ['720', '480'] as const) {
-        let mp4LinkLowRes = this.getMp4Link(clip.thumbnail_url, quality);
-        size = await this.getUrlContentLength(mp4LinkLowRes);
-        if (size === null) {
-          mp4LinkLowRes = this.getMp4LinkV2(mp4LinkLowRes);
-          size = await this.getUrlContentLength(mp4LinkLowRes);
-        }
-        if (size === null || size > SIZE_20_MB) continue;
-        const warningLine = `⚠️ _This video is ${quality}p\\. [Download original quality](${mp4Link})\\._`;
-        return {
-          type: 'video',
-          url: mp4LinkLowRes,
-          caption: `${title}\n\n${infoLine}\n\n${warningLine}`,
-        };
-      }
-      const warningLine = `⚠️ _Can't upload more than 20MB, please use [this link](${mp4Link}) to download\\._`;
+    }
+    if (size < SIZE_20_MB) {
       return {
-        type: 'photo',
-        url: clip.thumbnail_url,
+        type: 'video',
+        url: mp4Link,
+        caption: `${title}\n\n${infoLine}`,
+      };
+    }
+    for (const quality of ['720', '480'] as const) {
+      let mp4LinkLowRes = this.getMp4Link(clip.thumbnail_url, quality);
+      size = await this.getUrlContentLength(mp4LinkLowRes);
+      if (size === null) {
+        mp4LinkLowRes = this.getMp4LinkV2(mp4LinkLowRes);
+        size = await this.getUrlContentLength(mp4LinkLowRes);
+      }
+      if (size === null || size > SIZE_20_MB) continue;
+      const warningLine = `ℹ _This video is ${quality}p\\. [Download original quality](${mp4Link})\\._`;
+      return {
+        type: 'video',
+        url: mp4LinkLowRes,
         caption: `${title}\n\n${infoLine}\n\n${warningLine}`,
       };
     }
+    const warningLine = `⚠️ _Can't upload more than 20MB\\. [Download original quality](${mp4Link})\\._`;
     return {
-      type: 'video',
-      url: mp4Link,
-      caption: `${title}\n\n${infoLine}`,
+      type: 'photo',
+      url: clip.thumbnail_url,
+      caption: `${title}\n\n${infoLine}\n\n${warningLine}`,
     };
   }
 }
