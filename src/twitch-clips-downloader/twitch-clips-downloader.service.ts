@@ -129,16 +129,21 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
       this.logger.error(e.message, e.stack);
       return null;
     }
-    if (!THUMBNAIL_REGEX.test(clip?.thumbnail_url || '')) return null;
+    if (!clip) return null;
+    if (!THUMBNAIL_REGEX.test(clip.thumbnail_url || '')) return null;
     const mp4Link = clip.thumbnail_url.replace(THUMBNAIL_REGEX, '.mp4');
-    const title = escapers.MarkdownV2(clip?.title);
-    const channel = escapers.MarkdownV2(clip?.broadcaster_name);
-    const author = escapers.MarkdownV2(clip?.creator_name);
-    const caption = [
-      `${title}\n\n*Channel*: _${channel}_`,
-      `*Created by*: _${author}_`,
-      `*Views*: _${clip?.view_count}_`,
-    ].join(' \\| ');
+    const title = escapers.MarkdownV2(clip.title);
+    const channel = escapers.MarkdownV2(clip.broadcaster_name);
+    const channelLink = `[${channel}](https://www.twitch.tv/${clip.broadcaster_name})`;
+    const author = escapers.MarkdownV2(clip.creator_name);
+    const infoLine = [
+      clip.broadcaster_name ? `*Channel*: _${channelLink}_` : null,
+      clip.creator_name ? `*Created by*: _${author}_` : null,
+      `*Views*: _${clip.view_count}_`,
+    ]
+      .filter(Boolean)
+      .join(' \\| ');
+    const caption = `${title}\n\n${infoLine}`;
     let size = await this.getUrlContentLength(mp4Link);
     if (!size) return null;
     if (size > SIZE_20_MB) {
@@ -165,7 +170,7 @@ export class TwitchClipsDownloaderService implements OnModuleDestroy {
     return {
       type: 'video',
       url: mp4Link,
-      caption: caption,
+      caption,
     };
   }
 }
